@@ -4,8 +4,11 @@ import { useSearchParams } from "next/navigation";
 import useSearch from "../_hooks/use-search";
 import { BookOpen, Calendar, Tag, ExternalLink } from "lucide-react";
 
-export default function RepositoryPage() {
-  const searchParams = useSearchParams();
+export default function RepositoryPage({
+  searchParams,
+}: {
+  searchParams: URLSearchParams;
+}) {
   const { getSearchResults } = useSearch();
 
   // Extract all metadata parameters from the URL
