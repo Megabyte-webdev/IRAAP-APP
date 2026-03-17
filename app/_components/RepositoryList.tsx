@@ -17,8 +17,8 @@ export default function RepositoryList() {
     methodology: searchParams.get("methodology") || "",
   };
 
-  const { data, isLoading } = getSearchResults(searchFilters);
-  const results = data?.projects || [];
+  const { data:results=[], isLoading } = getSearchResults(searchFilters);
+  
 
   return (
     <div className="min-h-screen bg-slate-50">
