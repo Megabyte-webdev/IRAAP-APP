@@ -122,7 +122,7 @@ export function Sidebar() {
           return (
             <Link
               key={item.href}
-              href={`${userRole}${item.href}`}
+              href={`/${userRole}${item.href}`}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-950",
                 isActive
