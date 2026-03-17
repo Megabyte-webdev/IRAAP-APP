@@ -24,7 +24,18 @@ const useSearch = () => {
       },
       enabled: !!query,
     });
-  return { getCategories, getSearchResults };
+
+  const useHome = () => {
+    return useQuery({
+      queryKey: ["home"],
+      queryFn: async () => {
+        const { data } = await api.get("/search/homepage-data");
+        return data;
+      },
+    });
+  };
+
+  return { getCategories, getSearchResults, useHome };
 };
 
 export default useSearch;

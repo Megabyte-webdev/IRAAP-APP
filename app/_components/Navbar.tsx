@@ -4,7 +4,9 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-md py-4 px-6">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <div className="text-2xl font-bold text-blue-600">IRAP</div>
+        <Link href="/" className="text-2xl font-bold text-blue-600 font-roboto">
+          IRAAP
+        </Link>
 
         <div className="space-x-6 hidden md:flex">
           <Link href="/" className="hover:text-blue-600 transition">

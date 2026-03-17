@@ -1,4 +1,3 @@
-// src/app/repository/page.tsx
 import { Suspense } from "react";
 import RepositoryList from "../_components/RepositoryList";
 

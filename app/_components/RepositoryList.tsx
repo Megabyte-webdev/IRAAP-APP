@@ -1,15 +1,27 @@
-// src/app/repository/RepositoryList.tsx
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import useSearch from "../_hooks/use-search";
-import { BookOpen, Calendar, Tag, ExternalLink } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  Search,
+  X,
+  Check,
+  ArrowUpRight,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function RepositoryList() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { getSearchResults } = useSearch();
 
-  // Standard Next.js Client-side parameter extraction
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [tempValue, setTempValue] = useState("");
+
   const searchFilters = {
     title: searchParams.get("title") || "",
     year: searchParams.get("year") || "",
@@ -17,8 +29,31 @@ export default function RepositoryList() {
     methodology: searchParams.get("methodology") || "",
   };
 
-  const { data:results=[], isLoading } = getSearchResults(searchFilters);
-  
+  const { data: results = [], isLoading } = getSearchResults(searchFilters);
+
+  const updateFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value.trim()) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+    setEditingKey(null);
+  };
+
+  const removeFilter = (key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  // Removed the .filter() so all keys show up
+  const allFilters = Object.entries(searchFilters).map(([key, value]) => ({
+    key,
+    label: key.replace(/([A-Z])/g, " $1").toLowerCase(),
+    value: value,
+  }));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -32,17 +67,80 @@ export default function RepositoryList() {
               Explore student projects and academic research.
             </p>
           </div>
-          <div className="bg-white px-4 py-2 rounded-lg border shadow-sm">
-            <span className="text-sm text-slate-500">Results for: </span>
-            <span className="text-sm font-semibold text-blue-600">
-              "{searchFilters.title || "All Projects"}"
-            </span>
+
+          <div className="flex flex-col items-start md:items-end gap-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+              <Search className="h-4 w-4" />
+              <span>Search Parameters:</span>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-start md:justify-end">
+              {allFilters.map((filter) => (
+                <div
+                  key={filter.key}
+                  className={`flex items-center border rounded-full shadow-sm overflow-hidden transition-all ${
+                    filter.value
+                      ? "bg-white border-blue-100"
+                      : "bg-slate-100 border-slate-200 opacity-80"
+                  }`}
+                >
+                  <span className="text-[10px] uppercase tracking-wider text-slate-600 pl-3 pr-2 font-bold bg-slate-50 border-r py-1.5">
+                    {filter.label}
+                  </span>
+
+                  {editingKey === filter.key ? (
+                    <div className="flex items-center px-2 py-1">
+                      <input
+                        autoFocus
+                        placeholder="Type to search..."
+                        className="text-sm font-semibold text-blue-600 outline-none w-32 bg-blue-50/50 rounded px-1"
+                        value={tempValue}
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          updateFilter(filter.key, tempValue)
+                        }
+                        onBlur={() => updateFilter(filter.key, tempValue)}
+                      />
+                      <button
+                        onClick={() => updateFilter(filter.key, tempValue)}
+                      >
+                        <Check className="h-3.5 w-3.5 text-green-500 ml-1" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <span
+                        className={`text-sm font-semibold px-3 py-1 cursor-text hover:bg-blue-50 transition-colors ${
+                          filter.value
+                            ? "text-blue-600"
+                            : "text-slate-400 italic"
+                        }`}
+                        onClick={() => {
+                          setEditingKey(filter.key);
+                          setTempValue(filter.value);
+                        }}
+                      >
+                        {filter.value || "Any"}
+                      </span>
+                      {filter.value && (
+                        <button
+                          onClick={() => removeFilter(filter.key)}
+                          className="pr-2 pl-1 group"
+                        >
+                          <X className="h-3.5 w-3.5 text-slate-300 group-hover:text-red-500 transition-colors" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="col-span-full space-y-4">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
@@ -51,68 +149,59 @@ export default function RepositoryList() {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+            <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
               <BookOpen className="mx-auto h-12 w-12 text-slate-300" />
               <h3 className="mt-4 text-lg font-medium text-slate-900">
-                No projects found
+                No matches found
               </h3>
               <p className="text-slate-500">
-                Try adjusting your search terms or filters.
+                Try adjusting your search criteria or explore the full
+                repository.
               </p>
             </div>
           ) : (
             results.map((item: any) => (
               <article
                 key={item.projects.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-300"
+                className="group relative flex flex-col bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-sm transition-all duration-200"
               >
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-blue-50 text-blue-700">
-                      {item.categories.name}
-                    </span>
-                    <div className="flex items-center text-slate-400 text-sm">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {item.projects.submissionYear}
-                    </div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                    {item.categories.name}
+                  </span>
+                  <div className="flex items-center text-slate-400 text-xs">
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    {item.projects.submissionYear}
                   </div>
+                </div>
 
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 mb-2">
-                      {item.projects.title}
-                    </h2>
-                    <p className="text-slate-600 line-clamp-3">
-                      {item.projects.abstract}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Tag className="h-4 w-4 text-slate-400 self-center" />
-                    {item.metadata.keywords
-                      .split(",")
-                      .map((tag: string, idx: number) => (
-                        <span
-                          key={idx}
-                          className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded"
-                        >
-                          {tag.trim()}
-                        </span>
-                      ))}
-                  </div>
-
-                  <div className="pt-4 border-t flex items-center justify-between">
-                    <div className="text-xs text-slate-400 italic">
-                      Area: {item.metadata.researchArea}
-                    </div>
-                    <a
-                      href={item.projects.fileUrl}
-                      target="_blank"
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                    <Link
+                      href={`/repository/${item.projects.id}`}
+                      className="hover:underline"
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      View Project
-                    </a>
-                  </div>
+                      {item.projects.title}
+                    </Link>
+                  </h2>
+                  <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed">
+                    {item.projects.abstract}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-400 font-medium truncate max-w-[180px]">
+                    <span className="uppercase opacity-60 mr-1">Area:</span>
+                    {item.metadata.researchArea}
+                  </span>
+
+                  <Link
+                    href={`/repository/${item.projects.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors"
+                  >
+                    Details
+                    <ArrowUpRight className="h-3.5 w-3.5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </Link>
                 </div>
               </article>
             ))
