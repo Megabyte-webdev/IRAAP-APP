@@ -162,41 +162,41 @@ export default function RepositoryList() {
           ) : (
             results.map((item: any) => (
               <article
-                key={item.projects.id}
+                key={item.id}
                 className="group relative flex flex-col bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-sm transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                    {item.categories.name}
+                    {item.category}
                   </span>
                   <div className="flex items-center text-slate-400 text-xs">
                     <Calendar className="h-3.5 w-3.5 mr-1" />
-                    {item.projects.submissionYear}
+                    {item.submissionYear}
                   </div>
                 </div>
 
                 <div className="flex-1">
                   <h2 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors mb-2">
                     <Link
-                      href={`/repository/${item.projects.id}`}
+                      href={`/repository/${item.id}`}
                       className="hover:underline"
                     >
-                      {item.projects.title}
+                      {item.title}
                     </Link>
                   </h2>
                   <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed">
-                    {item.projects.abstract}
+                    {item.abstract}
                   </p>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
                   <span className="text-[11px] text-slate-400 font-medium truncate max-w-[180px]">
                     <span className="uppercase opacity-60 mr-1">Area:</span>
-                    {item.metadata.researchArea}
+                    {item.researchArea}
                   </span>
 
                   <Link
-                    href={`/repository/${item.projects.id}`}
+                    href={`/repository/${item.id}`}
                     className="inline-flex items-center gap-1 text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors"
                   >
                     Details

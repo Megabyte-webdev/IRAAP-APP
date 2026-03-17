@@ -1,25 +1,50 @@
 "use client";
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useProject } from "../_hooks/use-projects";
 import { toast } from "react-toastify";
 import useSearch from "../_hooks/use-search";
+import { useRouter } from "next/navigation";
 
-export default function ProjectUploadForm() {
-  const { submitProject } = useProject();
+interface ProjectFormProps {
+  initialData?: any; // You can replace 'any' with your Project type
+  isEditing?: boolean;
+}
+
+export default function ProjectForm({
+  initialData,
+  isEditing = false,
+}: ProjectFormProps) {
+  const router = useRouter();
+  const { submitProject, updateProject } = useProject(); // Assuming updateProject exists in your hook
   const { getCategories } = useSearch();
-  const [title, setTitle] = useState("");
-  const [abstract, setAbstract] = useState("");
-  const [methodology, setMethodology] = useState("");
-  const [category, setCategory] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [keywords, setKeywords] = useState("");
-  const [researchArea, setResearchArea] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: categories } = getCategories();
+  // Initialize state with initialData if editing
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [abstract, setAbstract] = useState(initialData?.abstract || "");
+  const [methodology, setMethodology] = useState(
+    initialData?.methodology || "",
+  );
+  const [category, setCategory] = useState(initialData?.categoryId || "");
+  const [file, setFile] = useState<File | null>(null);
+  const [keywords, setKeywords] = useState(initialData?.keywords || "");
+  const [researchArea, setResearchArea] = useState(
+    initialData?.researchArea || "",
+  );
 
+  const { data: categories } = getCategories();
   const currentYear = new Date().getFullYear().toString();
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setAbstract(initialData.abstract || "");
+      setMethodology(initialData.methodology || "");
+      setCategory(initialData.categoryId || "");
+      setKeywords(initialData.keywords || "");
+      setResearchArea(initialData.researchArea || "");
+    }
+  }, [initialData]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -44,7 +69,15 @@ export default function ProjectUploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !abstract || !category || !file || !methodology) {
+
+    // File is only strictly required if we aren't editing
+    if (
+      !title ||
+      !abstract ||
+      !category ||
+      !methodology ||
+      (!file && !isEditing)
+    ) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -54,23 +87,39 @@ export default function ProjectUploadForm() {
     formData.append("abstract", abstract);
     formData.append("methodology", methodology);
     formData.append("categoryId", category);
-    formData.append("file", file);
     formData.append("keywords", keywords);
     formData.append("researchArea", researchArea);
-    formData.append("submissionYear", currentYear);
+    formData.append(
+      "submissionYear",
+      initialData?.submissionYear || currentYear,
+    );
 
-    submitProject.mutate(formData, {
-      onSuccess: () => {
-        setTitle("");
-        setAbstract("");
-        setMethodology("");
-        setCategory("");
-        setFile(null);
-        setKeywords("");
-        setResearchArea("");
-        if (fileInputRef.current) fileInputRef.current.value = "";
+    if (file) {
+      formData.append("file", file);
+    }
+
+    const mutation = isEditing ? updateProject : submitProject;
+
+    mutation.mutate(
+      isEditing ? { id: initialData.id, projectData: formData } : formData,
+      {
+        onSuccess: () => {
+          if (!isEditing) {
+            // Reset form only on new submission
+            setTitle("");
+            setAbstract("");
+            setMethodology("");
+            setCategory("");
+            setFile(null);
+            setKeywords("");
+            setResearchArea("");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          } else {
+            router.push("/student"); // Redirect to projects list after editing
+          }
+        },
       },
-    });
+    );
   };
 
   return (
@@ -78,7 +127,9 @@ export default function ProjectUploadForm() {
       onSubmit={handleSubmit}
       className="bg-white border rounded-2xl p-8 space-y-6 shadow-md max-w-4xl mx-auto"
     >
-      <h2 className="text-2xl font-bold text-gray-800">Upload New Project</h2>
+      <h2 className="text-2xl font-bold text-gray-800">
+        {isEditing ? "Edit Project" : "Upload New Project"}
+      </h2>
 
       {/* Title */}
       <div>
@@ -145,7 +196,7 @@ export default function ProjectUploadForm() {
         </select>
       </div>
 
-      {/* Drag & Drop File Upload */}
+      {/* File Upload */}
       <div
         className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center cursor-pointer hover:border-blue-500 transition"
         onClick={() => fileInputRef.current?.click()}
@@ -153,7 +204,11 @@ export default function ProjectUploadForm() {
         onDragOver={(e) => e.preventDefault()}
       >
         {file ? (
-          <p className="text-gray-700">{file.name}</p>
+          <p className="text-blue-600 font-medium">{file.name}</p>
+        ) : isEditing ? (
+          <p className="text-gray-500 italic">
+            Click to replace existing PDF (optional)
+          </p>
         ) : (
           <p className="text-gray-400">
             Drag and drop PDF here, or click to select file
@@ -168,7 +223,7 @@ export default function ProjectUploadForm() {
         />
       </div>
 
-      {/* Keywords & Research Area */}
+      {/* Keywords & Area */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-gray-700 font-semibold mb-1">
@@ -176,13 +231,12 @@ export default function ProjectUploadForm() {
           </label>
           <input
             type="text"
-            placeholder="Comma separated keywords"
+            placeholder="e.g. AI, React, Health"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-
         <div>
           <label className="block text-gray-700 font-semibold mb-1">
             Research Area
@@ -196,13 +250,18 @@ export default function ProjectUploadForm() {
         </div>
       </div>
 
-      {/* Submit Button */}
       <button
         type="submit"
-        disabled={submitProject.isPending}
+        disabled={submitProject.isPending || updateProject?.isPending}
         className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition w-full"
       >
-        {submitProject.isPending ? "Uploading..." : "Submit Project"}
+        {isEditing
+          ? updateProject?.isPending
+            ? "Updating..."
+            : "Update Project"
+          : submitProject.isPending
+            ? "Uploading..."
+            : "Submit Project"}
       </button>
     </form>
   );

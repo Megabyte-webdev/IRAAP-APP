@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import RepositoryList from "../_components/RepositoryList";
+import Navbar from "../_components/Navbar";
+import Footer from "../_components/Footer";
 
 export default function RepositoryPage() {
   return (
@@ -11,7 +13,9 @@ export default function RepositoryPage() {
         </div>
       }
     >
+      <Navbar />
       <RepositoryList />
+      <Footer />
     </Suspense>
   );
 }

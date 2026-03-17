@@ -21,6 +21,26 @@ export const useProject = () => {
     },
   });
 
+  const updateProject: any = useMutation({
+    mutationFn: async ({
+      id,
+      projectData,
+    }: {
+      id: string;
+      projectData: any;
+    }) => {
+      const { data } = await api.put(`/projects/${id}`, projectData);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Project updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (error: any) => {
+      toast.error(extractErrorMessage(error));
+    },
+  });
+
   const getProjects = () =>
     useQuery({
       queryKey: ["projects"],
@@ -30,5 +50,14 @@ export const useProject = () => {
       },
     });
 
-  return { submitProject, getProjects };
+  const getProjectById = (id: string) =>
+    useQuery({
+      queryKey: ["project", id],
+      queryFn: async () => {
+        const { data } = await api.get(`/projects/${id}`);
+        return data?.project || null;
+      },
+    });
+
+  return { submitProject, updateProject, getProjects, getProjectById };
 };

@@ -27,13 +27,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     name: "Dashboard",
-    href: "/student",
-    roles: ["STUDENT"],
+    href: "/",
+    roles: "ALL",
     icon: LayoutDashboard,
   },
   {
     name: "Submit Project",
-    href: "/student/upload",
+    href: "/upload",
     roles: ["STUDENT"],
     icon: FileUp,
   },
@@ -88,7 +88,7 @@ export function Sidebar() {
     );
   }
 
-  const userRole = user?.user?.role as UserRole | undefined;
+  const userRole = user?.user?.role?.toLowerCase() as UserRole | undefined;
 
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter((item) => {
@@ -111,12 +111,18 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 p-4" aria-label="Main">
         {filteredNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          // Construct the actual full URL this link points to
+          const fullHref = `/${userRole?.toLowerCase()}${item.href === "/" ? "" : item.href}`;
+
+          // Check if current pathname matches exactly or starts with it
+          const isActive =
+            pathname === fullHref ||
+            (item.href !== "/" && pathname.startsWith(fullHref));
 
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={`${userRole}${item.href}`}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-950",
                 isActive
