@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   Search,
@@ -13,7 +13,7 @@ import {
 import useSearch from "@/app/_hooks/use-search";
 import debounce from "lodash.debounce";
 
-export default function AdminArchive() {
+function AdminArchiveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -194,5 +194,15 @@ function FilterInput({
         />
       </div>
     </div>
+  );
+}
+
+export default function AdminArchive() {
+  return (
+    // This boundary stops the build error by telling Next.js
+    // to render a fallback while the client-side hooks initialize.
+    <Suspense fallback={<div className="p-8">Loading Search...</div>}>
+      <AdminArchiveContent />
+    </Suspense>
   );
 }
