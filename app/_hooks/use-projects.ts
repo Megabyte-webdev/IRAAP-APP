@@ -1,9 +1,11 @@
-import { QueryClient, useMutation } from "@tanstack/react-query";
+"use client";
+
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
 import { toast } from "react-toastify";
 import { extractErrorMessage } from "../_lib/utils";
 
-export const useSubmitProject = () => {
+export const useProject = () => {
   const queryClient = new QueryClient();
   const submitProject: any = useMutation({
     mutationFn: async (projectData: any) => {
@@ -19,5 +21,14 @@ export const useSubmitProject = () => {
     },
   });
 
-  return { submitProject };
+  const getProjects = () =>
+    useQuery({
+      queryKey: ["projects"],
+      queryFn: async () => {
+        const { data } = await api.get("/projects/submissions");
+        return data?.projects || [];
+      },
+    });
+
+  return { submitProject, getProjects };
 };

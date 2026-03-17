@@ -1,95 +1,135 @@
 "use client";
 
-import { PendingReviews } from "../_components/PendingReviews";
-import { Clock, CheckCircle, XCircle, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Clock, CheckCircle, RefreshCcw, BookOpen } from "lucide-react";
 
-// Stat card component
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-}: {
+interface Project {
+  id: number;
   title: string;
-  value: number;
-  icon: any;
-  color: string;
-}) {
-  return (
-    <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{value}</p>
-        </div>
-        <div className={`rounded-full p-3 ${color}`}>
-          <Icon size={24} className="text-white" />
-        </div>
-      </div>
-    </div>
-  );
+  student: string;
+  status: string;
+  submissionYear: string;
 }
 
 export default function SupervisorDashboard() {
-  // Dummy stats – replace with real data later
-  const stats = {
-    pending: 8,
-    approved: 15,
-    rejected: 3,
-    totalStudents: 42,
-  };
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    revisions: 0,
+  });
+
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    axios.get("/api/supervisor/stats").then((res) => setStats(res.data));
+    axios.get("/api/supervisor/projects").then((res) => setProjects(res.data));
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Header */}
-        <header>
-          <h1 className="text-3xl font-bold text-gray-900">Review Queue</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage and track student reviews efficiently
-          </p>
-        </header>
+    <div className="p-8 space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Supervisor Dashboard
+        </h1>
+        <p className="text-gray-500">
+          Review and manage student research submissions.
+        </p>
+      </div>
 
-        {/* Stats Grid with dummy data */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Pending Reviews"
-            value={stats.pending}
-            icon={Clock}
-            color="bg-amber-500"
-          />
-          <StatCard
-            title="Approved"
-            value={stats.approved}
-            icon={CheckCircle}
-            color="bg-green-500"
-          />
-          <StatCard
-            title="Rejected"
-            value={stats.rejected}
-            icon={XCircle}
-            color="bg-red-500"
-          />
-          <StatCard
-            title="Total Students"
-            value={stats.totalStudents}
-            icon={Users}
-            color="bg-blue-500"
-          />
+      {/* Stats */}
+      <div className="grid md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center gap-4">
+          <BookOpen className="text-blue-600" />
+          <div>
+            <p className="text-sm text-gray-500">Total Projects</p>
+            <h3 className="text-xl font-bold">{stats.total}</h3>
+          </div>
         </div>
 
-        {/* Pending Reviews Section */}
-        <section className="rounded-xl bg-white p-6 shadow-lg">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Projects Awaiting Review
-            </h2>
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
-              {stats.pending} pending
-            </span>
+        <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center gap-4">
+          <Clock className="text-yellow-600" />
+          <div>
+            <p className="text-sm text-gray-500">Pending Reviews</p>
+            <h3 className="text-xl font-bold">{stats.pending}</h3>
           </div>
-          <PendingReviews />
-        </section>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center gap-4">
+          <CheckCircle className="text-green-600" />
+          <div>
+            <p className="text-sm text-gray-500">Approved</p>
+            <h3 className="text-xl font-bold">{stats.approved}</h3>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center gap-4">
+          <RefreshCcw className="text-purple-600" />
+          <div>
+            <p className="text-sm text-gray-500">Revisions Requested</p>
+            <h3 className="text-xl font-bold">{stats.revisions}</h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white border rounded-xl p-6 flex gap-4">
+        <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+          Review Latest Projects
+        </button>
+        <button className="border px-5 py-2 rounded-lg hover:bg-gray-50">
+          Search Projects
+        </button>
+      </div>
+
+      {/* Assigned Projects Table */}
+      <div className="bg-white border rounded-xl p-6">
+        <h2 className="text-lg font-semibold mb-4">Assigned Projects</h2>
+
+        <table className="w-full text-left">
+          <thead className="border-b">
+            <tr className="text-gray-500 text-sm">
+              <th className="py-3">Title</th>
+              <th>Student</th>
+              <th>Status</th>
+              <th>Submission Year</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="text-sm">
+            {projects.map((project) => (
+              <tr key={project.id} className="border-b">
+                <td className="py-3">{project.title}</td>
+                <td>{project.student}</td>
+                <td>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs ${
+                      project.status === "APPROVED"
+                        ? "bg-green-100 text-green-600"
+                        : project.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-purple-100 text-purple-600"
+                    }`}
+                  >
+                    {project.status}
+                  </span>
+                </td>
+                <td>{project.submissionYear}</td>
+                <td>
+                  <button className="text-blue-600 hover:underline mr-2">
+                    View
+                  </button>
+                  <button className="text-green-600 hover:underline">
+                    Review
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
