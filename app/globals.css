@@ -10,4 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Custom Grid Utility */
+  --grid-template-columns-responsive: repeat(auto-fill, minmax(200px, 1fr));
 }

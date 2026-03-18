@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/app/_context/AuthContext";
 import { useProject } from "@/app/_hooks/use-projects";
 import {
   BookOpen,
@@ -14,6 +15,7 @@ import Link from "next/link";
 
 export default function StudentDashboard() {
   const { getProjects } = useProject();
+  const { user } = useAuth();
   const { data: projects, isLoading } = getProjects();
 
   return (
@@ -28,17 +30,24 @@ export default function StudentDashboard() {
             Manage your research submissions and track review progress.
           </p>
         </div>
-        <Link
-          href="/student/upload"
-          className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
-        >
-          <Upload size={18} />
-          New Submission
-        </Link>
+        {!user?.supervisorId ? (
+          <div className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold opacity-50 cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-200">
+            <Upload size={18} />
+            New Submission
+          </div>
+        ) : (
+          <Link
+            href="/student/upload"
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
+          >
+            <Upload size={18} />
+            New Submission
+          </Link>
+        )}
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-responsive gap-6">
         <StatCard
           title="Total Projects"
           value={projects?.length || 0}
@@ -61,7 +70,7 @@ export default function StudentDashboard() {
           icon={CheckCircle}
           color="green"
         />
-        <StatCard title="Downloads" value="56" icon={Upload} color="purple" />
+        <StatCard title="Downloads" value="0" icon={Upload} color="purple" />
       </div>
 
       {/* My Projects Table */}

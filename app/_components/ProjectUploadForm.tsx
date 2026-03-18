@@ -1,12 +1,12 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { useProject } from "../_hooks/use-projects";
 import { toast } from "react-toastify";
 import useSearch from "../_hooks/use-search";
 import { useRouter } from "next/navigation";
 
 interface ProjectFormProps {
-  initialData?: any; // You can replace 'any' with your Project type
+  initialData?: any;
   isEditing?: boolean;
 }
 
@@ -15,11 +15,10 @@ export default function ProjectForm({
   isEditing = false,
 }: ProjectFormProps) {
   const router = useRouter();
-  const { submitProject, updateProject } = useProject(); // Assuming updateProject exists in your hook
+  const { submitProject, updateProject } = useProject();
   const { getCategories } = useSearch();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize state with initialData if editing
   const [title, setTitle] = useState(initialData?.title || "");
   const [abstract, setAbstract] = useState(initialData?.abstract || "");
   const [methodology, setMethodology] = useState(
@@ -27,7 +26,10 @@ export default function ProjectForm({
   );
   const [category, setCategory] = useState(initialData?.categoryId || "");
   const [file, setFile] = useState<File | null>(null);
-  const [keywords, setKeywords] = useState(initialData?.keywords || "");
+  const [keywords, setKeywords] = useState<string[]>(
+    initialData?.keywords || [],
+  );
+  const [currentKeyword, setCurrentKeyword] = useState("");
   const [researchArea, setResearchArea] = useState(
     initialData?.researchArea || "",
   );
@@ -41,7 +43,7 @@ export default function ProjectForm({
       setAbstract(initialData.abstract || "");
       setMethodology(initialData.methodology || "");
       setCategory(initialData.categoryId || "");
-      setKeywords(initialData.keywords || "");
+      setKeywords(initialData.keywords || []);
       setResearchArea(initialData.researchArea || "");
     }
   }, [initialData]);
@@ -67,10 +69,29 @@ export default function ProjectForm({
     }
   };
 
+  // ---------------- KEYWORDS TAG LOGIC ----------------
+  const addKeyword = (keyword: string) => {
+    const trimmed = keyword.trim();
+    if (trimmed && !keywords.includes(trimmed)) {
+      setKeywords([...keywords, trimmed]);
+    }
+  };
+
+  const removeKeyword = (index: number) => {
+    setKeywords(keywords.filter((_, i) => i !== index));
+  };
+
+  const handleKeywordKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addKeyword(currentKeyword);
+      setCurrentKeyword("");
+    }
+  };
+
+  // ---------------- SUBMIT ----------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // File is only strictly required if we aren't editing
     if (
       !title ||
       !abstract ||
@@ -87,16 +108,16 @@ export default function ProjectForm({
     formData.append("abstract", abstract);
     formData.append("methodology", methodology);
     formData.append("categoryId", category);
-    formData.append("keywords", keywords);
+
     formData.append("researchArea", researchArea);
     formData.append(
       "submissionYear",
       initialData?.submissionYear || currentYear,
     );
 
-    if (file) {
-      formData.append("file", file);
-    }
+    keywords.forEach((kw) => formData.append("keywords[]", kw));
+
+    if (file) formData.append("file", file);
 
     const mutation = isEditing ? updateProject : submitProject;
 
@@ -105,17 +126,17 @@ export default function ProjectForm({
       {
         onSuccess: () => {
           if (!isEditing) {
-            // Reset form only on new submission
             setTitle("");
             setAbstract("");
             setMethodology("");
             setCategory("");
             setFile(null);
-            setKeywords("");
+            setKeywords([]);
+            setCurrentKeyword("");
             setResearchArea("");
             if (fileInputRef.current) fileInputRef.current.value = "";
           } else {
-            router.push("/student"); // Redirect to projects list after editing
+            router.push("/student");
           }
         },
       },
@@ -154,7 +175,7 @@ export default function ProjectForm({
           value={abstract}
           onChange={(e) => setAbstract(e.target.value)}
           className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={4}
+          rows={6}
           required
         />
       </div>
@@ -223,31 +244,49 @@ export default function ProjectForm({
         />
       </div>
 
-      {/* Keywords & Area */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">
-            Keywords
-          </label>
+      {/* Keywords */}
+      <div>
+        <label className="block text-gray-700 font-semibold mb-1">
+          Keywords
+        </label>
+        <div className="flex flex-wrap gap-2 border p-2 rounded-lg">
+          {keywords.map((k, i) => (
+            <span
+              key={i}
+              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center hover:bg-red-100 hover:text-red-800"
+            >
+              {k}
+              <button
+                type="button"
+                onClick={() => removeKeyword(i)}
+                className="ml-1 font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
           <input
             type="text"
-            placeholder="e.g. AI, React, Health"
-            value={keywords}
-            onChange={(e) => setKeywords(e.target.value)}
-            className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={currentKeyword}
+            onChange={(e) => setCurrentKeyword(e.target.value)}
+            onKeyDown={handleKeywordKeyDown}
+            placeholder="Type and press Enter"
+            className="flex-1 min-w-[120px] border-none focus:ring-0 outline-none"
           />
         </div>
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">
-            Research Area
-          </label>
-          <input
-            type="text"
-            value={researchArea}
-            onChange={(e) => setResearchArea(e.target.value)}
-            className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      </div>
+
+      {/* Research Area */}
+      <div>
+        <label className="block text-gray-700 font-semibold mb-1">
+          Research Area
+        </label>
+        <input
+          type="text"
+          value={researchArea}
+          onChange={(e) => setResearchArea(e.target.value)}
+          className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       <button

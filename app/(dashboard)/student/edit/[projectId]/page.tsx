@@ -1,12 +1,21 @@
 "use client";
+import NoSupervisor from "@/app/(dashboard)/_components/NoSupervisor";
 import ProjectUploadForm from "@/app/_components/ProjectUploadForm";
+import { useAuth } from "@/app/_context/AuthContext";
 import { useProject } from "@/app/_hooks/use-projects";
 import { useParams } from "next/navigation";
 
 export default function UploadPage() {
   const { projectId } = useParams();
   const { getProjectById } = useProject();
+  const { user } = useAuth();
+  const hasSupervisor = user?.supervisorId;
+
   const { data: project, isLoading } = getProjectById(projectId as string);
+
+  if (!hasSupervisor) {
+    return <NoSupervisor />;
+  }
 
   if (isLoading) {
     return (
