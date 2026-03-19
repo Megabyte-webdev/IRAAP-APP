@@ -2,20 +2,23 @@ import { generatePageMetadata } from "@/app/_lib/metadata";
 import ProjectDetailPage from "../_components/ProjectDetailPage";
 import { getProjectByIdServer } from "@/app/_lib/meta-function";
 
-import { notFound } from "next/navigation";
+//import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: any) {
   const { pageId } = await params;
   const project = await getProjectByIdServer(pageId);
 
-  // If no project, stop here and trigger the notFound() UI
-  if (!project) {
-    notFound(); 
+  if (project) {
+    return generatePageMetadata({
+      title: `${project.title} · OOU Repository`,
+      description: `${project.category} (Author: ${project.author})`,
+    });
   }
 
+  // Explicit fallback so it doesn't use the root layout's metadata
   return generatePageMetadata({
-    title: `${project.title} · OOU Repository`,
-    description: `(Author: ${project.author}) - ${project.category}`,
+    title: "Project Not Found · OOU Repository",
+    description: "The requested project could not be located in our records.",
   });
 }
 
