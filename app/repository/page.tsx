@@ -2,6 +2,14 @@ import { Suspense } from "react";
 import RepositoryList from "../_components/RepositoryList";
 import Navbar from "../_components/Navbar";
 import Footer from "../_components/Footer";
+import { generatePageMetadata } from "../_lib/metadata";
+
+export const metadata = generatePageMetadata({
+  title: "IRAP Repository",
+  description:
+    "Explore the IRAP institutional repository—access research papers, academic publications, and digital resources across multiple disciplines.",
+  path: "/repository",
+});
 
 export default function RepositoryPage() {
   return (
