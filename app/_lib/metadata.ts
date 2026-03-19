@@ -21,7 +21,7 @@ export function generatePageMetadata({
       type: "website",
       images: [
         {
-          url: "/irap-logo.jpg",
+          url: "/irap-logo.png",
           alt: "IRAP",
         },
       ],
@@ -30,7 +30,7 @@ export function generatePageMetadata({
       card: "summary_large_image",
       title: title,
       description: description,
-      images: imageUrl ? [imageUrl] : undefined,
+      images: imageUrl ? [imageUrl] : ["/irap-logo.png"],
     },
   };
 }
