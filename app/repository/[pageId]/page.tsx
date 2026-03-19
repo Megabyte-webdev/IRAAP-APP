@@ -5,7 +5,7 @@ import { getProjectByIdServer } from "@/app/_lib/meta-function";
 export async function generateMetadata({ params }: any) {
   const { pageId } = await params;
   const project = await getProjectByIdServer(pageId);
-  return generatePageMetadata({
+  if(project) {return generatePageMetadata({
     title: project?.title
       ? `${project.title} · OOU Repository`
       : `Project ${pageId} · OOU Repository`,
@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: any) {
       ? `${project.category} (Author: ${project?.author})`
       : `Details for project ID ${pageId}`,
   });
+              }
 }
 
 const Page = () => {
