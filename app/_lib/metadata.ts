@@ -52,9 +52,9 @@ export function generatePageMetadata({
 
     twitter: {
       card: "summary_large_image",
-      title: finalTitle,
-      description: finalDescription,
-      images: [finalImage],
+      title: title,
+      description: description,
+      images: imageUrl ? [imageUrl] : undefined,
     },
   };
 }
