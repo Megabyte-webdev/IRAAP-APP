@@ -190,7 +190,7 @@ export default function RepositoryList() {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400 font-medium truncate max-w-[180px]">
+                  <span className="text-[11px] text-slate-400 font-medium truncate max-w-45">
                     <span className="uppercase opacity-60 mr-1">Area:</span>
                     {item.researchArea}
                   </span>

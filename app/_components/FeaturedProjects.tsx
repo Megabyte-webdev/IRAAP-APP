@@ -42,12 +42,12 @@ export default function FeaturedProjects({ projects }: any) {
             {projects.map((project: any) => (
               <article
                 key={project.id}
-                className="group relative flex flex-col bg-white rounded-2xl border border-slate-200 p-8 transition-all duration-300 hover:border-blue-200 hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)]"
+                className="group relative flex flex-col bg-white rounded-2xl border border-slate-200 p-8 transition-all duration-300 hover:border-blue-200 hover:shadow-[0_20px_50px_rgba(8,112,184,0.05)]"
               >
                 {/* Category Badge */}
                 <div className="mb-6">
-                  <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                    {project.categoryName || "General"}
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                    {project?.category}
                   </span>
                 </div>
 
