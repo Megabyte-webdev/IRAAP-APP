@@ -20,7 +20,7 @@ export function generatePageMetadata({
     description ||
     "IRAP is a digital institutional repository for accessing academic research, publications, and scholarly resources.";
 
-  const finalImage = imageUrl ? imageUrl : `${BASE_URL}/irap-logo.jpg`;
+  const finalImage = imageUrl ? imageUrl : `${BASE_URL}/irap-logo.png`;
 
   const url = `${BASE_URL}${path}`;
 
