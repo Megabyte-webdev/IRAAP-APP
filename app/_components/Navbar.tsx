@@ -21,7 +21,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-blue-600 font-roboto">
-          <Image src="/irap-logo.jpg" width={60} height={30} alt="IRAP" />
+          <Image src="/irap-logo.png" width={60} height={30} alt="IRAP" />
         </Link>
 
         {/* Desktop Navigation */}
