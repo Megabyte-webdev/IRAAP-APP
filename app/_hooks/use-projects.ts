@@ -41,7 +41,7 @@ export const useProject = () => {
     },
   });
 
-  const getProjects = () =>
+  const getProjects: any = () =>
     useQuery({
       queryKey: ["projects"],
       queryFn: async () => {
