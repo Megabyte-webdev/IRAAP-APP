@@ -7,7 +7,7 @@ import NoSupervisor from "../../_components/NoSupervisor";
 export default function UploadPage() {
   const { user } = useAuth();
 
-  const hasSupervisor = user?.supervisorId;
+  const hasSupervisor = user?.user?.supervisorId;
 
   if (!hasSupervisor) {
     return <NoSupervisor />;

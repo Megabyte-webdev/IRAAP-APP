@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { StatCard, StatusBadge } from "../_components/StatusHelper";
 
 export default function StudentDashboard() {
   const { getProjects } = useProject();
@@ -30,7 +31,7 @@ export default function StudentDashboard() {
             Manage your research submissions and track review progress.
           </p>
         </div>
-        {!user?.supervisorId ? (
+        {!user?.user?.supervisorId ? (
           <div className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold opacity-50 cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-200">
             <Upload size={18} />
             New Submission
@@ -117,7 +118,7 @@ export default function StudentDashboard() {
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/projects/${project.id}`}
+                          href={`/student/projects/${project.id}`}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                           title="View Project"
                         >
@@ -151,46 +152,5 @@ export default function StudentDashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-// --- Helper Components ---
-
-function StatCard({ title, value, icon: Icon, color }: any) {
-  const colors: any = {
-    blue: "text-blue-600 bg-blue-50",
-    amber: "text-amber-600 bg-amber-50",
-    green: "text-green-600 bg-green-50",
-    purple: "text-purple-600 bg-purple-50",
-  };
-  return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-xl ${colors[color]}`}>
-          <Icon size={24} />
-        </div>
-        <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            {title}
-          </p>
-          <h3 className="text-2xl font-black text-slate-800">{value}</h3>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: any = {
-    PENDING: "text-amber-600 bg-amber-50 border-amber-100",
-    APPROVED: "text-green-600 bg-green-50 border-green-100",
-    REJECTED: "text-red-600 bg-red-50 border-red-100",
-  };
-  return (
-    <span
-      className={`px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-tight ${styles[status] || styles.PENDING}`}
-    >
-      {status}
-    </span>
   );
 }

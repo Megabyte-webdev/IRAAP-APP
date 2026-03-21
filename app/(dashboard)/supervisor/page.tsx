@@ -24,7 +24,7 @@ export default function SupervisorDashboard() {
   const {
     getSupervisorProjects,
     getSupervisorStats,
-    reviewProject,
+    createReviewWithTasks,
     updateProjectStatus,
   } = useSupervisor();
 
@@ -58,20 +58,13 @@ export default function SupervisorDashboard() {
 
   const handleSaveReview = (text: string) => {
     if (!selectedProject) return;
-    reviewProject.mutate(
-      {
-        projectId: selectedProject!.id,
-        supervisorId: selectedProject.supervisorId,
-        comments: text,
-      },
-      {
-        onSuccess: () => {
-          setSelectedProject((prev) =>
-            prev ? { ...prev, status: "REVISION_REQUESTED" } : null,
-          );
-        },
-      },
-    );
+    createReviewWithTasks.mutate({
+      projectId: selectedProject!.id,
+      tasks: [
+        { title: "Fix Chapter 1 references" },
+        { title: "Add methodology diagram" },
+      ],
+    });
   };
 
   const handleStatusUpdate = (
@@ -245,7 +238,7 @@ export default function SupervisorDashboard() {
           project={selectedProject!}
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
-          reviewLoading={reviewProject.isPending}
+          reviewLoading={createReviewWithTasks.isPending}
           statusLoading={updateProjectStatus.isPending}
           onSaveReview={(text) => handleSaveReview(text)}
           onStatusChange={(status) => handleStatusUpdate(status)}

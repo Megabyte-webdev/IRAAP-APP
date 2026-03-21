@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
-import { Project, Stats } from "../_utils/types";
+import { Project, Stats, ReviewTask } from "../_utils/types";
+import { toast } from "react-toastify";
+import { extractErrorMessage } from "../_lib/utils";
 
 const useSupervisor = () => {
   const queryClient = useQueryClient();
@@ -23,41 +25,38 @@ const useSupervisor = () => {
       },
     });
 
-  const getProjectReviews = (id: number) =>
-    useQuery({
-      queryKey: ["project-reviews", id],
-      queryFn: async () => {
-        const { data } = await api.get(`/reviews/${id}`);
-        return data.reviews;
-      },
-      enabled: !!id,
-    });
-  const reviewProject = useMutation({
+  const createReviewWithTasks = useMutation({
     mutationFn: async ({
       projectId,
-      comments,
-      rating,
-      supervisorId,
+      tasks,
     }: {
       projectId: number;
-      comments: string;
-      rating?: number;
-      supervisorId: string;
+      tasks: { title: string; description?: string }[];
     }) => {
-      const { data } = await api.post("/reviews/generate", {
+      const { data } = await api.post("/reviews", {
         projectId,
-        comments,
-        rating,
-        supervisorId,
+        tasks,
       });
       return data;
     },
-
-    onSuccess: () => {
-      // refresh projects & stats after review
-      //   queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["project-reviews"] });
+    onSuccess: (_, { projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["project-reviews", projectId],
+      });
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
+    },
+  });
+
+  const verifyTaskBySupervisor = useMutation({
+    mutationFn: async ({ taskId }: { taskId: number }) => {
+      const { data } = await api.patch(`/reviews/tasks/${taskId}/verify`);
+      return data;
+    },
+    onSuccess: (_, { taskId, projectId }: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["project-reviews", projectId],
+      });
     },
   });
 
@@ -71,25 +70,25 @@ const useSupervisor = () => {
     }) => {
       const { data } = await api.patch(
         `/supervisor/projects/${projectId}/status`,
-        {
-          status,
-        },
+        { status },
       );
       return data;
     },
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
+    },
+    onError: (err) => {
+      toast.error(extractErrorMessage(err));
     },
   });
 
   return {
     getSupervisorProjects,
     getSupervisorStats,
-    reviewProject,
+    createReviewWithTasks,
+    verifyTaskBySupervisor,
     updateProjectStatus,
-    getProjectReviews,
   };
 };
 

@@ -1,9 +1,11 @@
 "use client";
+
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { useProject } from "../_hooks/use-projects";
 import { toast } from "react-toastify";
 import useSearch from "../_hooks/use-search";
 import { useRouter } from "next/navigation";
+import AddKeywords from "./AddKeywords";
 
 interface ProjectFormProps {
   initialData?: any;
@@ -69,12 +71,22 @@ export default function ProjectForm({
     }
   };
 
-  // ---------------- KEYWORDS TAG LOGIC ----------------
   const addKeyword = (keyword: string) => {
-    const trimmed = keyword.trim();
-    if (trimmed && !keywords.includes(trimmed)) {
-      setKeywords([...keywords, trimmed]);
-    }
+    // split by comma or space
+    const parts = keyword
+      .split(/[,]+/) // split on any space or comma
+      .map((k) => k.trim())
+      .filter(Boolean);
+
+    const newKeywords = [...keywords];
+
+    parts.forEach((k) => {
+      if (!newKeywords.includes(k)) {
+        newKeywords.push(k);
+      }
+    });
+
+    setKeywords(newKeywords);
   };
 
   const removeKeyword = (index: number) => {
@@ -82,10 +94,14 @@ export default function ProjectForm({
   };
 
   const handleKeywordKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
       e.preventDefault();
-      addKeyword(currentKeyword);
-      setCurrentKeyword("");
+
+      const trimmed = currentKeyword.trim();
+      if (trimmed) {
+        addKeyword(trimmed);
+        setCurrentKeyword("");
+      }
     }
   };
 
@@ -245,36 +261,14 @@ export default function ProjectForm({
       </div>
 
       {/* Keywords */}
-      <div>
-        <label className="block text-gray-700 font-semibold mb-1">
-          Keywords
-        </label>
-        <div className="flex flex-wrap gap-2 border p-2 rounded-lg">
-          {keywords.map((k, i) => (
-            <span
-              key={i}
-              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center hover:bg-red-100 hover:text-red-800"
-            >
-              {k}
-              <button
-                type="button"
-                onClick={() => removeKeyword(i)}
-                className="ml-1 font-bold cursor-pointer"
-              >
-                &times;
-              </button>
-            </span>
-          ))}
-          <input
-            type="text"
-            value={currentKeyword}
-            onChange={(e) => setCurrentKeyword(e.target.value)}
-            onKeyDown={handleKeywordKeyDown}
-            placeholder="Type and press Enter"
-            className="flex-1 min-w-[120px] border-none focus:ring-0 outline-none"
-          />
-        </div>
-      </div>
+      <AddKeywords
+        keywords={keywords}
+        setCurrentKeyword={setCurrentKeyword}
+        currentKeyword={currentKeyword}
+        handleKeywordKeyDown={handleKeywordKeyDown}
+        removeKeyword={removeKeyword}
+        addKeyword={addKeyword}
+      />
 
       {/* Research Area */}
       <div>

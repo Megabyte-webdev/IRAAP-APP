@@ -120,7 +120,7 @@ export function ProjectCard({
       </div>
 
       {/* Subtle decorative element */}
-      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500 to-indigo-500 opacity-0 transition-opacity group-hover:opacity-100" />
     </article>
   );
 }

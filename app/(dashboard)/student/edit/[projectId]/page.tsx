@@ -9,7 +9,7 @@ export default function UploadPage() {
   const { projectId } = useParams();
   const { getProjectById } = useProject();
   const { user } = useAuth();
-  const hasSupervisor = user?.supervisorId;
+  const hasSupervisor = user?.user?.supervisorId;
 
   const { data: project, isLoading } = getProjectById(projectId as string);
 
