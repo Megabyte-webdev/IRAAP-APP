@@ -11,7 +11,7 @@ export default function UploadPage() {
   const { user } = useAuth();
   const hasSupervisor = user?.user?.supervisorId;
 
-  const { data: project, isLoading } = getProjectById(projectId as string);
+  const { data: project, isLoading } = getProjectById(Number(projectId));
 
   if (!hasSupervisor) {
     return <NoSupervisor />;
