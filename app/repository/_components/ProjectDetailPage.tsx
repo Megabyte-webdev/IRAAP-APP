@@ -21,7 +21,7 @@ export default function ProjectDetailPage() {
   const { getProjectById } = useProject();
   const { pageId } = useParams();
   const router = useRouter();
-  const { data: project, isLoading, error } = getProjectById(pageId as string);
+  const { data: project, isLoading, error } = getProjectById(Number(pageId));
 
   if (isLoading) return <LoadingSkeleton />;
   if (error || !project) {
