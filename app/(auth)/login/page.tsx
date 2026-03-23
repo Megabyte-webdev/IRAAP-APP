@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/app/_context/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -8,6 +9,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || undefined;
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -29,7 +32,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, callbackUrl);
       // On success, the auth provider will redirect (assumed)
     } catch (err) {
       setError(

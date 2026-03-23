@@ -6,16 +6,6 @@ import { ToastContainer } from "react-toastify";
 import { generatePageMetadata } from "./_lib/metadata";
 import { RouteProtector } from "./_hocs/RouteProtector";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = generatePageMetadata({
   title:
     "OOU · Institutional Repository for Academic Projects | Department of Computer Engineering",
@@ -31,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`antialiased`}>
         <Providers>
           <RouteProtector>
             {children}

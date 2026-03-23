@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import useSearch from "../_hooks/use-search";
 import {
   BookOpen,
@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function RepositoryList() {
-  const searchParams = useSearchParams();
+export default function RepositoryList({ searchParams }: any) {
   const router = useRouter();
   const pathname = usePathname();
   const { getSearchResults } = useSearch();

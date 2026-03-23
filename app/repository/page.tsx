@@ -11,7 +11,7 @@ export const metadata = generatePageMetadata({
   path: "/repository",
 });
 
-export default function RepositoryPage() {
+export default function RepositoryPage({ searchParams }: any) {
   return (
     // The Suspense boundary is what fixes the "prerender-error" during build
     <Suspense
@@ -22,7 +22,7 @@ export default function RepositoryPage() {
       }
     >
       <Navbar />
-      <RepositoryList />
+      <RepositoryList searchParams={searchParams} />
       <Footer />
     </Suspense>
   );
