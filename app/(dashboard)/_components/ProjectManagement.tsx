@@ -10,6 +10,7 @@ import {
   X,
   Activity,
   LayoutDashboard,
+  ClipboardList,
 } from "lucide-react";
 import { useProject } from "@/app/_hooks/use-projects";
 import ProjectInfo from "@/app/(dashboard)/_components/ProjectInfo";
@@ -100,7 +101,7 @@ const ProjectManagement = () => {
               className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu size={20} />
+              <ClipboardList size={20} />
             </button>
             <div className="flex items-center gap-3">
               <div className="hidden md:block p-1.5 bg-indigo-600 rounded-lg text-white">
@@ -121,9 +122,6 @@ const ProjectManagement = () => {
               onClick={() => setIsActivityOpen(!isActivityOpen)}
             >
               <Activity size={18} />
-            </button>
-            <button className="p-2 text-slate-400 hover:text-slate-600">
-              <MoreVertical size={20} />
             </button>
           </div>
         </header>

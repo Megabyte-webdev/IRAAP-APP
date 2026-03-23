@@ -6,15 +6,8 @@ import { Header } from "./Header";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <div>
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Pass toggle function to Header */}

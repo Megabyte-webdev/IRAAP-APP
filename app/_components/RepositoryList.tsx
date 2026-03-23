@@ -22,27 +22,40 @@ export default function RepositoryList({ searchParams }: any) {
   const [tempValue, setTempValue] = useState("");
 
   const searchFilters = {
-    title: searchParams.get("title") || "",
-    year: searchParams.get("year") || "",
-    researchArea: searchParams.get("researchArea") || "",
-    methodology: searchParams.get("methodology") || "",
+    title: searchParams?.title || "",
+    year: searchParams?.year || "",
+    researchArea: searchParams?.researchArea || "",
+    methodology: searchParams?.methodology || "",
   };
 
   const { data: results = [], isLoading } = getSearchResults(searchFilters);
 
   const updateFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    // Create a new URLSearchParams instance from the existing object
+    const params = new URLSearchParams();
+
+    // Spread existing params into the new instance
+    Object.entries(searchParams).forEach(([k, v]) => {
+      if (v) params.set(k, v as string);
+    });
+
     if (value.trim()) {
       params.set(key, value);
     } else {
       params.delete(key);
     }
+
     router.push(`${pathname}?${params.toString()}`);
     setEditingKey(null);
   };
 
   const removeFilter = (key: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
+
+    Object.entries(searchParams).forEach(([k, v]) => {
+      if (v) params.set(k, v as string);
+    });
+
     params.delete(key);
     router.push(`${pathname}?${params.toString()}`);
   };
@@ -55,7 +68,7 @@ export default function RepositoryList({ searchParams }: any) {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div>

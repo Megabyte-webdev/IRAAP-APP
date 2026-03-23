@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./_context/Providers";
 import { ToastContainer } from "react-toastify";
 import { generatePageMetadata } from "./_lib/metadata";
-import { RouteProtector } from "./_hocs/RouteProtector";
 
 export const metadata: Metadata = generatePageMetadata({
   title:
@@ -23,14 +21,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <Providers>
-          <RouteProtector>
-            {children}
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-            />
-          </RouteProtector>
+          {children}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+          />
         </Providers>
 
         {/* ALL MODALS WILL RENDER HERE, OUTSIDE THE DASHBOARD FLOW */}

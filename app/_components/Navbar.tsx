@@ -1,80 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react"; // npm install lucide-react
+import { Menu, X, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
-    { name: "Home", href: "/" },
     { name: "Repository", href: "/repository" },
-    { name: "Login", href: "/login" },
+    { name: "About IRAP", href: "/about" },
+    { name: "Archive v2", href: "/archive" },
   ];
 
   return (
-    <nav className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-blue-600 font-roboto">
-          <Image src="/irap-logo.png" width={60} height={30} alt="IRAP" />
+    <nav
+      className={`fixed top-0 w-full z-100 transition-all duration-500 ${
+        scrolled
+          ? "py-4 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
+          : "py-10 bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-10 flex justify-between items-center">
+        {/* Branding */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:rotate-6 transition-transform">
+            <Image
+              src="/irap-logo.png"
+              width={20}
+              height={20}
+              alt="Logo"
+              className="brightness-0 invert"
+            />
+          </div>
+          <span className="text-slate-900 font-bold tracking-tighter text-xl">
+            IRAP
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-slate-600 hover:text-blue-600 font-medium transition"
-            >
-              {link.name}
-            </Link>
-          ))}
-          <Link
-            href="/register"
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm active:scale-95"
-          >
-            Submit Project
-          </Link>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMenu}
-          className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
-          aria-label="Toggle Menu"
+        {/* Desktop Navigation Pill */}
+        <div
+          className={`hidden md:flex items-center gap-1 p-1 rounded-full border transition-all duration-500 ${
+            scrolled
+              ? "bg-slate-100/50 border-slate-200/60"
+              : "bg-transparent border-transparent"
+          }`}
         >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-      </div>
-
-      {/* Mobile Navigation Dropdown */}
-      {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-slate-100 shadow-xl py-6 px-6 space-y-4 animate-in fade-in slide-in-from-top-4">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="block text-lg font-medium text-slate-700 hover:text-blue-600"
+              className={`px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all rounded-full ${
+                scrolled
+                  ? "text-slate-600 hover:text-blue-600 hover:bg-white"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
+              }`}
             >
               {link.name}
             </Link>
           ))}
+        </div>
+
+        {/* Action Button */}
+        <div className="flex items-center gap-8">
+          <Link
+            href="/login"
+            className="hidden lg:block text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
+          >
+            Portal
+          </Link>
           <Link
             href="/register"
-            onClick={() => setIsOpen(false)}
-            className="block bg-blue-600 text-white text-center px-4 py-3 rounded-xl font-bold shadow-md"
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
+              scrolled
+                ? "bg-slate-900 text-white hover:bg-blue-600"
+                : "bg-white text-slate-900 hover:bg-slate-900 hover:text-white shadow-slate-200/50"
+            }`}
           >
-            Submit Project
+            Submit <ArrowUpRight size={14} />
           </Link>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

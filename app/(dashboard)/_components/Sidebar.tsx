@@ -7,7 +7,7 @@ import {
   ClipboardCheck,
   Search,
   LogOut,
-  X, // Added X icon for closing
+  X,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { authService } from "@/app/_services/auth.service";
@@ -72,72 +72,81 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   });
 
   return (
-    <aside
-      className={cn(
-        "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-blue-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full", // 3. Toggle visibility
-      )}
-      aria-label="Sidebar navigation"
-    >
-      {/* Header & Close Button */}
-      <div className="flex items-center justify-between border-b border-blue-800 p-6">
-        <div>
-          <h2 className="text-lg font-bold tracking-tight">OOU Repository</h2>
-          <p className="text-xs text-blue-300">Computer Engineering</p>
-        </div>
-        {/* 4. Close button only visible on mobile */}
-        <button
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-5 bg-black/50 lg:hidden"
           onClick={onClose}
-          className="rounded-md p-1 hover:bg-blue-900 lg:hidden"
-        >
-          <X size={20} />
-        </button>
-      </div>
+        />
+      )}
 
-      <nav className="flex-1 space-y-1 p-4">
-        {filteredNavItems.map((item) => {
-          const Icon = item.icon;
-          const fullHref = `/${userRole?.toLowerCase()}${item.href === "/" ? "" : item.href}`;
-          const isActive =
-            pathname === fullHref ||
-            (item.href !== "/" && pathname.startsWith(fullHref));
-
-          return (
-            <Link
-              key={item.href}
-              href={`/${userRole?.toLowerCase()}${item.href}`}
-              onClick={onClose} // 5. Close sidebar when a link is clicked on mobile
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-blue-800 text-white"
-                  : "text-blue-100 hover:bg-blue-900 hover:text-white",
-              )}
-            >
-              <Icon size={20} />
-              <span>{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-blue-800 p-4">
-        {user && (
-          <div className="mb-3 px-4 py-2 text-sm text-blue-200">
-            <p className="truncate font-medium">
-              {user.fullName || user.email}
-            </p>
-            <p className="text-xs text-blue-300 uppercase">{user.role}</p>
-          </div>
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-blue-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
-        <button
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-950/30"
-        >
-          <LogOut size={20} />
-          <span>Sign Out</span>
-        </button>
-      </div>
-    </aside>
+        aria-label="Sidebar navigation"
+      >
+        {/* Header & Close Button */}
+        <div className="flex items-center justify-between border-b border-blue-800 p-6">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">OOU Repository</h2>
+            <p className="text-xs text-blue-300">Computer Engineering</p>
+          </div>
+          {/* 4. Close button only visible on mobile */}
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 hover:bg-blue-900 lg:hidden"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="flex-1 space-y-1 p-4">
+          {filteredNavItems.map((item) => {
+            const Icon = item.icon;
+            const fullHref = `/${userRole?.toLowerCase()}${item.href === "/" ? "" : item.href}`;
+            const isActive =
+              pathname === fullHref ||
+              (item.href !== "/" && pathname.startsWith(fullHref));
+
+            return (
+              <Link
+                key={item.href}
+                href={`/${userRole?.toLowerCase()}${item.href}`}
+                onClick={onClose} // 5. Close sidebar when a link is clicked on mobile
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-blue-800 text-white"
+                    : "text-blue-100 hover:bg-blue-900 hover:text-white",
+                )}
+              >
+                <Icon size={20} />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-blue-800 p-4">
+          {user && (
+            <div className="mb-3 px-4 py-2 text-sm text-blue-200">
+              <p className="truncate font-medium">
+                {user.fullName || user.email}
+              </p>
+              <p className="text-xs text-blue-300 uppercase">{user.role}</p>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-950/30"
+          >
+            <LogOut size={20} />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

@@ -72,3 +72,10 @@ export const StatusButton: FC<StatusBtnProps> = ({
     )}
   </button>
 );
+
+export const statusStyles: Record<string, string> = {
+  APPROVED: "bg-green-100 text-green-600",
+  PENDING: "bg-yellow-100 text-yellow-600",
+  REJECTED: "bg-red-100 text-red-600",
+  REVISION_REQUESTED: "bg-purple-100 text-purple-600",
+};
