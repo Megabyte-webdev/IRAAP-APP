@@ -10,8 +10,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <h1 className="text-3xl font-bold">Admin Command Center</h1>
-
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          Command Center
+        </h1>
+        <p className="text-slate-500">
+          Overview of system health and student allocations.
+        </p>
+      </div>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard

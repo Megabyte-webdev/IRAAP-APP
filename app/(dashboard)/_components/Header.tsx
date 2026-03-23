@@ -1,10 +1,10 @@
 "use client";
 import { useAuth } from "@/app/_context/AuthContext";
-import { Bell, UserCircle, ChevronDown } from "lucide-react";
+import { Bell, UserCircle, ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { authDetails, isLoading: authLoading } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -51,7 +51,13 @@ export function Header() {
     <header className="sticky top-0 z-10 h-16 border-b border-gray-200 bg-white/80 backdrop-blur-sm flex items-center justify-between px-4 sm:px-8 shadow-sm">
       {/* Left section */}
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-gray-600">
+        <button
+          onClick={onMenuClick}
+          className="p-2 -ml-2 text-gray-600 lg:hidden hover:bg-gray-100 rounded-md"
+        >
+          <Menu size={24} />
+        </button>
+        <span className="hidden md:block text-sm font-medium text-gray-600">
           Academic Year: <span className="text-gray-900">2025/2026</span>
         </span>
       </div>
@@ -121,7 +127,7 @@ export function Header() {
               >
                 Settings
               </Link>
-              <button
+              {/* <button
                 onClick={async () => {
                   setShowUserMenu(false);
                   // Import dynamically to avoid circular dependency
@@ -132,7 +138,7 @@ export function Header() {
                 className="block lg:hidden w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
               >
                 Sign Out
-              </button>
+              </button> */}
             </div>
           )}
         </div>
