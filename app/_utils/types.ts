@@ -43,6 +43,7 @@ export interface Task {
   title: string;
   description?: string;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "VERIFIED";
+  createdAt: Date;
 }
 
 export interface Review {
@@ -75,6 +76,7 @@ export interface ProjectReviewModalProps {
 }
 
 export type ProjectStatus = "APPROVED" | "REJECTED" | "REVISION_REQUESTED";
+export type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "VERIFIED";
 
 export interface ProjectReviewsProps {
   reviews: any;

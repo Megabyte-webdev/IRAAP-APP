@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./_context/Providers";
 import { ToastContainer } from "react-toastify";
 import { generatePageMetadata } from "./_lib/metadata";
+import { RouteProtector } from "./_hocs/RouteProtector";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,13 +35,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-          />
+          <RouteProtector>
+            {children}
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+            />
+          </RouteProtector>
         </Providers>
+
+        {/* ALL MODALS WILL RENDER HERE, OUTSIDE THE DASHBOARD FLOW */}
+        <div id="modal-root" className="relative z-9999" />
       </body>
     </html>
   );

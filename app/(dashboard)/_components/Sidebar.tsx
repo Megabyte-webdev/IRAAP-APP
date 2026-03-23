@@ -53,7 +53,8 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, isLoading: authLoading } = useAuth();
+  const { authDetails, isLoading: authLoading } = useAuth();
+  const user = authDetails?.user;
 
   // Handle logout with error feedback
   const handleLogout = async () => {
@@ -88,7 +89,7 @@ export function Sidebar() {
     );
   }
 
-  const userRole = user?.user?.role?.toLowerCase() as UserRole | undefined;
+  const userRole = user?.role?.toLowerCase() as UserRole | undefined;
 
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter((item) => {

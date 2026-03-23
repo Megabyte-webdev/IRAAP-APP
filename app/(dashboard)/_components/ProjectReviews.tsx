@@ -7,8 +7,8 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const ProjectReviews = ({ reviews, historyLoading }: ProjectReviewsProps) => {
-  const { user } = useAuth();
-  const role: "STUDENT" | "SUPERVISOR" = user?.user?.role;
+  const { authDetails } = useAuth();
+  const role: "STUDENT" | "SUPERVISOR" = authDetails?.user?.role;
   const onUpdateTaskStatus = async (taskId: number, status: string) => {};
   const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
 

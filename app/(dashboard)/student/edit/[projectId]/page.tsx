@@ -8,10 +8,10 @@ import { useParams } from "next/navigation";
 export default function UploadPage() {
   const { projectId } = useParams();
   const { getProjectById } = useProject();
-  const { user } = useAuth();
-  const hasSupervisor = user?.user?.supervisorId;
+  const { authDetails } = useAuth();
+  const hasSupervisor = authDetails?.user?.supervisorId;
 
-  const { data: project, isLoading } = getProjectById(projectId as string);
+  const { data: project, isLoading } = getProjectById(Number(projectId));
 
   if (!hasSupervisor) {
     return <NoSupervisor />;

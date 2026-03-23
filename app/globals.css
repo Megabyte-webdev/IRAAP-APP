@@ -14,3 +14,8 @@
   /* Custom Grid Utility */
   --grid-template-columns-responsive: repeat(auto-fill, minmax(200px, 1fr));
 }
+
+/* Ensure all fixed items are definitely on top */
+.fixed {
+  z-index: 9999 !important;
+}

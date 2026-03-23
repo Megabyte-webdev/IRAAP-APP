@@ -5,9 +5,9 @@ import { useAuth } from "@/app/_context/AuthContext";
 import NoSupervisor from "../../_components/NoSupervisor";
 
 export default function UploadPage() {
-  const { user } = useAuth();
+  const { authDetails } = useAuth();
 
-  const hasSupervisor = user?.user?.supervisorId;
+  const hasSupervisor = authDetails?.user?.supervisorId;
 
   if (!hasSupervisor) {
     return <NoSupervisor />;

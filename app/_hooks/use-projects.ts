@@ -70,32 +70,11 @@ export const useProject = () => {
       },
     });
 
-  const updateTaskByStudent = useMutation({
-    mutationFn: async ({
-      taskId,
-      status,
-    }: {
-      taskId: number;
-      status?: "IN_PROGRESS" | "COMPLETED";
-    }) => {
-      const { data } = await api.patch(`/reviews/tasks/${taskId}`, {
-        status,
-      });
-      return data;
-    },
-    onSuccess: (_, { taskId, projectId }: any) => {
-      queryClient.invalidateQueries({
-        queryKey: ["project-reviews", projectId],
-      });
-    },
-  });
-
   return {
     submitProject,
     updateProject,
     getProjects,
     getProjectById,
     getProjectReviews,
-    updateTaskByStudent,
   };
 };

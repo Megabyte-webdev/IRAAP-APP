@@ -55,7 +55,7 @@ const ProjectInfo: FC<{ project: Project }> = ({ project }) => {
             Resources
           </h4>
           <a
-            href={project.fileUrl}
+            href={`${project.fileUrl}.pdf`}
             className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/20 transition-all group"
           >
             <div className="flex items-center gap-2">

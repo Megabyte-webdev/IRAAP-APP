@@ -28,14 +28,17 @@ const useSupervisor = () => {
   const createReviewWithTasks = useMutation({
     mutationFn: async ({
       projectId,
+      summary,
       tasks,
     }: {
       projectId: number;
+      summary: string;
       tasks: { title: string; description?: string }[];
     }) => {
       const { data } = await api.post("/reviews", {
         projectId,
         tasks,
+        summary,
       });
       return data;
     },
@@ -57,6 +60,9 @@ const useSupervisor = () => {
       queryClient.invalidateQueries({
         queryKey: ["project-reviews", projectId],
       });
+    },
+    onError: (err) => {
+      toast.error(extractErrorMessage(err));
     },
   });
 
@@ -83,12 +89,75 @@ const useSupervisor = () => {
     },
   });
 
+  const deleteTask = useMutation({
+    mutationFn: async ({
+      taskId,
+      projectId,
+    }: {
+      taskId: number;
+      projectId: number;
+    }) => {
+      const { data } = await api.delete(`/reviews/tasks/${taskId}`);
+      return data;
+    },
+    onSuccess: (_, { taskId, projectId }: any) => {
+      // Refresh the specific project board
+      queryClient.setQueryData(
+        ["project-reviews", projectId],
+        (oldData: any) => {
+          if (!oldData) return [];
+
+          // Map through the revision rounds and filter the task out of the correct round
+          return oldData.map((review: any) => ({
+            ...review,
+            tasks: review.tasks.filter(
+              (t: any) => Number(t.id) !== Number(taskId),
+            ),
+          }));
+        },
+      );
+      toast.success("Task removed successfully");
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
+  const deleteReview = useMutation({
+    mutationFn: async ({
+      reviewId,
+      projectId,
+    }: {
+      reviewId: number;
+      projectId: number;
+    }) => {
+      const { data } = await api.delete(`/reviews/${reviewId}`);
+      return data;
+    },
+    onSuccess: (_, { reviewId, projectId }: any) => {
+      queryClient.setQueryData(
+        ["project-reviews", projectId],
+        (oldData: any) => {
+          if (!oldData) return [];
+
+          return oldData.filter(
+            (review: any) => Number(review.id) !== Number(reviewId),
+          );
+        },
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
+      toast.success("Revision round deleted");
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
   return {
     getSupervisorProjects,
     getSupervisorStats,
     createReviewWithTasks,
     verifyTaskBySupervisor,
     updateProjectStatus,
+    deleteTask,
+    deleteReview,
   };
 };
 

@@ -5,9 +5,10 @@ import { useState } from "react";
 import Link from "next/link";
 
 export function Header() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { authDetails, isLoading: authLoading } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const user = authDetails?.user;
 
   // Simulated notification count (replace with real data)
   const notificationCount = 3;
@@ -105,7 +106,7 @@ export function Header() {
 
           {/* Dropdown menu */}
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="absolute right-0 mt-2  w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
               <Link
                 href="/profile"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

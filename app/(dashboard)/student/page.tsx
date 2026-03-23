@@ -16,7 +16,8 @@ import { StatCard, StatusBadge } from "../_components/StatusHelper";
 
 export default function StudentDashboard() {
   const { getProjects } = useProject();
-  const { user } = useAuth();
+  const { authDetails } = useAuth();
+  const user = authDetails?.user;
   const { data: projects, isLoading } = getProjects();
 
   return (
@@ -31,7 +32,7 @@ export default function StudentDashboard() {
             Manage your research submissions and track review progress.
           </p>
         </div>
-        {!user?.user?.supervisorId ? (
+        {!user?.supervisorId ? (
           <div className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold opacity-50 cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-200">
             <Upload size={18} />
             New Submission

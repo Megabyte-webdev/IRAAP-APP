@@ -11,7 +11,7 @@ import {
 import { Clock, CheckCircle, RefreshCcw, BookOpen, Eye } from "lucide-react";
 import useSupervisor from "@/app/_hooks/use-supervisor";
 import { Project } from "@/app/_utils/types";
-import ProjectReviewModal from "../_components/ProjectReviewModal";
+import Link from "next/link";
 
 const statusStyles: Record<string, string> = {
   APPROVED: "bg-green-100 text-green-600",
@@ -55,17 +55,6 @@ export default function SupervisorDashboard() {
       icon: <RefreshCcw className="text-purple-600" />,
     },
   ];
-
-  const handleSaveReview = (text: string) => {
-    if (!selectedProject) return;
-    createReviewWithTasks.mutate({
-      projectId: selectedProject!.id,
-      tasks: [
-        { title: "Fix Chapter 1 references" },
-        { title: "Add methodology diagram" },
-      ],
-    });
-  };
 
   const handleStatusUpdate = (
     status: "APPROVED" | "REJECTED" | "REVISION_REQUESTED",
@@ -218,12 +207,12 @@ export default function SupervisorDashboard() {
                   </td>
                   <td className="px-6 text-center">{project.submissionYear}</td>
                   <td className="px-6 text-right space-x-2">
-                    <button
-                      onClick={() => setSelectedProject(project)}
+                    <Link
+                      href={`/supervisor/projects/${project.id}`}
                       className="text-blue-600 hover:underline inline-flex items-center gap-1"
                     >
                       <Eye size={16} /> View
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -231,19 +220,6 @@ export default function SupervisorDashboard() {
           </table>
         </div>
       </div>
-
-      {/* Project Modal */}
-      {selectedProject && (
-        <ProjectReviewModal
-          project={selectedProject!}
-          isOpen={!!selectedProject}
-          onClose={() => setSelectedProject(null)}
-          reviewLoading={createReviewWithTasks.isPending}
-          statusLoading={updateProjectStatus.isPending}
-          onSaveReview={(text) => handleSaveReview(text)}
-          onStatusChange={(status) => handleStatusUpdate(status)}
-        />
-      )}
     </div>
   );
 }
