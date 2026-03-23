@@ -46,7 +46,7 @@ const TaskCard = ({ task, projectId }: TaskCardProps) => {
       newStatus === "VERIFIED" ||
       (task.status === "COMPLETED" && newStatus === "PENDING")
     ) {
-      verifyTaskBySupervisor.mutate({ taskId }, options);
+      verifyTaskBySupervisor.mutate({ taskId, projectId }, options);
     } else {
       updateTaskByStudent.mutate(
         { taskId, status: newStatus as any, projectId },
