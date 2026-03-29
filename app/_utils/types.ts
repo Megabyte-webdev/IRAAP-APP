@@ -83,3 +83,17 @@ export interface ProjectReviewsProps {
   historyLoading: boolean;
   updatingTaskId?: number;
 }
+
+export interface Student {
+  id: number;
+  fullName: string;
+  email: string;
+  supervisorName: string | null;
+  supervisorId: number | null;
+  projectStatus:
+    | "PENDING"
+    | "APPROVED"
+    | "REJECTED"
+    | "REVISION_REQUESTED"
+    | null;
+}

@@ -1,8 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
 import { toast } from "react-toastify";
+import { extractErrorMessage } from "../_lib/utils";
 
 const useAdmin = () => {
+  const queryClient = new QueryClient();
   const adminDashboardData = () =>
     useQuery({
       queryKey: ["adminDashboardData"],
@@ -32,6 +34,33 @@ const useAdmin = () => {
     },
     onError: () => {
       toast.error("Failed to assign students. Please try again.");
+    },
+  });
+
+  const bulkImportStudents = useMutation({
+    mutationKey: ["bulkImportStudents"],
+    mutationFn: async (
+      students: {
+        lastname: string;
+        firstname: string;
+        email: string;
+      }[],
+    ) => {
+      const { data } = await api.post("/admin/bulk-students", {
+        students,
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || "Students imported successfully!");
+
+      queryClient.invalidateQueries({ queryKey: ["studentsList"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        extractErrorMessage(Error) ||
+          "Failed to import students. Please check your CSV format.",
+      );
     },
   });
 
@@ -68,6 +97,7 @@ const useAdmin = () => {
     supervisorsQuery,
     unassignedStudentsQuery,
     studentsQuery,
+    bulkImportStudents,
   };
 };
 export default useAdmin;

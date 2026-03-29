@@ -1,4 +1,6 @@
 "use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,9 +10,11 @@ import {
   Search,
   LogOut,
   X,
+  ChevronLeft,
+  ChevronRight,
+  Users,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
-import { authService } from "@/app/_services/auth.service";
 import { useAuth } from "@/app/_context/AuthContext";
 
 type UserRole = "STUDENT" | "SUPERVISOR" | "ADMIN";
@@ -23,48 +27,32 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: "Dashboard", href: "/", roles: "ALL", icon: LayoutDashboard },
+  { name: "Dashboard", href: "", roles: "ALL", icon: LayoutDashboard },
   { name: "Submit Project", href: "/upload", roles: ["STUDENT"], icon: FileUp },
   {
     name: "Review Queue",
-    href: "/supervisor",
+    href: "/review",
     roles: ["SUPERVISOR"],
     icon: ClipboardCheck,
   },
+  { name: "Students", href: "/students", roles: ["ADMIN"], icon: Users },
   { name: "Archive Search", href: "/projects", roles: "ALL", icon: Search },
 ];
 
-// 1. Add Props interface
-interface SidebarProps {
+export function Sidebar({
+  isOpen,
+  onClose,
+}: {
   isOpen: boolean;
   onClose: () => void;
-}
-
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+}) {
   const pathname = usePathname();
-  const { authDetails, isLoading: authLoading } = useAuth();
+  const { authDetails, isLoading: authLoading, logout } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const user = authDetails?.user;
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  // 2. Consistent Loading State for Sidebar
-  if (authLoading) {
-    return (
-      <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-blue-950 lg:static lg:block hidden">
-        <div className="p-6 border-b border-blue-800">
-          <div className="h-6 w-32 animate-pulse rounded bg-blue-800" />
-        </div>
-      </aside>
-    );
-  }
-
   const userRole = user?.role as UserRole | undefined;
+  const rolePrefix = `/${userRole?.toLowerCase()}`;
 
   const filteredNavItems = navItems.filter((item) => {
     if (item.roles === "ALL") return true;
@@ -73,77 +61,125 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-5 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-blue-950 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-blue-950 text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-blue-900",
           isOpen ? "translate-x-0" : "-translate-x-full",
+          isCollapsed ? "lg:w-18" : "lg:w-64",
         )}
-        aria-label="Sidebar navigation"
       >
-        {/* Header & Close Button */}
-        <div className="flex items-center justify-between border-b border-blue-800 p-6">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">OOU Repository</h2>
-            <p className="text-xs text-blue-300">Computer Engineering</p>
-          </div>
-          {/* 4. Close button only visible on mobile */}
-          <button
-            onClick={onClose}
-            className="rounded-md p-1 hover:bg-blue-900 lg:hidden"
+        {/* --- THE EDGE TOGGLE BUTTON --- */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={cn(
+            "absolute -right-3 top-12 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-blue-800 bg-blue-950 text-blue-300 transition-all hover:text-white lg:flex",
+            "hover:scale-110 active:scale-95 shadow-sm",
+          )}
+        >
+          {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+        </button>
+
+        {/* Header */}
+        <div className="flex h-20 items-center overflow-hidden px-6">
+          <div
+            className={cn(
+              "min-w-45 transition-opacity duration-300",
+              isCollapsed && "lg:opacity-0",
+            )}
           >
-            <X size={20} />
+            <h2 className="text-lg font-bold tracking-tight">OOU IRAP</h2>
+            <p className="text-[10px] text-blue-400 uppercase tracking-widest font-semibold">
+              Repository
+            </p>
+          </div>
+          <button onClick={onClose} className="ml-auto lg:hidden text-blue-200">
+            <X size={24} />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 p-4">
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1.5 p-3 overflow-y-auto overflow-x-hidden">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
-            const fullHref = `/${userRole?.toLowerCase()}${item.href === "/" ? "" : item.href}`;
-            const isActive =
-              pathname === fullHref ||
-              (item.href !== "/" && pathname.startsWith(fullHref));
+            const fullHref = `${rolePrefix}${item.href}`;
+            const isActive = pathname === fullHref;
 
             return (
               <Link
                 key={item.href}
-                href={`/${userRole?.toLowerCase()}${item.href}`}
-                onClick={onClose} // 5. Close sidebar when a link is clicked on mobile
+                href={fullHref}
+                onClick={() => {
+                  if (window.innerWidth < 1024) onClose();
+                }}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
                   isActive
-                    ? "bg-blue-800 text-white"
-                    : "text-blue-100 hover:bg-blue-900 hover:text-white",
+                    ? "bg-blue-900/50 text-white shadow-inner"
+                    : "text-blue-200/70 hover:bg-blue-900/30 hover:text-white",
                 )}
               >
-                <Icon size={20} />
-                <span>{item.name}</span>
+                <Icon
+                  size={20}
+                  className={cn(
+                    "shrink-0",
+                    isActive
+                      ? "text-indigo-400"
+                      : "text-blue-400 group-hover:text-blue-300",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "transition-all duration-300 whitespace-nowrap",
+                    isCollapsed
+                      ? "lg:opacity-0 lg:pointer-events-none"
+                      : "opacity-100",
+                  )}
+                >
+                  {item.name}
+                </span>
+
+                {/* Active Indicator Line */}
+                {isActive && (
+                  <div className="absolute left-0 h-5 w-1 rounded-r-full bg-indigo-500" />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-blue-800 p-4">
-          {user && (
-            <div className="mb-3 px-4 py-2 text-sm text-blue-200">
-              <p className="truncate font-medium">
-                {user.fullName || user.email}
+        {/* Footer */}
+        <div className="mt-auto border-t border-blue-900/50 p-4">
+          {!isCollapsed && (
+            <div className="mb-4 px-2 overflow-hidden transition-all duration-300">
+              <p className="truncate text-sm font-semibold text-white">
+                {user?.fullName}
               </p>
-              <p className="text-xs text-blue-300 uppercase">{user.role}</p>
+              <p className="text-[10px] text-blue-500 uppercase font-bold">
+                {user?.role}
+              </p>
             </div>
           )}
+
           <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-950/30"
+            onClick={logout}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-950/20 group",
+              isCollapsed && "lg:justify-center lg:px-0",
+            )}
           >
-            <LogOut size={20} />
-            <span>Sign Out</span>
+            <LogOut
+              size={20}
+              className="shrink-0 group-hover:-translate-x-0.5 transition-transform"
+            />
+            {!isCollapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>

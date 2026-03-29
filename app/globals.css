@@ -19,3 +19,40 @@
 .fixed {
   z-index: 9999 !important;
 }
+
+/* Orange-themed scrollbar */
+::-webkit-scrollbar {
+  width: 5px; /* Slim but visible scrollbar */
+  height: 5px; /* Horizontal scrollbar height */
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+  background: #d5d8ff; /* Soft orange tint background */
+  border-radius: 10px;
+}
+
+/* Thumb (draggable handle) */
+::-webkit-scrollbar-thumb {
+  background: #355aff; /* Primary orange color */
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+/* Thumb hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #2040e3; /* Darker orange on hover */
+}
+
+/* Corner (where scrollbars meet) */
+::-webkit-scrollbar-corner {
+  background: #fff0e6;
+}
+
+/* Hide scrollbar on very small screens */
+@media (max-width: 600px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+}

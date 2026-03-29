@@ -1,4 +1,5 @@
-import { StatusBtnProps } from "@/app/_utils/types";
+import { StatusBtnProps, Student } from "@/app/_utils/types";
+import { CheckCircle2, RefreshCcw, ShieldAlert } from "lucide-react";
 import { FC } from "react";
 
 export function StatCard({ title, value, icon: Icon, color }: any) {
@@ -78,4 +79,40 @@ export const statusStyles: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-600",
   REJECTED: "bg-red-100 text-red-600",
   REVISION_REQUESTED: "bg-purple-100 text-purple-600",
+};
+
+export const ProjectStatusBadge = ({
+  status,
+}: {
+  status: Student["projectStatus"];
+}) => {
+  if (status === "APPROVED") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+        <CheckCircle2 size={12} /> Archived
+      </span>
+    );
+  }
+
+  if (status === "PENDING") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">
+        <ShieldAlert size={12} /> In Review
+      </span>
+    );
+  }
+
+  if (status === "REVISION_REQUESTED") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100">
+        <RefreshCcw size={12} /> Revision
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-400 border border-slate-100">
+      No Submission
+    </span>
+  );
 };
