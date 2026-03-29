@@ -17,8 +17,16 @@ export default function BulkAssignTable() {
   const [targetSupervisor, setTargetSupervisor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: supervisors } = supervisorsQuery();
-  const { data: unassignedStudents } = studentsQuery();
+  const {
+    data: supervisors,
+    isLoading: supLoading,
+    isError: supError,
+  } = supervisorsQuery();
+  const {
+    data: unassignedStudents,
+    isLoading: stuLoading,
+    isError: stuError,
+  } = studentsQuery();
 
   // 1. Memoized Filtered List
   const filteredStudents = useMemo(() => {
@@ -39,6 +47,22 @@ export default function BulkAssignTable() {
       );
     });
   }, [selectedIds, targetSupervisor, unassignedStudents]);
+
+  if (supLoading || stuLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin h-10 w-10 border-4 border-t-indigo-500 border-slate-200 rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (supError || stuError) {
+    return (
+      <div className="text-center py-12 text-red-600">
+        <p>Error loading data: {String(supError || stuError)}</p>
+      </div>
+    );
+  }
 
   const toggleAll = () => {
     if (selectedIds.length === filteredStudents?.length) {

@@ -6,7 +6,23 @@ import useAdmin from "@/app/_hooks/use-admin";
 
 export default function AdminDashboard() {
   const { adminDashboardData } = useAdmin();
-  const { data: stats } = adminDashboardData();
+  const { data: stats, isLoading, isError, error } = adminDashboardData();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-b-4"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-12 text-red-600">
+        <p>Error loading dashboard: {String(error)}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
