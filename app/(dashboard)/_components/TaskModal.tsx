@@ -147,40 +147,67 @@ const TaskModal = ({
               )}
 
               {!isSupervisor && (
-                <>
+                <div className="flex flex-col items-end gap-3 w-full">
+                  {/* CASE: Task is IN_PROGRESS (Allow moving back to PENDING) */}
+                  {task.status === "IN_PROGRESS" && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() =>
+                          onUpdateStatus(Number(task.id), "PENDING")
+                        }
+                        disabled={isLoading}
+                        className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition underline underline-offset-4"
+                      >
+                        Reset to Pending
+                      </button>
+                      <button
+                        onClick={() =>
+                          onUpdateStatus(Number(task.id), "COMPLETED")
+                        }
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md transition"
+                      >
+                        <Send size={16} /> Submit for Review
+                      </button>
+                    </div>
+                  )}
+
+                  {/* CASE: Task is COMPLETED (Allow recalling to IN_PROGRESS) */}
+                  {task.status === "COMPLETED" && (
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-xs font-bold text-slate-400 italic">
+                        Submitted! Waiting for Approval
+                      </span>
+                      <button
+                        onClick={() =>
+                          onUpdateStatus(Number(task.id), "IN_PROGRESS")
+                        }
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition border border-indigo-100"
+                      >
+                        {isLoading ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <RotateCcw size={12} />
+                        )}
+                        Recall to Edit
+                      </button>
+                    </div>
+                  )}
+
+                  {/* CASE: Task is PENDING (The Start Button) */}
                   {task.status === "PENDING" && (
                     <button
                       onClick={() =>
                         onUpdateStatus(Number(task.id), "IN_PROGRESS")
                       }
                       disabled={isLoading}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-md disabled:opacity-50 disabled:cursor-progress"
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-md transition"
                     >
                       <PlayCircle size={16} /> Start Task
                     </button>
                   )}
-                  {task.status === "IN_PROGRESS" && (
-                    <button
-                      onClick={() =>
-                        onUpdateStatus(Number(task.id), "COMPLETED")
-                      }
-                      disabled={isLoading}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md disabled:opacity-50 disabled:cursor-progress"
-                    >
-                      <Send size={16} /> Submit for Review
-                    </button>
-                  )}
-                  {task.status === "COMPLETED" && (
-                    <span className="text-xs font-bold text-slate-400 italic">
-                      Submitted! Waiting for Approval
-                    </span>
-                  )}
-                  {task.status === "VERIFIED" && (
-                    <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs">
-                      <CheckCircle size={16} /> Task Completed & Verified
-                    </div>
-                  )}
-                </>
+                </div>
               )}
             </div>
           </div>

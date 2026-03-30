@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
-import { toast } from "react-toastify";
 import { extractErrorMessage } from "../_lib/utils";
+import { onFailure, onSuccess } from "../_utils/Notification";
 
 const useStudent = () => {
   const queryClient = useQueryClient();
@@ -38,7 +38,12 @@ const useStudent = () => {
       );
     },
     onError: (err) => {
-      toast.error(extractErrorMessage(err));
+      onFailure({
+        title: "Update Failed",
+        message:
+          extractErrorMessage(err) ||
+          "Could not update task status. Please try again.",
+      });
     },
   });
   return {

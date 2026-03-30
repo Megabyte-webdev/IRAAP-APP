@@ -2,6 +2,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "../_context/AuthContext";
+import Loading from "../(dashboard)/loading";
 
 export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
   const { authDetails, isLoading } = useAuth();
@@ -28,16 +29,7 @@ export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
 
   // 1. Show loader while checking session
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-          <p className="text-sm font-bold text-slate-600">
-            Verifying session...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   // 2. If on login page and NOT logged in, allow viewing the login form

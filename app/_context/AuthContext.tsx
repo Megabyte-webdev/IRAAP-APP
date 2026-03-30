@@ -3,8 +3,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { authService } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import { extractErrorMessage } from "../_lib/utils";
+import { onFailure, onPrompt, onSuccess } from "../_utils/Notification";
 
 const AuthContext = createContext<any>(null);
 
@@ -27,7 +27,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     callbackUrl?: string,
   ) => {
     if (!email || !password) {
-      toast.info("Please fill in all fields");
+      onPrompt({
+        title: "Missing Credentials",
+        message: "Please enter both your email and password to continue.",
+      });
       return;
     }
 
@@ -39,6 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userRole = data.user.role.toLowerCase();
 
+      onSuccess({
+        title: "Welcome Back!",
+        message: `Successfully signed in as ${data.user.firstname || "User"}.`,
+      });
+
       // Decide destination
       const destination =
         callbackUrl && callbackUrl.startsWith(`/${userRole}`)
@@ -47,16 +55,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       router.push(destination);
     } catch (err) {
-      toast.error(extractErrorMessage(err));
+      onFailure({
+        title: "Login Failed",
+        message:
+          extractErrorMessage(err) ||
+          "Please check your credentials and try again.",
+      });
       setAuthDetails(null);
     } finally {
       setIsLoading(false);
     }
   };
+  const logout = () => {
+    try {
+      authService.logout(); // Clears tokens/localStorage
+      setAuthDetails(null);
+
+      onSuccess({
+        title: "Signed Out",
+        message: "You have been logged out successfully. See you soon!",
+      });
+
+      router.replace("/login");
+
+      // Force a refresh to clear any sensitive data in the React state/memory
+      window.location.href = "/login";
+    } catch (err) {
+      onFailure({
+        title: "Logout Error",
+        message: "An unexpected error occurred while signing out.",
+      });
+    }
+  };
 
   return (
     <AuthContext.Provider
-      value={{ authDetails, login, isLoading, setAuthDetails }}
+      value={{ authDetails, login, isLoading, setAuthDetails, logout }}
     >
       {children}
     </AuthContext.Provider>

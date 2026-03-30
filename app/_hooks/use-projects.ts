@@ -2,9 +2,9 @@
 
 import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
-import { toast } from "react-toastify";
 import { extractErrorMessage } from "../_lib/utils";
 import { ReviewTask } from "../_utils/types";
+import { onFailure, onSuccess } from "../_utils/Notification";
 
 export const useProject = () => {
   const queryClient = new QueryClient();
@@ -14,11 +14,19 @@ export const useProject = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Project submitted for review!");
+      onSuccess({
+        title: "Submission Received",
+        message: "Your project has been submitted and is now awaiting review.",
+      });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: (error: any) => {
-      toast.error(extractErrorMessage(error));
+      onFailure({
+        title: "Submission Failed",
+        message:
+          extractErrorMessage(error) ||
+          "We couldn't submit your project. Please try again.",
+      });
     },
   });
 
@@ -34,11 +42,19 @@ export const useProject = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Project updated successfully!");
+      onSuccess({
+        title: "Changes Saved",
+        message: "Your project details have been updated successfully.",
+      });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: (error: any) => {
-      toast.error(extractErrorMessage(error));
+      onFailure({
+        title: "Update Failed",
+        message:
+          extractErrorMessage(error) ||
+          "Failed to save changes. Please check your connection.",
+      });
     },
   });
 

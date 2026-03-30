@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import TaskModal from "./TaskModal";
 import { ConfirmationModal } from "./ConfirmationModal";
-import { toast } from "react-toastify";
+import { onSuccess } from "@/app/_utils/Notification";
+import { useAuth } from "@/app/_context/AuthContext";
 
 interface TaskCardProps {
   task: Task;
@@ -21,6 +22,9 @@ interface TaskCardProps {
 }
 
 const TaskCard = ({ task, projectId }: TaskCardProps) => {
+  const { authDetails } = useAuth();
+  const role = authDetails?.user?.role;
+  const isSupervisor = role === "SUPERVISOR";
   const { verifyTaskBySupervisor, deleteTask } = useSupervisor();
   const { updateTaskByStudent } = useStudent();
 
@@ -37,7 +41,26 @@ const TaskCard = ({ task, projectId }: TaskCardProps) => {
   const handleUpdateStatus = (taskId: number, newStatus: TaskStatus) => {
     const options = {
       onSuccess: () => {
-        toast.success(`Task updated to ${newStatus}`);
+        let title = "Status Updated";
+        let message = `Task is now ${newStatus.toLowerCase().replace("_", " ")}.`;
+
+        if (newStatus === "PENDING" && !isSupervisor) {
+          title = "Task Reset";
+          message = "The task has been moved back to the pending queue.";
+        } else if (newStatus === "IN_PROGRESS") {
+          if (task.status === "COMPLETED") {
+            title = "Submission Recalled";
+            message = "Task moved back to 'In Progress' for further editing.";
+          } else {
+            title = "Task Started";
+            message = "Time to get to work! Status set to 'In Progress'.";
+          }
+        } else if (newStatus === "COMPLETED") {
+          title = "Great Work!";
+          message = "Task submitted. Your supervisor has been notified.";
+        }
+
+        onSuccess({ title, message });
         setIsModalOpen(false);
       },
     };

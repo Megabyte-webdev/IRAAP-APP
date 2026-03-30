@@ -10,9 +10,10 @@ export const StudentTable = ({
   deleteRow,
 }: any) => (
   <div className="max-h-64 overflow-y-auto border border-slate-100 rounded-xl">
-    <table className="w-full text-left text-sm">
+    <table className="w-full min-w-200 text-left text-sm">
       <thead className="sticky top-0 bg-slate-100 border-b border-slate-200">
         <tr>
+          <th className="p-2">S/N</th>
           <th className="p-2">Lastname</th>
           <th className="p-2">Firstname</th>
           <th className="p-2">Email</th>
@@ -22,6 +23,7 @@ export const StudentTable = ({
       <tbody>
         {data.map((row: any, i: number) => (
           <tr key={i} className="hover:bg-slate-50">
+            <td className="p-2">{i + 1}</td>
             <td className="p-2">
               {editingIndex === i ? (
                 <input

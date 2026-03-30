@@ -9,7 +9,6 @@ export const authService = {
   },
   logout: () => {
     sessionStorage.removeItem("user");
-    window.location.href = "/login";
   },
   getCurrentUser: () => {
     // In a real app, decode the JWT here

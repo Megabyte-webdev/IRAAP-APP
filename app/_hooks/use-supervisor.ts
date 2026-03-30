@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
-import { Project, Stats, ReviewTask } from "../_utils/types";
-import { toast } from "react-toastify";
+import { Project, Stats } from "../_utils/types";
 import { extractErrorMessage } from "../_lib/utils";
+import { onFailure, onSuccess } from "../_utils/Notification";
 
 const useSupervisor = () => {
   const queryClient = useQueryClient();
@@ -43,11 +43,22 @@ const useSupervisor = () => {
       return data;
     },
     onSuccess: (_, { projectId }) => {
+      onSuccess({
+        title: "Review Published",
+        message: "The feedback and tasks have been sent to the student.",
+      });
       queryClient.invalidateQueries({
         queryKey: ["project-reviews", projectId],
       });
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
       queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
+    },
+    onError: (err) => {
+      onFailure({
+        title: "Review Failed",
+        message:
+          extractErrorMessage(err) || "Could not publish the review round.",
+      });
     },
   });
 
@@ -82,7 +93,10 @@ const useSupervisor = () => {
       });
     },
     onError: (err) => {
-      toast.error(extractErrorMessage(err));
+      onFailure({
+        title: "Verification Failed",
+        message: extractErrorMessage(err) || "Could not verify this task.",
+      });
     },
   });
 
@@ -101,11 +115,18 @@ const useSupervisor = () => {
       return data;
     },
     onSuccess: () => {
+      onSuccess({
+        title: "Status Updated",
+        message: `Project has been marked as ${status.replace("_", " ")}.`,
+      });
       queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
     },
     onError: (err) => {
-      toast.error(extractErrorMessage(err));
+      onFailure({
+        title: "Status Update Failed",
+        message: extractErrorMessage(err),
+      });
     },
   });
 
@@ -121,6 +142,10 @@ const useSupervisor = () => {
       return data;
     },
     onSuccess: (_, { taskId, projectId }: any) => {
+      onSuccess({
+        title: "Task Deleted",
+        message: "The task was successfully removed from the project.",
+      });
       // Refresh the specific project board
       queryClient.setQueryData(
         ["project-reviews", projectId],
@@ -136,9 +161,9 @@ const useSupervisor = () => {
           }));
         },
       );
-      toast.success("Task removed successfully");
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) =>
+      onFailure({ title: "Delete Failed", message: extractErrorMessage(err) }),
   });
 
   const deleteReview = useMutation({
@@ -153,6 +178,10 @@ const useSupervisor = () => {
       return data;
     },
     onSuccess: (_, { reviewId, projectId }: any) => {
+      onSuccess({
+        title: "Round Removed",
+        message: "The revision round has been deleted.",
+      });
       queryClient.setQueryData(
         ["project-reviews", projectId],
         (oldData: any) => {
@@ -165,9 +194,9 @@ const useSupervisor = () => {
       );
 
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
-      toast.success("Revision round deleted");
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) =>
+      onFailure({ title: "Action Failed", message: extractErrorMessage(err) }),
   });
 
   return {

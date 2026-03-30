@@ -1,7 +1,7 @@
 import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
-import { toast } from "react-toastify";
 import { extractErrorMessage } from "../_lib/utils";
+import { onFailure, onSuccess } from "../_utils/Notification";
 
 const useAdmin = () => {
   const queryClient = new QueryClient();
@@ -29,11 +29,21 @@ const useAdmin = () => {
       });
       return data;
     },
-    onSuccess: () => {
-      toast.success("Students assigned successfully!");
+    onSuccess: (data) => {
+      onSuccess({
+        title: "Assignment Complete",
+        message:
+          data?.message ||
+          "Students have been successfully assigned to the supervisor.",
+      });
     },
-    onError: () => {
-      toast.error("Failed to assign students. Please try again.");
+    onError: (err) => {
+      onFailure({
+        title: "Assignment Failed",
+        message:
+          extractErrorMessage(err) ||
+          "Could not complete assignment. Please try again.",
+      });
     },
   });
 
@@ -52,15 +62,20 @@ const useAdmin = () => {
       return data;
     },
     onSuccess: (data) => {
-      toast.success(data?.message || "Students imported successfully!");
-
+      onSuccess({
+        title: "Import Successful",
+        message:
+          data?.message || "All student records have been processed and saved.",
+      });
       queryClient.invalidateQueries({ queryKey: ["studentsList"] });
     },
-    onError: (error: any) => {
-      toast.error(
-        extractErrorMessage(Error) ||
-          "Failed to import students. Please check your CSV format.",
-      );
+    onError: (err: any) => {
+      onFailure({
+        title: "Import Error",
+        message:
+          extractErrorMessage(err) ||
+          "Failed to import records. Please verify your data format.",
+      });
     },
   });
 

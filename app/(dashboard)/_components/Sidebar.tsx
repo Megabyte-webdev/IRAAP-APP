@@ -36,7 +36,7 @@ const navItems: NavItem[] = [
     icon: ClipboardCheck,
   },
   { name: "Students", href: "/students", roles: ["ADMIN"], icon: Users },
-  { name: "Archive Search", href: "/projects", roles: "ALL", icon: Search },
+  { name: "Archive Search", href: "/repository", roles: "ALL", icon: Search },
 ];
 
 export function Sidebar({

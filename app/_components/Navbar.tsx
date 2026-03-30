@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, LayoutDashboard, LogOut } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "../_context/AuthContext";
 
 export default function Navbar() {
+  const { authDetails, logout } = useAuth();
+
+  // Get user role for the dashboard link
+  const userRole = authDetails?.user?.role?.toLowerCase();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -70,22 +75,42 @@ export default function Navbar() {
 
         {/* Action Button */}
         <div className="flex items-center gap-8">
-          <Link
-            href="/login"
-            className="hidden lg:block text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
-          >
-            Portal
-          </Link>
-          <Link
-            href="/register"
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
-              scrolled
-                ? "bg-slate-900 text-white hover:bg-blue-600"
-                : "bg-white text-slate-900 hover:bg-slate-900 hover:text-white shadow-slate-200/50"
-            }`}
-          >
-            Submit <ArrowUpRight size={14} />
-          </Link>
+          {authDetails ? (
+            /* AUTHENTICATED STATE */
+            <>
+              <Link
+                href={`/${userRole}`}
+                className="hidden lg:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-colors"
+              >
+                <LayoutDashboard size={14} /> Dashboard
+              </Link>
+
+              <button
+                onClick={logout}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
+                  scrolled
+                    ? "bg-red-50 text-red-600 hover:bg-red-600 hover:text-white"
+                    : "bg-white text-slate-900 hover:bg-red-600 hover:text-white shadow-slate-200/50"
+                }`}
+              >
+                Logout <LogOut size={14} />
+              </button>
+            </>
+          ) : (
+            /* GUEST STATE */
+            <>
+              <Link
+                href="/login"
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
+                  scrolled
+                    ? "bg-slate-900 text-white hover:bg-blue-600"
+                    : "bg-white text-slate-900 hover:bg-slate-900 hover:text-white shadow-slate-200/50"
+                }`}
+              >
+                Portal <ArrowUpRight size={14} />
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

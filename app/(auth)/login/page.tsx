@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import LoginPage from "./LoginClient";
+import Loading from "@/app/(dashboard)/loading";
 
 const page = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loading />}>
       <LoginPage />
     </Suspense>
   );
