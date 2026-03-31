@@ -5,6 +5,7 @@ import { X, Send, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import useSupervisor from "@/app/_hooks/use-supervisor";
 import { toast } from "react-toastify";
 import Portal from "@/app/_components/Portal";
+import { onPrompt } from "@/app/_utils/Notification";
 
 const NewReviewModal = ({ isOpen, onClose, projectId }: any) => {
   const { createReviewWithTasks } = useSupervisor();
@@ -29,7 +30,11 @@ const NewReviewModal = ({ isOpen, onClose, projectId }: any) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!summary.trim()) return toast.error("Please provide a review summary");
+    if (!summary.trim())
+      return onPrompt({
+        title: "Review",
+        message: "Please provide a review summary",
+      });
 
     // Filter out empty tasks
     const validTasks = tasks.filter((t) => t.title.trim() !== "");
@@ -42,7 +47,6 @@ const NewReviewModal = ({ isOpen, onClose, projectId }: any) => {
       },
       {
         onSuccess: () => {
-          toast.success("Review and tasks created");
           setSummary("");
           setTasks([{ title: "", description: "" }]);
           onClose();

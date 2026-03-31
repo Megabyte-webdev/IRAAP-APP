@@ -79,6 +79,38 @@ const useAdmin = () => {
     },
   });
 
+  const bulkImportSupervisors = useMutation({
+    mutationKey: ["bulkImportSupervisors"],
+    mutationFn: async (
+      supervisors: {
+        lastname: string;
+        firstname: string;
+        email: string;
+      }[],
+    ) => {
+      const { data } = await api.post("/admin/bulk-supervisors", {
+        supervisors,
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      onSuccess({
+        title: "Import Successful",
+        message:
+          data?.message ||
+          "All supervisor records have been processed and saved.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["supervisorsList"] });
+    },
+    onError: (err: any) => {
+      onFailure({
+        title: "Import Error",
+        message:
+          extractErrorMessage(err) ||
+          "Failed to import records. Please verify your data format.",
+      });
+    },
+  });
   const supervisorsQuery = () =>
     useQuery({
       queryKey: ["supervisorsList"],
@@ -113,6 +145,7 @@ const useAdmin = () => {
     unassignedStudentsQuery,
     studentsQuery,
     bulkImportStudents,
+    bulkImportSupervisors,
   };
 };
 export default useAdmin;

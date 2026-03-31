@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
@@ -36,6 +37,12 @@ const navItems: NavItem[] = [
     icon: ClipboardCheck,
   },
   { name: "Students", href: "/students", roles: ["ADMIN"], icon: Users },
+  {
+    name: "Supervisors",
+    href: "/supervisors",
+    roles: ["ADMIN"],
+    icon: GraduationCap,
+  },
   { name: "Archive Search", href: "/repository", roles: "ALL", icon: Search },
 ];
 

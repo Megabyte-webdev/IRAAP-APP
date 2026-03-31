@@ -50,7 +50,7 @@ const CustomToast: React.FC<ToastProps> = ({ title, message, variant }) => {
     <motion.div
       initial={{ opacity: 0, x: 20, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      className={`flex items-start gap-4 p-4 min-w-[320px] bg-linear-to-br ${config.bgColor} 
+      className={`flex items-start gap-4 p-4 w-full bg-linear-to-br ${config.bgColor} 
                  shadow-xl rounded-2xl border ${config.borderColor} ${config.shadowColor} 
                  transition-all duration-300`}
     >
@@ -80,12 +80,12 @@ const CustomToast: React.FC<ToastProps> = ({ title, message, variant }) => {
 // --- Professional API ---
 const defaultOptions: ToastOptions = {
   position: "top-right",
-  autoClose: 4000,
+  autoClose: 2000,
   hideProgressBar: true,
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,
-  className: "!bg-transparent !shadow-none !p-0",
+  className: "!bg-transparent !shadow-none !p-0 w-80 max-w-[320px] mr-2 mt-2",
 };
 
 export const notify = {

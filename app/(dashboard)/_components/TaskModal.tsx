@@ -165,7 +165,7 @@ const TaskModal = ({
                           onUpdateStatus(Number(task.id), "COMPLETED")
                         }
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md transition"
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md transition disabled:opacity-50"
                       >
                         <Send size={16} /> Submit for Review
                       </button>
