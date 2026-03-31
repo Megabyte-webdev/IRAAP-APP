@@ -153,15 +153,6 @@ const TaskModal = ({
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() =>
-                          onUpdateStatus(Number(task.id), "PENDING")
-                        }
-                        disabled={isLoading}
-                        className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition underline underline-offset-4"
-                      >
-                        Reset to Pending
-                      </button>
-                      <button
-                        onClick={() =>
                           onUpdateStatus(Number(task.id), "COMPLETED")
                         }
                         disabled={isLoading}
