@@ -3,6 +3,7 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { Bell, UserCircle, ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import ProfileDropdown from "@/app/_components/ProfileDropdown";
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { authDetails, isLoading: authLoading } = useAuth();
@@ -48,7 +49,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <header className="sticky top-0 z-10 h-16 border-b border-gray-200 bg-white/80 backdrop-blur-sm flex items-center justify-between px-4 sm:px-8 shadow-sm">
+    <header className="sticky top-0 z-10 h-18 border-b border-tertiary bg-white/80  flex items-center justify-between px-4 sm:px-8">
       {/* Left section */}
       <div className="flex items-center gap-4">
         <button
@@ -57,13 +58,13 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
         >
           <Menu size={24} />
         </button>
-        <span className="hidden md:block text-sm font-medium text-gray-600">
-          Academic Year: <span className="text-gray-900">2025/2026</span>
+        <span className="hidden md:block text-sm font-bold text-black">
+          Good day, {user.fullName}
         </span>
       </div>
 
       {/* Right section */}
-      <div className="flex items-center gap-4 sm:gap-6">
+      <div className="flex items-center">
         {/* Notification bell */}
         <div className="relative">
           <button
@@ -72,9 +73,9 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             aria-label="Notifications"
             aria-expanded={showNotifications}
           >
-            <Bell size={20} />
+            <Bell size={24} />
             {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+              <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {notificationCount}
               </span>
             )}
@@ -83,65 +84,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
         </div>
 
         {/* User menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 rounded-full pl-3 pr-2 py-1 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-label="User menu"
-            aria-expanded={showUserMenu}
-          >
-            <div className="hidden sm:block text-right">
-              <p className="text-sm font-semibold text-gray-900">
-                {user.fullName || user.email}
-              </p>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">
-                {user.role}
-              </p>
-            </div>
-            <div className="relative">
-              <UserCircle size={36} className="text-gray-400" />
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white" />
-            </div>
-            <ChevronDown
-              size={16}
-              className={`text-gray-400 transition-transform ${
-                showUserMenu ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {/* Dropdown menu */}
-          {showUserMenu && (
-            <div className="absolute right-0 mt-2  w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-              <Link
-                href="/profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setShowUserMenu(false)}
-              >
-                Your Profile
-              </Link>
-              <Link
-                href="/settings"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setShowUserMenu(false)}
-              >
-                Settings
-              </Link>
-              {/* <button
-                onClick={async () => {
-                  setShowUserMenu(false);
-                  // Import dynamically to avoid circular dependency
-                  const { authService } =
-                    await import("@/app/_services/auth.service");
-                  authService.logout();
-                }}
-                className="block lg:hidden w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-              >
-                Sign Out
-              </button> */}
-            </div>
-          )}
-        </div>
+        <ProfileDropdown />
       </div>
     </header>
   );

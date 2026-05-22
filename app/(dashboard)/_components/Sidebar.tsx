@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
+import Image from "next/image";
 
 type UserRole = "STUDENT" | "SUPERVISOR" | "ADMIN";
 
@@ -29,7 +30,13 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: "Dashboard", href: "", roles: "ALL", icon: LayoutDashboard },
-  { name: "Submit Project", href: "/upload", roles: ["STUDENT"], icon: FileUp },
+  {
+    name: "Submit Project",
+    href: "/upload",
+    roles: ["STUDENT"],
+    icon: FileUp,
+  },
+  { name: "My Project", href: "/projects", roles: ["STUDENT"], icon: FileUp },
   {
     name: "Review Queue",
     href: "/review",
@@ -71,14 +78,14 @@ export function Sidebar({
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-white lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-blue-950 text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-blue-900",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-primary",
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "lg:w-18" : "lg:w-64",
         )}
@@ -87,7 +94,7 @@ export function Sidebar({
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "absolute -right-3 top-12 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-blue-800 bg-blue-950 text-blue-300 transition-all hover:text-white lg:flex",
+            "absolute -right-4 top-20 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-tertiary bg-white text-gray-700 transition-all lg:flex",
             "hover:scale-110 active:scale-95 shadow-sm",
           )}
         >
@@ -95,17 +102,20 @@ export function Sidebar({
         </button>
 
         {/* Header */}
-        <div className="flex h-20 items-center overflow-hidden px-6">
+        <div className="flex h-18 items-center  border-b border-tertiary overflow-hidden">
           <div
             className={cn(
-              "min-w-45 transition-opacity duration-300",
+              "w-full transition-opacity duration-300 flex justify-center items-center px-6",
               isCollapsed && "lg:opacity-0",
             )}
           >
-            <h2 className="text-lg font-bold tracking-tight">OOU IRAP</h2>
-            <p className="text-[10px] text-blue-400 uppercase tracking-widest font-semibold">
-              Repository
-            </p>
+            <Image
+              alt="IRAP"
+              src="/irap-logo.png"
+              width={150}
+              height={150}
+              className="h-14 w-auto"
+            />
           </div>
           <button onClick={onClose} className="ml-auto lg:hidden text-blue-200">
             <X size={24} />
@@ -113,7 +123,7 @@ export function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1.5 p-3 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 space-y-1.5 p-3 pt-7 pr-5 overflow-y-auto overflow-x-hidden">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const fullHref = `${rolePrefix}${item.href}`;
@@ -129,17 +139,15 @@ export function Sidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
                   isActive
-                    ? "bg-blue-900/50 text-white shadow-inner"
-                    : "text-blue-200/70 hover:bg-blue-900/30 hover:text-white",
+                    ? "bg-primary text-white"
+                    : "text-gray-700 hover:bg-primary/30",
                 )}
               >
                 <Icon
                   size={20}
                   className={cn(
                     "shrink-0",
-                    isActive
-                      ? "text-indigo-400"
-                      : "text-blue-400 group-hover:text-blue-300",
+                    isActive ? "text-white" : "text-gray-700",
                   )}
                 />
                 <span
@@ -152,18 +160,13 @@ export function Sidebar({
                 >
                   {item.name}
                 </span>
-
-                {/* Active Indicator Line */}
-                {isActive && (
-                  <div className="absolute left-0 h-5 w-1 rounded-r-full bg-indigo-500" />
-                )}
               </Link>
             );
           })}
         </nav>
 
         {/* Footer */}
-        <div className="mt-auto border-t border-blue-900/50 p-4">
+        <div className="mt-auto border-t border-primary/50 p-4">
           {!isCollapsed && (
             <div className="mb-4 px-2 overflow-hidden transition-all duration-300">
               <p className="truncate text-sm font-semibold text-white">
