@@ -2,117 +2,114 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, ArrowUpRight, LayoutDashboard, LogOut } from "lucide-react";
+import { Menu, X, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { useAuth } from "../_context/AuthContext";
 
 export default function Navbar() {
-  const { authDetails, logout } = useAuth();
-
-  // Get user role for the dashboard link
-  const userRole = authDetails?.user?.role?.toLowerCase();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
-    { name: "Repository", href: "/repository" },
-    { name: "About IRAP", href: "/about" },
-    { name: "Archive v2", href: "/archive" },
+    { name: "Repository", href: "/repository", icon: "📚" },
+    { name: "About IRAP", href: "/about", icon: "ℹ️" },
+    { name: "Archive v2", href: "/archive", icon: "🗂️" },
   ];
 
   return (
     <nav
-      className={`fixed top-0 w-full z-100 transition-all duration-500 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-700 ${
         scrolled
-          ? "py-4 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
-          : "py-10 bg-transparent border-b border-transparent"
+          ? "py-3 bg-[#0a0f1f]/80 backdrop-blur-2xl shadow-2xl shadow-blue-950/10 border-b border-blue-400/10"
+          : "py-6 bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-10 flex justify-between items-center">
-        {/* Branding */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:rotate-6 transition-transform">
-            <Image
-              src="/irap-logo.png"
-              width={20}
-              height={20}
-              alt="Logo"
-              className="brightness-0 invert"
-            />
-          </div>
-          <span className="text-slate-900 font-bold tracking-tighter text-xl">
-            IRAP
-          </span>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 flex justify-between items-center">
+        {/* Logo - Premium Version */}
+        <Link href="/" className="flex items-center group relative">
+          <Image
+            src="/irap-logo.png"
+            alt="IRAP"
+            width={100}
+            height={40}
+            className="h-12 object-contain"
+          />
         </Link>
 
-        {/* Desktop Navigation Pill */}
+        {/* Desktop Navigation - Premium Pill Design */}
         <div
-          className={`hidden md:flex items-center gap-1 p-1 rounded-full border transition-all duration-500 ${
+          className={`hidden md:flex items-center gap-1 px-2 py-1.5 rounded-full border transition-all duration-500 backdrop-blur-md ${
             scrolled
-              ? "bg-slate-100/50 border-slate-200/60"
-              : "bg-transparent border-transparent"
+              ? "bg-white/5 border-blue-400/20 shadow-lg shadow-blue-500/5"
+              : "bg-white/3 border-white/10"
           }`}
         >
+          {navLinks.map((link, idx) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className="group relative px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-300 hover:text-white transition-all rounded-lg overflow-hidden"
+            >
+              {/* Hover background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-lg" />
+              <span className="relative flex items-center gap-2">
+                {link.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Action Buttons - Premium Style */}
+        <div className="flex items-center gap-4">
+          {/* CTA Button */}
+          <Link
+            href="/login"
+            className="group relative hidden sm:flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-500 active:scale-95 overflow-hidden"
+          >
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+            {/* Animated border */}
+            <div className="absolute inset-0 border border-blue-400/30 rounded-xl group-hover:border-blue-400/60 transition-all duration-500" />
+            <span className="relative text-white flex items-center gap-2">
+              Portal{" "}
+              <ArrowUpRight
+                size={14}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </span>
+          </Link>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-[#0a0f1f]/95 backdrop-blur-xl border-b border-blue-400/10 p-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={`px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all rounded-full ${
-                scrolled
-                  ? "text-slate-600 hover:text-blue-600 hover:bg-white"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
-              }`}
+              className="block px-4 py-3 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+              onClick={() => setMobileMenuOpen(false)}
             >
               {link.name}
             </Link>
           ))}
         </div>
-
-        {/* Action Button */}
-        <div className="flex items-center gap-8">
-          {authDetails ? (
-            /* AUTHENTICATED STATE */
-            <>
-              <Link
-                href={`/${userRole}`}
-                className="hidden lg:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-colors"
-              >
-                <LayoutDashboard size={14} /> Dashboard
-              </Link>
-
-              <button
-                onClick={logout}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
-                  scrolled
-                    ? "bg-red-50 text-red-600 hover:bg-red-600 hover:text-white"
-                    : "bg-white text-slate-900 hover:bg-red-600 hover:text-white shadow-slate-200/50"
-                }`}
-              >
-                Logout <LogOut size={14} />
-              </button>
-            </>
-          ) : (
-            /* GUEST STATE */
-            <>
-              <Link
-                href="/login"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
-                  scrolled
-                    ? "bg-slate-900 text-white hover:bg-blue-600"
-                    : "bg-white text-slate-900 hover:bg-slate-900 hover:text-white shadow-slate-200/50"
-                }`}
-              >
-                Portal <ArrowUpRight size={14} />
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
+      )}
     </nav>
   );
 }
