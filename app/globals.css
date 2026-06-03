@@ -2,7 +2,25 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --card: #ffffff;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --border: #e4e4e7;
+}
+
+.dark {
+  --background: #0f1115;
+  --foreground: #f8fafc;
+
+  --card: #171a20;
+
+  --muted: #1f2430;
+  --muted-foreground: #94a3b8;
+
+  --border: #262b36;
 }
 
 @theme inline {
@@ -49,6 +67,30 @@
 /* Corner (where scrollbars meet) */
 ::-webkit-scrollbar-corner {
   background: #fff0e6;
+}
+
+.bg-background {
+  background: var(--background);
+}
+
+.bg-card {
+  background: var(--card);
+}
+
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+.bg-muted {
+  background: var(--muted);
+}
+
+.border {
+  border-color: var(--border);
 }
 
 /* Hide scrollbar on very small screens */
