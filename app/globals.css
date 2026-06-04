@@ -77,22 +77,6 @@
   background: var(--card);
 }
 
-.text-foreground {
-  color: var(--foreground);
-}
-
-.text-muted-foreground {
-  color: var(--muted-foreground);
-}
-
-.bg-muted {
-  background: var(--muted);
-}
-
-.border {
-  border-color: var(--border);
-}
-
 /* Hide scrollbar on very small screens */
 @media (max-width: 600px) {
   ::-webkit-scrollbar {

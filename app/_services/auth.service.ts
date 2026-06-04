@@ -4,15 +4,15 @@ export const authService = {
   login: async (credentials: any) => {
     const { data } = await api.post("/auth/login", credentials);
     // data should contain { token, user: { role, name } }
-    sessionStorage.setItem("user", JSON.stringify(data));
+    localStorage.setItem("user", JSON.stringify(data));
     return data;
   },
   logout: () => {
-    sessionStorage.removeItem("user");
+    localStorage.removeItem("user");
   },
   getCurrentUser: () => {
     // In a real app, decode the JWT here
-    const user = sessionStorage.getItem("user");
+    const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
 };
