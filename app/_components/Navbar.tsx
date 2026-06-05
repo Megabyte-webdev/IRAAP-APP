@@ -4,9 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import ProfileDropdown from "./ProfileDropdown";
+import { useAuth } from "../_context/AuthContext";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
+  const { authDetails } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
@@ -52,12 +55,16 @@ export default function Navbar() {
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-medium rounded-lg border"
-          >
-            Sign In
-          </Link>
+          {authDetails?.user ? (
+            <ProfileDropdown />
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-medium rounded-lg border"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </header>

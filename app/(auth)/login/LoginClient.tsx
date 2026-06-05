@@ -3,17 +3,33 @@
 import { useState } from "react";
 import { useAuth } from "@/app/_context/AuthContext";
 import { useSearchParams } from "next/navigation";
-import { Mail, Lock, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Loader2,
+  AlertCircle,
+  ShieldCheck,
+  Database,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const { login } = useAuth();
+
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -26,13 +42,14 @@ export default function LoginPage() {
       setError("Email and password are required.");
       return;
     }
+
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       await login(email, password, callbackUrl);
     } catch (err) {
       setError(
@@ -46,114 +63,198 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#fafafa] p-4 overflow-hidden">
-      {/* Subtle Background Decorative Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-50/50 blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-50/50 blur-[120px]" />
-
-      <div className="w-full max-w-110 z-10">
-        <div className="bg-white rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8 md:p-12">
-          {/* Logo/Icon */}
-          <div className="flex justify-center mb-8">
-            <div className="h-14 w-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
-              <ShieldCheck className="text-white w-8 h-8" />
-            </div>
-          </div>
-
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-              Portal Login
-            </h2>
-            <p className="mt-2 text-sm text-gray-500">
-              Enter your credentials to access your account
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-6" noValidate>
-            {error && (
-              <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-700 border border-red-100 animate-in fade-in slide-in-from-top-1">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <p>{error}</p>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-7xl min-h-screen px-6 lg:px-10 flex items-center">
+        <div className="w-full grid lg:grid-cols-2 overflow-hidden rounded-3xl border border-border bg-card">
+          {/* LEFT SIDE */}
+          <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border bg-muted/30">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
+                <Database className="w-4 h-4" />
+                Academic Archive
               </div>
-            )}
 
-            <div className="space-y-5">
-              <div className="group">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">
-                  Email Address
-                </label>
-                <div className="relative transition-all duration-200">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                  </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                    className="block w-full rounded-xl border border-gray-200 bg-gray-50/30 pl-11 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 disabled:opacity-50 transition-all outline-none"
-                    placeholder="name@university.edu"
-                    required
-                  />
+              <h1 className="mt-8 text-5xl xl:text-6xl font-semibold tracking-tight">
+                IRAAP Repository
+              </h1>
+
+              <p className="mt-6 max-w-lg text-muted-foreground text-lg leading-relaxed">
+                Access archived theses, dissertations, publications, and
+                scholarly research from across departments and faculties.
+              </p>
+
+              <div className="mt-10 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="text-muted-foreground">
+                    Indexed academic research
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-blue-500" />
+                  <span className="text-muted-foreground">
+                    Faculty-reviewed submissions
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-purple-500" />
+                  <span className="text-muted-foreground">
+                    Departmental knowledge archive
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6 pt-10 border-t border-border">
+              <div>
+                <div className="text-3xl font-bold">4.8k+</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
+                  Records
                 </div>
               </div>
 
-              <div className="group">
-                <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className="text-sm font-medium text-gray-700">
-                    Password
+              <div>
+                <div className="text-3xl font-bold">120+</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
+                  Supervisors
+                </div>
+              </div>
+
+              <div>
+                <div className="text-3xl font-bold">15+</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
+                  Years
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex items-center justify-center p-8 md:p-12">
+            <div className="w-full max-w-md">
+              <Link href="/" className="flex justify-center mb-8">
+                <Image
+                  src="/irap-logo.png"
+                  alt="IRAP"
+                  width={120}
+                  height={40}
+                  className="object-contain h-18 w-auto transition-transform hover:scale-105"
+                />
+              </Link>
+
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-semibold tracking-tight">
+                  Sign In
+                </h2>
+
+                <p className="mt-3 text-muted-foreground">
+                  Access the research repository portal
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-5" noValidate>
+                {error && (
+                  <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* EMAIL */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Email Address
                   </label>
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700"
-                  >
-                    Forgot?
-                  </button>
-                </div>
-                <div className="relative transition-all duration-200">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
+                    <input
+                      type="email"
+                      value={email}
+                      disabled={isLoading}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@institution.edu"
+                      className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-4 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    />
                   </div>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    className="block w-full rounded-xl border border-gray-200 bg-gray-50/30 pl-11 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 disabled:opacity-50 transition-all outline-none"
-                    placeholder="••••••••"
-                    required
-                  />
                 </div>
+
+                {/* PASSWORD */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="text-sm font-medium">Password</label>
+
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      disabled={isLoading}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-12 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* REMEMBER */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    Remember me
+                  </label>
+                </div>
+
+                {/* BUTTON */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex h-12 w-full items-center justify-center rounded-xl bg-foreground text-background font-medium transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    "Sign In"
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-8 border-t border-border pt-6 text-center">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Secure Academic Access
+                </p>
               </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="relative w-full flex items-center justify-center rounded-xl bg-gray-900 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-gray-200 hover:bg-black focus:ring-4 focus:ring-gray-900/10 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                "Sign in to Dashboard"
-              )}
-            </button>
-          </form>
-
-          <div className="mt-10 pt-6 border-t border-gray-50 text-center">
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-medium">
-              Secure Department Access
-            </p>
           </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            Don't have an account?{" "}
-            <span className="text-blue-600 font-semibold cursor-pointer hover:underline">
-              Contact Admin
-            </span>
-          </p>
         </div>
       </div>
     </div>

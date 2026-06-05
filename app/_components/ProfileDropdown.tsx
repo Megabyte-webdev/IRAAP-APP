@@ -65,7 +65,7 @@ const ProfileDropdown = ({ fullMode = false }) => {
             <ul className="py-2 text-sm text-gray-700">
               {/* Dashboard Link - Based on Role */}
               <Link
-                href="/app"
+                href={`/${user?.role?.toLowerCase()}`}
                 className="px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 transition-colors"
                 onClick={() => setIsOpen(false)}
               >

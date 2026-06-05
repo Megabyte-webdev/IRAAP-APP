@@ -16,15 +16,6 @@ export default function Hero() {
     methodology: "",
   });
 
-  const suggestedSearches = [
-    "Machine Learning",
-    "Quantum Computing",
-    "Biomedical Research",
-    "Climate Science",
-    "Artificial Intelligence",
-    "Data Science",
-  ];
-
   const activeFilterCount = useMemo(() => {
     return Object.values(searchState).filter(Boolean).length;
   }, [searchState]);
@@ -152,7 +143,7 @@ export default function Hero() {
         )}
 
         {/* SUGGESTIONS */}
-        {!searchState.title && (
+        {/* {!searchState.title && (
           <div className="flex flex-wrap gap-2 pt-2">
             {suggestedSearches.map((item) => (
               <button
@@ -164,7 +155,7 @@ export default function Hero() {
               </button>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* FOOTER ACTIONS */}
         <div className="flex items-center justify-between pt-4 border-t text-sm text-muted-foreground">
