@@ -78,7 +78,7 @@ export function Sidebar({
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-white lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -86,7 +86,9 @@ export function Sidebar({
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex flex-col bg-white text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-primary",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          isOpen
+            ? "translate-x-0 max-w-80 w-full shadow-lg"
+            : "-translate-x-full",
           isCollapsed ? "lg:w-18" : "lg:w-64",
         )}
       >
@@ -117,7 +119,10 @@ export function Sidebar({
               className="h-14 w-auto"
             />
           </div>
-          <button onClick={onClose} className="ml-auto lg:hidden text-blue-200">
+          <button
+            onClick={onClose}
+            className="ml-auto mr-2 lg:hidden text-blue-200"
+          >
             <X size={24} />
           </button>
         </div>
