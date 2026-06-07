@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Users,
   GraduationCap,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
@@ -30,6 +31,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: "Dashboard", href: "", roles: "ALL", icon: LayoutDashboard },
+  {
+    name: "Chat",
+    href: "/chat",
+    roles: ["STUDENT", "SUPERVISOR"],
+    icon: MessageSquare,
+  },
   {
     name: "Submit Project",
     href: "/upload",
