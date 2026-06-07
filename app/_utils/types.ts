@@ -97,3 +97,18 @@ export interface Student {
     | "REVISION_REQUESTED"
     | null;
 }
+
+export interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+}
+
+export interface ChatUser {
+  id: number;
+  participant: User;
+  lastMessage: any;
+  unreadCount: number | null;
+  updatedAt: string;
+}

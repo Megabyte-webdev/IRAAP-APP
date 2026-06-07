@@ -80,18 +80,6 @@ const ProfileDropdown = ({ fullMode = false }) => {
               >
                 <FiUser size={18} className="text-gray-400" /> Profile
               </Link>
-
-              <hr className="my-1 border-gray-100" />
-
-              <li
-                className="px-4 py-2.5 flex items-center gap-2 text-red-500 hover:bg-red-50 cursor-pointer transition-colors"
-                onClick={() => {
-                  setIsOpen(false);
-                  logout.mutate();
-                }}
-              >
-                <FiLogOut size={18} /> Logout
-              </li>
             </ul>
           </div>
         </>
