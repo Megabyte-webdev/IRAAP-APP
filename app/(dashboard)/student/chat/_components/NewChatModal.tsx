@@ -154,7 +154,7 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
             Cancel
           </button>
 
-          <button className="cursor-pointer py-2 bg-[#FF4D2D] text-white rounded-[10px]">
+          <button className="cursor-pointer py-2 bg-[#1E4DFF] text-white rounded-[10px]">
             Start Chat
           </button>
         </div>
