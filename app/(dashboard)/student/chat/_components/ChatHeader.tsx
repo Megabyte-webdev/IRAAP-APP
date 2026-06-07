@@ -19,7 +19,7 @@ const ChatHeader = ({ selectedChat, role = "buyer" }: ChatHeaderProps) => {
   return (
     <div className="h-16 border-b border-[#00000033] flex items-center px-4 md:px-6 gap-3 shrink-0 bg-white">
       <button
-        onClick={() => router.push("/app/chat")}
+        onClick={() => router.push("/student/chat")}
         className="cursor-pointer md:hidden p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <ChevronLeft className="size-6 text-black" />
