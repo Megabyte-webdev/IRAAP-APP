@@ -37,11 +37,6 @@ const ScrollToBottomBtn = ({
               d="M19 9l-7 7-7-7"
             />
           </svg>
-          {unreadCount !== undefined && unreadCount > 0 && (
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
-              {unreadCount}
-            </div>
-          )}
         </motion.button>
       )}
     </AnimatePresence>
