@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../_context/AuthContext";
 import { useChatUtils } from "../_context/ChatContext";
 import { websocket } from "../_services/websocket";
+import { showChatNotification } from "../_services/chatNotification";
 
 export const useSocketConnection = ({
   authUserId,
@@ -29,7 +30,6 @@ export const useSocketConnection = ({
   authUserRef.current = authUserId;
   queryClientRef.current = queryClient;
 
-  // ── 1. Connect / disconnect ───────────────────────────────────────────────
   useEffect(() => {
     const token = authDetails?.token;
     if (!token) {
@@ -40,7 +40,6 @@ export const useSocketConnection = ({
     websocket.connect(token);
   }, [authDetails?.token]);
 
-  // ── 2. Presence list on connect ───────────────────────────────────────────
   useEffect(() => {
     const handler = (state: string) => {
       if (state === "connected") websocket.emit("chat:presence:list");
@@ -49,27 +48,41 @@ export const useSocketConnection = ({
     return () => websocket.offStateChange(handler);
   }, []);
 
-  // ── 3. All message handlers ───────────────────────────────────────────────
   useEffect(() => {
     // Incoming message from another user
     const onMessage = (event: any) => {
       const msg = event.payload;
       const qc = queryClientRef.current;
 
+      // Update cache
       appendToCache(qc, msg.senderId, msg);
       qc.invalidateQueries({ queryKey: ["conversations"] });
 
-      // Auto read receipt if this chat is open
-      if (activeUserRef.current === msg.senderId) {
-        const convoId = msg.conversationId;
+      const isOwnMessage = msg.senderId === authUserRef.current;
+
+      const isCurrentConversation = activeUserRef.current === msg.senderId;
+
+      // Show notification
+      if (!isOwnMessage && !isCurrentConversation) {
+        showChatNotification({
+          senderId: msg.senderId,
+          senderName: msg.sender?.fullName ?? msg.sender?.name ?? "New Message",
+          message: msg.content,
+          avatar: msg.sender?.profileImage,
+          conversationId: msg.conversationId,
+          authRole: authDetails?.user?.role,
+        });
+      }
+
+      // Auto-read if currently viewing chat
+      if (isCurrentConversation) {
         websocket.emit("chat:read:bulk", {
-          conversationId: convoId,
+          conversationId: msg.conversationId,
           senderId: msg.senderId,
         });
       }
     };
 
-    // Our own message confirmed — replace optimistic entry with real one
     const onSent = (event: any) => {
       const real = event.payload;
       const qc = queryClientRef.current;
@@ -81,7 +94,6 @@ export const useSocketConnection = ({
           pages: old.pages.map((page: any) => ({
             ...page,
             data: page.data.map((m: any) =>
-              // match by clientId echo'd back from server, or by _tempId
               (real.clientId && m.id === real.clientId) ||
               (m.id && m.clientId === real.clientId)
                 ? { ...real, clientId: undefined }
@@ -94,12 +106,10 @@ export const useSocketConnection = ({
       qc.invalidateQueries({ queryKey: ["conversations"] });
     };
 
-    // Bulk offline messages on reconnect — server sends chat:messages:bulk
     const onMessagesBulk = (event: any) => {
       const msgs: any[] = event.payload ?? [];
       const qc = queryClientRef.current;
 
-      // Group by senderId and append each group to its cache entry
       const bySender = msgs.reduce<Record<number, any[]>>((acc, m) => {
         (acc[m.senderId] ??= []).push(m);
         return acc;
@@ -122,9 +132,7 @@ export const useSocketConnection = ({
       qc.invalidateQueries({ queryKey: ["conversations"] });
     };
 
-    // Single delivered — server now wraps in payload
     const onDelivered = (event: any) => {
-      // Support both shapes: { messageId } and { payload: { messageId } }
       const messageId = event.payload?.messageId ?? event.messageId;
       queryClientRef.current.setQueriesData(
         { queryKey: ["messages"] },
@@ -211,8 +219,6 @@ export const useSocketConnection = ({
   }, []);
 };
 
-// ─── Optimistic send ──────────────────────────────────────────────────────────
-
 export function addOptimisticMessage(
   queryClient: ReturnType<typeof useQueryClient>,
   recipientId: number,
@@ -233,8 +239,6 @@ export function addOptimisticMessage(
   };
   appendToCache(queryClient, recipientId, optimistic);
 }
-
-// ─── Cache helpers ────────────────────────────────────────────────────────────
 
 function appendToCache(qc: any, userId: number, msg: any) {
   qc.setQueryData(["messages", userId], (old: any) => {

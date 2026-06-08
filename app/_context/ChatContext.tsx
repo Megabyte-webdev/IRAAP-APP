@@ -7,15 +7,10 @@ import {
   useState,
   useCallback,
 } from "react";
-import { useAuth } from "./AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
 
 export const ChatContext = createContext<any>({});
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
-  const { authDetails } = useAuth();
-  const authUserId = authDetails?.user?.id;
-
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
