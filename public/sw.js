@@ -1,35 +1,38 @@
-self.addEventListener("push", function (event) {
-  const data = event.data ? event.data.json() : {};
-
-  const title = data.title || "New Message";
-
-  const options = {
-    body: data.body,
-    icon: data.icon || "/irap-logo.png",
-    data: {
-      url: data.url,
-    },
-    tag: data.tag || "chat-message",
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
+self.addEventListener("install", () => {
+  self.skipWaiting();
 });
 
-self.addEventListener("notificationclick", function (event) {
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener("push", (event) => {
+  event.waitUntil(handlePush(event));
+});
+
+async function handlePush(event) {
+  try {
+    if (!event.data) return;
+
+    const data = event.data.json();
+
+    console.log("PUSH EVENT RECEIVED", data);
+
+    return self.registration.showNotification(data.title ?? "New message", {
+      body: data.body ?? "",
+      icon: data.icon ?? "/irap-logo.png",
+      data: { url: data.url },
+      tag: data.tag,
+    });
+  } catch (err) {
+    console.error("Push failed:", err);
+  }
+}
+
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
   const url = event.notification.data?.url;
-
-  event.waitUntil(
-    clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if (client.url === url && "focus" in client) {
-            return client.focus();
-          }
-        }
-        return clients.openWindow(url);
-      }),
-  );
+  if (url) {
+    event.waitUntil(clients.openWindow(url));
+  }
 });

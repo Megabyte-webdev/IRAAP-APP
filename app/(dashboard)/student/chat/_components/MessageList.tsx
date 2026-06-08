@@ -21,6 +21,8 @@ import { useChatUtils } from "@/app/_context/ChatContext";
 import useChat from "@/app/_hooks/use-chat";
 import { useMessageReadObserver } from "@/app/_hooks/useMessageReadObserver";
 import { User } from "@/app/_utils/types";
+import { clearUnreadInCache } from "@/app/helpers/chat-cache";
+import { queryClient } from "@/app/_services/query-client";
 
 interface Props {
   selectedUser?: User;
@@ -200,6 +202,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       markedReadRef.current = new Set();
       lastMessageIdRef.current = null;
       loadingOlderRef.current = false;
+      clearUnreadInCache(queryClient, Number(userId));
     }, [userId]);
 
     // ── Initial scroll to bottom
@@ -267,12 +270,12 @@ const MessageList = forwardRef<MessageListRef, Props>(
 
     // ── Unread count
     const unreadCount = useMemo(() => {
-      if (!authDetails?.user?.id) return 0;
+      const myId = Number(authDetails.user.id);
+
       return sortedMessages.filter(
-        (m) =>
-          m.senderId !== Number(authDetails.user.id) && m.status !== "READ",
+        (m) => m.senderId !== myId && m.status !== "READ",
       ).length;
-    }, [sortedMessages, authDetails?.user?.id]);
+    }, [sortedMessages]);
 
     useEffect(() => {
       onUnreadChange?.(unreadCount);

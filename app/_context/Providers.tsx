@@ -10,12 +10,6 @@ import { ToastContainer } from "react-toastify";
 import { NotificationProvider } from "./NotificationContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js");
-    }
-  }, []);
-
   return (
     <ThemeProvider
       attribute="class"

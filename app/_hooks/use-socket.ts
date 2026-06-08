@@ -6,6 +6,13 @@ import { useAuth } from "../_context/AuthContext";
 import { useChatUtils } from "../_context/ChatContext";
 import { websocket } from "../_services/websocket";
 import { showChatNotification } from "../_services/chatNotification";
+import {
+  appendToCache,
+  clearUnreadInCache,
+  updateConversationLastMessage,
+  updateMessageStatus,
+  updateMessageStatusBulk,
+} from "../helpers/chat-cache";
 
 export const useSocketConnection = ({
   authUserId,
@@ -56,7 +63,8 @@ export const useSocketConnection = ({
 
       // Update cache
       appendToCache(qc, msg.senderId, msg);
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+
+      updateConversationLastMessage(qc, msg, authUserRef.current);
 
       const isOwnMessage = msg.senderId === authUserRef.current;
 
@@ -76,6 +84,7 @@ export const useSocketConnection = ({
 
       // Auto-read if currently viewing chat
       if (isCurrentConversation) {
+        clearUnreadInCache(qc, msg.senderId);
         websocket.emit("chat:read:bulk", {
           conversationId: msg.conversationId,
           senderId: msg.senderId,
@@ -102,8 +111,7 @@ export const useSocketConnection = ({
           })),
         };
       });
-
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+      updateConversationLastMessage(qc, real, authUserRef.current);
     };
 
     const onMessagesBulk = (event: any) => {
@@ -127,9 +135,8 @@ export const useSocketConnection = ({
           pages[pages.length - 1] = last;
           return { ...old, pages };
         });
+        clearUnreadInCache(qc, Number(senderId));
       }
-
-      qc.invalidateQueries({ queryKey: ["conversations"] });
     };
 
     const onDelivered = (event: any) => {
@@ -156,17 +163,48 @@ export const useSocketConnection = ({
       qc.setQueriesData({ queryKey: ["messages"] }, (old: any) =>
         updateMessageStatus(old, messageId, "READ"),
       );
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+      qc.setQueryData(["conversations"], (old: any) => {
+        if (!old) return old;
+
+        return old.map((conversation: any) => {
+          if (conversation.lastMessage?.id !== messageId) {
+            return conversation;
+          }
+
+          return {
+            ...conversation,
+            lastMessage: {
+              ...conversation.lastMessage,
+              status: "READ",
+            },
+          };
+        });
+      });
     };
 
     // Read bulk
     const onReadBulk = (event: any) => {
       const qc = queryClientRef.current;
       const messageIds: number[] = event.payload?.messageIds ?? [];
+      const senderId: number = event.payload?.senderId; // ✅ use this
+
       qc.setQueriesData({ queryKey: ["messages"] }, (old: any) =>
         updateMessageStatusBulk(old, messageIds, "READ"),
       );
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+
+      qc.setQueryData(["conversations"], (old: any) => {
+        if (!old) return old;
+        return old.map((convo: any) => {
+          if (convo.participant?.id !== senderId) return convo;
+          return {
+            ...convo,
+            unreadCount: 0,
+            lastMessage: convo.lastMessage
+              ? { ...convo.lastMessage, status: "READ" }
+              : convo.lastMessage,
+          };
+        });
+      });
     };
 
     // Typing
@@ -218,68 +256,3 @@ export const useSocketConnection = ({
     };
   }, []);
 };
-
-export function addOptimisticMessage(
-  queryClient: ReturnType<typeof useQueryClient>,
-  recipientId: number,
-  senderId: number,
-  content: string,
-  tempId: string,
-) {
-  const optimistic = {
-    id: tempId, // temporary — replaced on ack
-    _tempId: tempId,
-    conversationId: -1,
-    senderId,
-    content,
-    status: "SENT" as const,
-    readAt: null,
-    createdAt: new Date().toISOString(),
-    sender: { id: senderId, fullName: "", role: "" },
-  };
-  appendToCache(queryClient, recipientId, optimistic);
-}
-
-function appendToCache(qc: any, userId: number, msg: any) {
-  qc.setQueryData(["messages", userId], (old: any) => {
-    if (!old) return old;
-    const pages = [...old.pages];
-    const last = { ...pages[pages.length - 1] };
-    last.data = [...(last.data ?? []), msg];
-    pages[pages.length - 1] = last;
-    return { ...old, pages };
-  });
-}
-
-function updateMessageStatus(
-  old: any,
-  messageId: number,
-  status: "DELIVERED" | "READ",
-) {
-  if (!old?.pages) return old;
-  return {
-    ...old,
-    pages: old.pages.map((page: any) => ({
-      ...page,
-      data: page.data.map((m: any) =>
-        m.id === messageId ? { ...m, status } : m,
-      ),
-    })),
-  };
-}
-
-function updateMessageStatusBulk(
-  old: any,
-  messageIds: number[],
-  status: "DELIVERED" | "READ",
-) {
-  if (!old?.pages) return old;
-  const idSet = new Set(messageIds);
-  return {
-    ...old,
-    pages: old.pages.map((page: any) => ({
-      ...page,
-      data: page.data.map((m: any) => (idSet.has(m.id) ? { ...m, status } : m)),
-    })),
-  };
-}
