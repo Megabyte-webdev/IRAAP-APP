@@ -86,11 +86,65 @@ export const useProject = () => {
       },
     });
 
+  const submitRevisionForReview = useMutation({
+    mutationFn: async ({
+      reviewId,
+      file,
+      changeNote,
+    }: {
+      reviewId: number;
+      file: File;
+      changeNote?: string;
+    }) => {
+      const formData = new FormData();
+
+      formData.append("file", file);
+
+      if (changeNote) {
+        formData.append("changeNote", changeNote);
+      }
+
+      const { data } = await api.post(
+        `/reviews/${reviewId}/submit-revision`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      return data;
+    },
+
+    onSuccess: () => {
+      onSuccess({
+        title: "Revision Submitted",
+        message:
+          "Your revised project has been submitted successfully for review.",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["project-reviews"],
+      });
+    },
+
+    onError: (error: any) => {
+      onFailure({
+        title: "Revision Failed",
+        message:
+          extractErrorMessage(error) ||
+          "Unable to submit revision. Please try again.",
+      });
+    },
+  });
+
   return {
     submitProject,
     updateProject,
     getProjects,
     getProjectById,
     getProjectReviews,
+    submitRevisionForReview,
   };
 };
