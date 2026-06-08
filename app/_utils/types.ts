@@ -13,6 +13,7 @@ export interface Project {
   categoryId?: number;
   category: string;
   createdAt: string;
+  keywords?: string[];
 }
 
 export interface Stats {
@@ -39,7 +40,7 @@ export interface ReviewTask {
 }
 
 export interface Task {
-  id: string;
+  id: number;
   title: string;
   description?: string;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "VERIFIED";
@@ -112,3 +113,9 @@ export interface ChatUser {
   unreadCount: number | null;
   updatedAt: string;
 }
+
+export type SectionCompletion = {
+  details: boolean;
+  upload: boolean;
+  keywords: boolean;
+};

@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   Search,
   LogOut,
+  FolderOpen,
   X,
   ChevronLeft,
   ChevronRight,
@@ -43,7 +44,12 @@ const navItems: NavItem[] = [
     roles: ["STUDENT"],
     icon: FileUp,
   },
-  { name: "My Project", href: "/projects", roles: ["STUDENT"], icon: FileUp },
+  {
+    name: "My Project",
+    href: "/projects",
+    roles: ["STUDENT"],
+    icon: FolderOpen,
+  },
   {
     name: "Review Queue",
     href: "/review",
@@ -92,9 +98,9 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-primary",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-tertiary ",
           isOpen
-            ? "translate-x-0 max-w-80 w-full shadow-lg"
+            ? "translate-x-0 max-w-64 w-full shadow-lg"
             : "-translate-x-full",
           isCollapsed ? "lg:w-18" : "lg:w-64",
         )}
@@ -128,7 +134,7 @@ export function Sidebar({
           </div>
           <button
             onClick={onClose}
-            className="ml-auto mr-2 lg:hidden text-blue-200"
+            className="ml-auto mr-4 lg:hidden text-red-500 cursor-pointer"
           >
             <X size={24} />
           </button>

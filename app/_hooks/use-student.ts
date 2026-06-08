@@ -10,12 +10,21 @@ const useStudent = () => {
       taskId,
       status,
       projectId,
+      file,
     }: {
       taskId: number;
       status: "IN_PROGRESS" | "COMPLETED";
+      file: File;
       projectId: number;
     }) => {
-      const { data } = await api.patch(`/reviews/tasks/${taskId}`, { status });
+      const form = new FormData();
+      form.append("status", status);
+      if (file) form.append("file", file);
+
+      const { data } = await api.patch(`/reviews/tasks/${taskId}`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       return data;
     },
     onSuccess: (response, variables) => {

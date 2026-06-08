@@ -7,6 +7,9 @@ import {
   FileVideo,
   FileCode,
   File,
+  BookOpen,
+  FileUp,
+  Tag,
 } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
@@ -204,3 +207,9 @@ export const getRadius = (i: number, total: number) => {
 
   return "";
 };
+
+export const projectSubmissionSteps = [
+  { icon: BookOpen, label: "Project details", key: "details" },
+  { icon: FileUp, label: "Document upload", key: "upload" },
+  { icon: Tag, label: "Keywords & research area", key: "keywords" },
+];
