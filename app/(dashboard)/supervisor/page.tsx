@@ -81,96 +81,18 @@ export default function SupervisorDashboard() {
             Failed to load stats.
           </div>
         ) : (
-          dashboardStats.map(
-            (
-              item: {
-                icon:
-                  | string
-                  | number
-                  | bigint
-                  | boolean
-                  | ReactElement<unknown, string | JSXElementConstructor<any>>
-                  | Iterable<ReactNode>
-                  | ReactPortal
-                  | Promise<
-                      | string
-                      | number
-                      | bigint
-                      | boolean
-                      | ReactPortal
-                      | ReactElement<
-                          unknown,
-                          string | JSXElementConstructor<any>
-                        >
-                      | Iterable<ReactNode>
-                      | null
-                      | undefined
-                    >
-                  | null
-                  | undefined;
-                label:
-                  | string
-                  | number
-                  | bigint
-                  | boolean
-                  | ReactElement<unknown, string | JSXElementConstructor<any>>
-                  | Iterable<ReactNode>
-                  | ReactPortal
-                  | Promise<
-                      | string
-                      | number
-                      | bigint
-                      | boolean
-                      | ReactPortal
-                      | ReactElement<
-                          unknown,
-                          string | JSXElementConstructor<any>
-                        >
-                      | Iterable<ReactNode>
-                      | null
-                      | undefined
-                    >
-                  | null
-                  | undefined;
-                value:
-                  | string
-                  | number
-                  | bigint
-                  | boolean
-                  | ReactElement<unknown, string | JSXElementConstructor<any>>
-                  | Iterable<ReactNode>
-                  | ReactPortal
-                  | Promise<
-                      | string
-                      | number
-                      | bigint
-                      | boolean
-                      | ReactPortal
-                      | ReactElement<
-                          unknown,
-                          string | JSXElementConstructor<any>
-                        >
-                      | Iterable<ReactNode>
-                      | null
-                      | undefined
-                    >
-                  | null
-                  | undefined;
-              },
-              i: Key | null | undefined,
-            ) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl shadow-sm border p-5 flex items-center gap-4 hover:shadow-md transition"
-              >
-                {item.icon}
-                <div>
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <h3 className="text-xl font-semibold">{item.value}</h3>
-                </div>
+          dashboardStats.map((item: any, i: Key | null | undefined) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl shadow-sm border p-5 flex items-center gap-4 hover:shadow-md transition"
+            >
+              {item.icon}
+              <div>
+                <p className="text-xs text-gray-500">{item.label}</p>
+                <h3 className="text-xl font-semibold">{item.value}</h3>
               </div>
-            ),
-          )
+            </div>
+          ))
         )}
       </div>
 

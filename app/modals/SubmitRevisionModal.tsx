@@ -1,59 +1,74 @@
 "use client";
 
 import { useState } from "react";
-import { useProject } from "@/app/_hooks/use-projects";
+import { Loader2, Upload } from "lucide-react";
 import Portal from "../_components/Portal";
-
-export default function SubmitRevisionModal({
-  reviewId,
-  projectId,
+function SubmitRevisionModal({
+  isOpen,
   onClose,
-}: any) {
-  const { submitRevisionForReview } = useProject();
-
+  onSubmit,
+  isLoading,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (file: File, changeNote: string) => void;
+  isLoading: boolean;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [changeNote, setChangeNote] = useState("");
 
-  const handleSubmit = () => {
-    if (!file) return;
-
-    submitRevisionForReview.mutate(
-      {
-        reviewId,
-        file,
-        changeNote,
-      },
-      {
-        onSuccess: () => onClose(),
-      },
-    );
-  };
+  if (!isOpen) return null;
 
   return (
     <Portal>
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-        <div className="bg-white p-4 rounded w-100 space-y-3">
-          <h2 className="text-sm font-bold">Submit Revision</h2>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4">
+          <h3 className="text-sm font-bold text-slate-800">
+            Submit Revision for Review
+          </h3>
 
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-          />
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-600">
+              Revised File
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+          </div>
 
-          <textarea
-            placeholder="Change note"
-            value={changeNote}
-            onChange={(e) => setChangeNote(e.target.value)}
-            className="w-full border p-2 text-xs"
-          />
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-600">
+              Change Note (optional)
+            </label>
+            <textarea
+              value={changeNote}
+              onChange={(e) => setChangeNote(e.target.value)}
+              rows={3}
+              placeholder="Describe what you changed..."
+              className="w-full text-xs rounded-lg border border-slate-200 p-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
 
-          <div className="flex justify-end gap-2">
-            <button onClick={onClose}>Cancel</button>
+          <div className="flex gap-2 justify-end pt-1">
             <button
-              onClick={handleSubmit}
-              className="bg-indigo-600 text-white px-3 py-1 rounded"
+              onClick={onClose}
+              className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
             >
-              Submit
+              Cancel
+            </button>
+            <button
+              disabled={!file || isLoading}
+              onClick={() => file && onSubmit(file, changeNote)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <Upload size={12} />
+              )}
+              Submit Revision
             </button>
           </div>
         </div>
@@ -61,3 +76,5 @@ export default function SubmitRevisionModal({
     </Portal>
   );
 }
+
+export default SubmitRevisionModal;

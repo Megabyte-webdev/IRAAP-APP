@@ -3,8 +3,9 @@
 import { useProject } from "@/app/_hooks/use-projects";
 import TaskItem from "./_components/TaskItem";
 import TaskList from "./_components/TaskList";
+import { getChapterState } from "@/app/_utils/utility";
 
-export default function StudentDashboard() {
+export default function Projects() {
   const { getProjects, getProjectReviews } = useProject();
   const { data: projects = [], isLoading, isError } = getProjects();
 
@@ -77,8 +78,6 @@ export default function StudentDashboard() {
     );
   }
 
-  // CORE DATA LAYER
-
   const allTasks = reviews.flatMap((r: any) =>
     (r.tasks || []).map((t: any) => ({
       ...t,
@@ -113,26 +112,47 @@ export default function StudentDashboard() {
   };
 
   const getTaskScore = (task: any) => {
-    let score = 0;
+    // VERIFIED tasks are done — score 0, they don't contribute urgency
+    if (task.status === "VERIFIED") return 0;
 
+    let score = 0;
     if (task.status === "PENDING") score += 2;
-    if (task.status === "COMPLETED") score += 1;
-    if (!task.completedAt) score += 1;
-    if (new Date(task.completedAt) > new Date(task.createdAt)) score += 3;
+    if (task.status === "IN_PROGRESS") score += 1;
+    if (task.status === "COMPLETED") score += 1; // done but not verified yet
+
+    // Only check overdue if completedAt actually exists
+    if (
+      task.completedAt &&
+      new Date(task.completedAt) > new Date(task.createdAt)
+    ) {
+      score += 3;
+    }
 
     return score;
   };
 
   const groupedByChapter = tasks.reduce((acc: any, task: any) => {
-    acc[task.chapter] = acc[task.chapter] || [];
-    acc[task.chapter].push(task);
+    if (!acc[task.chapter]) {
+      acc[task.chapter] = {
+        tasks: [],
+        // Find the parent review for this chapter
+        review: reviews.find((r: any) => r.summary === task.chapter) ?? null,
+      };
+    }
+    acc[task.chapter].tasks.push(task);
     return acc;
   }, {});
 
   const chapters = Object.entries(groupedByChapter).sort(
     ([, a]: any, [, b]: any) => {
-      const scoreA = a.reduce((s: number, t: any) => s + getTaskScore(t), 0);
-      const scoreB = b.reduce((s: number, t: any) => s + getTaskScore(t), 0);
+      const scoreA = a.tasks.reduce(
+        (s: number, t: any) => s + getTaskScore(t),
+        0,
+      );
+      const scoreB = b.tasks.reduce(
+        (s: number, t: any) => s + getTaskScore(t),
+        0,
+      );
       return scoreB - scoreA;
     },
   );
@@ -141,56 +161,39 @@ export default function StudentDashboard() {
 
   const firstUnfinishedTask = tasks.find((t) => t.status !== "VERIFIED");
 
-  // HELPERS
-
-  const getStatus = (chapterTasks: any[]) =>
-    chapterTasks.every((t) => t.status === "VERIFIED")
-      ? "Completed"
-      : "Needs Attention";
-
-  // UI
-
   return (
     <div className="p-8 max-w-7xl mx-auto flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
       {/* LEFT */}
       <div className="col-span-12 lg:col-span-8 space-y-8">
-        {chapters.map(([chapter, chapterTasks]: any) => {
+        {chapters.map(([chapter, { tasks: chapterTasks, review }]: any) => {
+          const state = getChapterState(chapterTasks, review);
           const score = chapterTasks.reduce(
             (s: number, t: any) => s + getTaskScore(t),
             0,
           );
-
           const progress = getProgress(chapterTasks);
-          const status = getStatus(chapterTasks);
-
-          const completed = isCompleted(chapterTasks);
-          const urgent = !completed && score > 0;
 
           return (
             <div
               key={chapter}
               className={`bg-white border rounded-2xl shadow-sm overflow-hidden ${
-                urgent ? "border-red-200" : "border-slate-200"
+                state.urgent ? "border-red-200" : "border-slate-200"
               }`}
             >
-              <div className="p-4 border-b border-slate-200 flex justify-between bg-slate-50/30!">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-bold">{chapter}</h2>
+                  <h2 className="text-base font-bold text-slate-800">
+                    {chapter}
+                  </h2>
                   <p className="text-xs text-slate-400 mt-1">
-                    {progress.toFixed(0)}% • Score {score}
+                    {progress.toFixed(0)}% complete
                   </p>
                 </div>
 
                 <span
-                  className={`px-3 py-2 text-xs font-bold rounded-full h-max border ${
-                    urgent
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : completed
-                        ? "bg-green-50 text-green-700 border-green-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-full h-max border ${state.style}`}
                 >
-                  {completed ? "Completed" : "Needs Attention"}
+                  {state.label}
                 </span>
               </div>
 

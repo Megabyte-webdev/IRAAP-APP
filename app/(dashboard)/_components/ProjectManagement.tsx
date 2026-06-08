@@ -144,12 +144,14 @@ const ProjectManagement = () => {
       {/* RIGHT ACTIVITY FEED (DRAWER ON MOBILE) */}
       <aside
         className={`
-        fixed inset-y-0 right-0 z-70 w-80 bg-white border-l border-slate-200 transform transition-transform duration-300
-        
-        ${isActivityOpen ? "translate-x-0" : "translate-x-full"}
-      `}
+    fixed inset-y-0 right-0 z-70 w-80 bg-white border-l border-slate-200 
+    transform transition-transform duration-300
+    flex flex-col                          
+    ${isActivityOpen ? "translate-x-0" : "translate-x-full"}
+  `}
       >
-        <div className="h-14 flex items-center justify-between px-6 border-b border-slate-100">
+        {/* Fixed header */}
+        <div className="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-slate-100">
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
             Updates
           </h3>
@@ -160,7 +162,9 @@ const ProjectManagement = () => {
             <X size={16} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
+
+        {/* Scrollable body — takes remaining height */}
+        <div className="flex-1 overflow-y-auto p-6 min-h-0">
           <ActivityFeed reviews={reviews} loading={isReviewLoading} />
         </div>
       </aside>

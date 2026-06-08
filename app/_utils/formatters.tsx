@@ -1,5 +1,5 @@
 import { Variants } from "framer-motion";
-import { Check, CheckCheck } from "lucide-react";
+import { Check, CheckCheck, FileText, GitBranch } from "lucide-react";
 
 export const extractErrorMessage = (
   error:
@@ -242,4 +242,30 @@ export const getInitials = (name?: string) => {
     .slice(0, 2)
     .map((n) => n[0].toUpperCase())
     .join("");
+};
+
+export const getTriggerMeta = (trigger: string, isCurrent: boolean) => {
+  switch (trigger) {
+    case "REVISION_SUBMISSION":
+      return {
+        color: "border-indigo-300 bg-indigo-50",
+        dot: "bg-indigo-500",
+        icon: <FileText size={10} className="text-indigo-500" />,
+        label: "Revision submitted",
+      };
+    case "INITIAL_UPLOAD":
+      return {
+        color: "border-slate-300 bg-white",
+        dot: "bg-slate-400",
+        icon: <GitBranch size={10} className="text-slate-400" />,
+        label: "Initial upload",
+      };
+    default:
+      return {
+        color: "border-slate-200 bg-white",
+        dot: isCurrent ? "bg-emerald-500" : "bg-slate-300",
+        icon: <FileText size={10} className="text-slate-400" />,
+        label: trigger?.replace(/_/g, " ") ?? "Upload",
+      };
+  }
 };

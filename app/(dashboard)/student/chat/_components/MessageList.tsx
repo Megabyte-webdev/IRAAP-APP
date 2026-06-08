@@ -69,20 +69,20 @@ const MessageList = forwardRef<MessageListRef, Props>(
       isFetchingNextPage,
     } = getMessages(Number(userId));
 
-    // ── Refs ──────────────────────────────────────────────────────────────
+    // ── Refs─
     const containerRef = useRef<HTMLDivElement | null>(null);
     const hasScrolledInitiallyRef = useRef(false);
     const prevScrollHeightRef = useRef(0);
     const prevScrollTopRef = useRef(0);
     const loadingOlderRef = useRef(false);
     const lastMessageIdRef = useRef<number | null>(null);
-    const markedReadRef = useRef<Set<number>>(new Set()); // ids we've already sent read for
+    const markedReadRef = useRef<Set<number>>(new Set());
 
-    // ── State ─────────────────────────────────────────────────────────────
+    // ── State
     const [viewerOpen, setViewerOpen] = useState(false);
     const [viewerIndex, setViewerIndex] = useState(0);
 
-    // ── Derived data ──────────────────────────────────────────────────────
+    // ── Derived data
     const flatMessages: Message[] =
       messagesData?.pages?.flatMap((page: any) => page?.data ?? []) ?? [];
 
@@ -150,7 +150,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
     const isTyping = typingUsers[Number(userId)];
     const conversationId = messagesData?.pages?.[0]?.conversationId;
 
-    // ── Intersection-observer based read receipts (WhatsApp style) ────────
+    // ── Intersection-observer based read receipts (WhatsApp style)
     useMessageReadObserver({
       containerRef,
       messages: sortedMessages,
@@ -161,7 +161,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       enabled: !!userId && !!conversationId,
     });
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // ── Helpers─
     const isNearBottom = () => {
       const el = containerRef.current;
       if (!el) return true;
@@ -194,7 +194,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       setTimeout(() => target.classList.remove("bg-yellow-100"), 800);
     };
 
-    // ── Reset on chat switch ──────────────────────────────────────────────
+    // ── Reset on chat switch
     useEffect(() => {
       hasScrolledInitiallyRef.current = false;
       markedReadRef.current = new Set();
@@ -202,7 +202,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       loadingOlderRef.current = false;
     }, [userId]);
 
-    // ── Initial scroll to bottom ──────────────────────────────────────────
+    // ── Initial scroll to bottom
     useLayoutEffect(() => {
       const el = containerRef.current;
       if (!el || !sortedMessages.length || hasScrolledInitiallyRef.current)
@@ -240,7 +240,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       };
     }, [userId, sortedMessages.length]);
 
-    // ── Restore scroll after pagination ───────────────────────────────────
+    // Restore scroll after pagination
     useLayoutEffect(() => {
       const el = containerRef.current;
       if (!el || !loadingOlderRef.current) return;
@@ -250,7 +250,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       loadingOlderRef.current = false;
     }, [messagesData?.pages]);
 
-    // ── Auto scroll on new message ────────────────────────────────────────
+    // ── Auto scroll on new message
     useLayoutEffect(() => {
       if (!hasScrolledInitiallyRef.current || loadingOlderRef.current) return;
       const last = sortedMessages.at(-1);
@@ -265,7 +265,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
         requestAnimationFrame(() => scrollToBottom("smooth"));
     }, [sortedMessages]);
 
-    // ── Unread count ──────────────────────────────────────────────────────
+    // ── Unread count
     const unreadCount = useMemo(() => {
       if (!authDetails?.user?.id) return 0;
       return sortedMessages.filter(
@@ -278,7 +278,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       onUnreadChange?.(unreadCount);
     }, [unreadCount]);
 
-    // ── Scroll handler ────────────────────────────────────────────────────
+    // ── Scroll handler ─
     const handleScroll = async () => {
       const el = containerRef.current;
       if (!el) return;
@@ -295,7 +295,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       }
     };
 
-    // ── Loading / empty ───────────────────────────────────────────────────
+    // ── Loading / empty
     const totalMessages =
       messagesData?.pages?.flatMap((p: any) => p?.data ?? []).length ?? 0;
 
@@ -322,7 +322,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       );
     }
 
-    // ── Render ────────────────────────────────────────────────────────────
+    // ── Render──
     return (
       <div className="flex flex-col flex-1 overflow-hidden">
         <div

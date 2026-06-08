@@ -213,3 +213,68 @@ export const projectSubmissionSteps = [
   { icon: FileUp, label: "Document upload", key: "upload" },
   { icon: Tag, label: "Keywords & research area", key: "keywords" },
 ];
+
+export const getStatus = (chapterTasks: any[]) => {
+  const allVerified = chapterTasks.every((t) => t.status === "VERIFIED");
+  if (allVerified) return "Completed";
+
+  const anyInProgress = chapterTasks.some(
+    (t) => t.status === "PENDING" || t.status === "IN_PROGRESS",
+  );
+
+  const allSubmittedOrDone = chapterTasks.every(
+    (t) => t.status === "COMPLETED" || t.status === "VERIFIED",
+  );
+
+  // 🔥 KEY STATE YOU WERE MISSING
+  if (allSubmittedOrDone) return "Awaiting Review";
+
+  if (anyInProgress) return "In Progress";
+
+  return "Needs Attention";
+};
+
+export const getChapterState = (chapterTasks: any[], review: any) => {
+  if (chapterTasks.every((t: any) => t.status === "VERIFIED")) {
+    return {
+      label: "Verified",
+      style: "bg-green-50 text-green-700 border-green-200",
+      urgent: false,
+    };
+  }
+
+  if (
+    review?.revisionSubmitted &&
+    chapterTasks.every(
+      (t: any) => t.status === "COMPLETED" || t.status === "VERIFIED",
+    )
+  ) {
+    return {
+      label: "Awaiting Review",
+      style: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      urgent: false,
+    };
+  }
+
+  if (chapterTasks.every((t: any) => t.status === "COMPLETED")) {
+    return {
+      label: "Ready to Submit",
+      style: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      urgent: false,
+    };
+  }
+
+  if (chapterTasks.some((t: any) => t.status === "IN_PROGRESS")) {
+    return {
+      label: "In Progress",
+      style: "bg-amber-50 text-amber-700 border-amber-200",
+      urgent: false,
+    };
+  }
+
+  return {
+    label: "Needs Attention",
+    style: "bg-red-50 text-red-700 border-red-200",
+    urgent: true,
+  };
+};

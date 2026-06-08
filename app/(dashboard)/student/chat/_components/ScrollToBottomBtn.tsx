@@ -20,7 +20,7 @@ const ScrollToBottomBtn = ({
           onClick={onScrollToBottom}
           aria-label="Scroll to bottom"
           className="cursor-pointer absolute -top-16 right-5 w-11 h-11 
-                     bg-lighter-ash rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] 
+                     bg-tertiary rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] 
                      border border-gray-300 flex items-center justify-center 
                      hover:bg-gray-50 active:scale-90 transition-colors z-50"
         >

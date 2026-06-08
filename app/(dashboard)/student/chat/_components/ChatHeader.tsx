@@ -1,5 +1,6 @@
 "use client";
 import UserImage from "@/app/(dashboard)/_components/UserImage";
+import { useAuth } from "@/app/_context/AuthContext";
 import { useChatUtils } from "@/app/_context/ChatContext";
 import { User } from "@/app/_utils/types";
 import { ChevronLeft } from "lucide-react"; // Import for mobile back button
@@ -12,6 +13,8 @@ interface ChatHeaderProps {
 
 const ChatHeader = ({ selectedChat, role = "buyer" }: ChatHeaderProps) => {
   const router = useRouter();
+  const { authDetails } = useAuth();
+  const userRole = authDetails?.user?.role?.toLowerCase();
   const { userId } = useParams();
   const { onlineUsers, typingUsers } = useChatUtils();
   const isOnline = selectedChat?.id ? !!onlineUsers?.[selectedChat.id] : false;
@@ -19,7 +22,7 @@ const ChatHeader = ({ selectedChat, role = "buyer" }: ChatHeaderProps) => {
   return (
     <div className="h-16 border-b border-[#00000033] flex items-center px-4 md:px-6 gap-3 shrink-0 bg-white">
       <button
-        onClick={() => router.push("/student/chat")}
+        onClick={() => router.push(`/${userRole}/chat`)}
         className="cursor-pointer md:hidden p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <ChevronLeft className="size-6 text-black" />

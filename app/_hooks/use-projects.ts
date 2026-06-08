@@ -1,13 +1,13 @@
 "use client";
 
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
 import { extractErrorMessage } from "../_lib/utils";
 import { ReviewTask } from "../_utils/types";
 import { onFailure, onSuccess } from "../_utils/Notification";
 
 export const useProject = () => {
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
   const submitProject: any = useMutation({
     mutationFn: async (projectData: any) => {
       const { data } = await api.post("/projects/submit", projectData);
@@ -77,6 +77,16 @@ export const useProject = () => {
       enabled: !!projectId,
     });
 
+  const getProjectVersionHistory = (projectId: number) =>
+    useQuery({
+      queryKey: ["project-history", projectId],
+      queryFn: async () => {
+        const { data } = await api.get(`/projects/${projectId}/history`);
+        return data || null;
+      },
+      enabled: !!projectId,
+    });
+
   const getProjectById = (id: number) =>
     useQuery({
       queryKey: ["project", id],
@@ -97,44 +107,41 @@ export const useProject = () => {
       changeNote?: string;
     }) => {
       const formData = new FormData();
-
       formData.append("file", file);
 
       if (changeNote) {
         formData.append("changeNote", changeNote);
       }
 
-      const { data } = await api.post(
-        `/reviews/${reviewId}/submit-revision`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
+      const { data } = await api.post(`/reviews/${reviewId}/submit`, formData);
 
       return data;
     },
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const reviewId = data?.version?.linkedReviewId;
+      const projectId = data?.version?.projectId;
+
+      queryClient.setQueryData(["project-reviews", projectId], (old: any) => {
+        if (!old?.data) return old;
+
+        return {
+          ...old,
+          data: old.data.map((review: any) =>
+            review.id === reviewId
+              ? {
+                  ...review,
+                  revisionSubmitted: true,
+                  revisionVersionId: data.version.id,
+                }
+              : review,
+          ),
+        };
+      });
+
       onSuccess({
         title: "Revision Submitted",
-        message:
-          "Your revised project has been submitted successfully for review.",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["project-reviews"],
-      });
-    },
-
-    onError: (error: any) => {
-      onFailure({
-        title: "Revision Failed",
-        message:
-          extractErrorMessage(error) ||
-          "Unable to submit revision. Please try again.",
+        message: "Your revised project has been submitted successfully.",
       });
     },
   });
@@ -143,6 +150,7 @@ export const useProject = () => {
     submitProject,
     updateProject,
     getProjects,
+    getProjectVersionHistory,
     getProjectById,
     getProjectReviews,
     submitRevisionForReview,
