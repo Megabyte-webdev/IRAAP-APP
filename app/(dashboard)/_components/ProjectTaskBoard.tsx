@@ -299,9 +299,29 @@ export default function ProjectTaskBoard({
                       {/* REVIEW ROUND HEADER */}
                       <div className="flex items-center gap-3 px-1">
                         <div className="h-px flex-1 bg-slate-200" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded">
-                          {round.summary}
-                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded">
+                            {round.summary}
+                          </span>
+
+                          {/* Delete button — supervisors only, not for General */}
+                          {isSupervisor && reviewId !== "General" && (
+                            <button
+                              onClick={() =>
+                                setConfirmDeleteReview({
+                                  id: round.id,
+                                  summary: round.summary,
+                                })
+                              }
+                              className="p-0.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Delete revision round"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          )}
+                        </div>
+
                         <div className="h-px flex-1 bg-slate-200" />
                       </div>
 
