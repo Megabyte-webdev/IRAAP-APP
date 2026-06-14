@@ -7,7 +7,7 @@ interface PageMetadataOptions {
   path?: string;
 }
 
-const BASE_URL = "http://iraap-app.vercel.app";
+const BASE_URL = "http://iraap.com.ng";
 
 export function generatePageMetadata({
   title,
