@@ -27,7 +27,7 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
   const { authDetails } = useAuth();
   const role = authDetails?.user?.role;
   const isSupervisor = role === "SUPERVISOR";
-  const { verifyTaskBySupervisor, deleteTask } = useSupervisor();
+  const { verifyReviewRound, deleteTask } = useSupervisor();
   const { updateTaskByStudent } = useStudent();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +36,7 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
   const statusDetails = statusConfig[task.status];
 
   const isAnyMutationPending =
-    verifyTaskBySupervisor.isPending ||
+    verifyReviewRound.isPending ||
     deleteTask.isPending ||
     updateTaskByStudent.isPending;
 
@@ -71,7 +71,7 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
       newStatus === "VERIFIED" ||
       (task.status === "COMPLETED" && newStatus === "PENDING")
     ) {
-      verifyTaskBySupervisor.mutate({ taskId, projectId }, options);
+      verifyReviewRound.mutate({ reviewId: taskId, projectId }, options);
     } else {
       updateTaskByStudent.mutate(
         { taskId, status: newStatus as any, projectId },

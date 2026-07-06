@@ -5,6 +5,11 @@ import { authService } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onPrompt, onSuccess } from "../_utils/Notification";
+import { jwtDecode } from "jwt-decode";
+
+interface JwtPayload {
+  exp: number;
+}
 
 const AuthContext = createContext<any>(null);
 
@@ -16,7 +21,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Load user on mount
   useEffect(() => {
     const data = authService.getCurrentUser();
-    if (data) setAuthDetails(data);
+
+    if (data?.token) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(data.token);
+
+        if (decoded.exp * 1000 < Date.now()) {
+          authService.logout();
+          setAuthDetails(null);
+          router.replace("/login");
+        } else {
+          setAuthDetails(data);
+        }
+      } catch {
+        authService.logout();
+        setAuthDetails(null);
+      }
+    }
+
     setIsLoading(false);
   }, []);
 

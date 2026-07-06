@@ -5,8 +5,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import {
   Loader2,
   ShieldCheck,
-  MoreVertical,
-  Menu,
   X,
   Activity,
   LayoutDashboard,
@@ -22,7 +20,6 @@ const ProjectManagement = () => {
   const { projectId } = useParams();
   const searchParams = useSearchParams();
   const activeTaskId = searchParams.get("task");
-
   const { authDetails } = useAuth();
   const role = authDetails?.user?.role;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,16 +33,13 @@ const ProjectManagement = () => {
     Number(projectId),
   );
   const allTasks = useMemo(() => {
-    // 1. Ensure reviews is an array before processing
     if (!Array.isArray(reviews)) return [];
 
     return reviews.flatMap((r: any) => {
-      // 2. Ensure r.tasks exists and is an array
       const tasks = Array.isArray(r.tasks) ? r.tasks : [];
 
       return tasks.map((task: any) => ({
         ...task,
-        // Pass the parent review info down so the Board can group it correctly
         review: {
           id: r.id,
           summary: r.summary,
@@ -79,7 +73,7 @@ const ProjectManagement = () => {
       {/* LEFT SIDEBAR (COLLAPSIBLE) */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z- lg:z-auto w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 lg:z-auto w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out
         lg:relative lg:translate-x-0
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}

@@ -35,8 +35,7 @@ const TaskModal = ({
   const isSupervisor = role === "SUPERVISOR";
   const statusDetails = statusConfig[task?.status];
 
-  // Logic: Supervisor can only act if student has finished ('COMPLETED')
-  // We allow actions if NOT pending/in_progress, or simply check if status === 'COMPLETED'
+  // Supervisor can only act if student has finished ('COMPLETED')
   const canSupervisorAction = task.status === "COMPLETED";
 
   return (
@@ -108,7 +107,6 @@ const TaskModal = ({
             <div className="flex items-center gap-3">
               {isSupervisor && (
                 <>
-                  {/* Disable Reject/Verify if task isn't completed by student */}
                   <button
                     onClick={() => onUpdateStatus(Number(task.id), "PENDING")}
                     disabled={isLoading || !canSupervisorAction}
@@ -148,7 +146,6 @@ const TaskModal = ({
 
               {!isSupervisor && (
                 <div className="flex flex-col items-end gap-3 w-full">
-                  {/* CASE: Task is IN_PROGRESS (Allow moving back to PENDING) */}
                   {task.status === "IN_PROGRESS" && (
                     <div className="flex items-center gap-3">
                       <button
@@ -158,16 +155,15 @@ const TaskModal = ({
                         disabled={isLoading}
                         className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md transition disabled:opacity-50"
                       >
-                        <Send size={16} /> Submit for Review
+                        <Send size={16} /> Mark as Completed
                       </button>
                     </div>
                   )}
 
-                  {/* CASE: Task is COMPLETED (Allow recalling to IN_PROGRESS) */}
                   {task.status === "COMPLETED" && (
                     <div className="flex flex-col items-end gap-2">
                       <span className="text-xs font-bold text-slate-400 italic">
-                        Submitted! Waiting for Approval
+                        Task Finished!
                       </span>
                       <button
                         onClick={() =>
@@ -186,7 +182,6 @@ const TaskModal = ({
                     </div>
                   )}
 
-                  {/* CASE: Task is PENDING (The Start Button) */}
                   {task.status === "PENDING" && (
                     <button
                       onClick={() =>
@@ -199,7 +194,7 @@ const TaskModal = ({
                         <Loader2 size={12} className="animate-spin" />
                       ) : (
                         <PlayCircle size={16} />
-                      )}{" "}
+                      )}
                       Start Task
                     </button>
                   )}

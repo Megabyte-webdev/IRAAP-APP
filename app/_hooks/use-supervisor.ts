@@ -62,28 +62,26 @@ const useSupervisor = () => {
     },
   });
 
-  const verifyTaskBySupervisor = useMutation({
+  const verifyReviewRound = useMutation({
     mutationFn: async ({
-      taskId,
+      reviewId,
       projectId,
     }: {
-      taskId: number;
+      reviewId: number;
       projectId: number;
     }) => {
-      const { data } = await api.patch(`/reviews/tasks/${taskId}/verify`);
+      const { data } = await api.patch(`/reviews/${reviewId}/approve`);
       return data;
     },
-    onSuccess: (_, { taskId, projectId }: any) => {
+    onSuccess: (_, { reviewId, projectId }: any) => {
       queryClient.setQueryData(
         ["project-reviews", projectId],
         (oldData: any) => {
           if (!oldData) return [];
-
-          // Map through the revision rounds and filter the task out of the correct round
           return oldData.map((review: any) => ({
             ...review,
             tasks: review.tasks.filter(
-              (t: any) => Number(t.id) !== Number(taskId),
+              (t: any) => Number(t.id) !== Number(reviewId),
             ),
           }));
         },
@@ -203,7 +201,7 @@ const useSupervisor = () => {
     getSupervisorProjects,
     getSupervisorStats,
     createReviewWithTasks,
-    verifyTaskBySupervisor,
+    verifyReviewRound,
     updateProjectStatus,
     deleteTask,
     deleteReview,

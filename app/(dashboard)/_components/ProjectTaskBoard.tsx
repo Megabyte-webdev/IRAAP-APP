@@ -11,6 +11,7 @@ import {
   Upload,
   History,
   FileText,
+  CheckCircle2,
 } from "lucide-react";
 import TaskCard from "./TaskCard";
 import NewReviewModal from "./NewReviewModal";
@@ -45,7 +46,7 @@ export default function ProjectTaskBoard({
   reviews,
   activeTaskId,
 }: Props) {
-  const { deleteReview } = useSupervisor();
+  const { deleteReview, verifyReviewRound } = useSupervisor();
   const { authDetails } = useAuth();
   const { submitRevisionForReview } = useProject();
   const isSupervisor = authDetails?.user?.role === "SUPERVISOR";
@@ -80,7 +81,6 @@ export default function ProjectTaskBoard({
     });
   };
 
-  // Scroll to active task
   useEffect(() => {
     if (!activeTaskId) return;
     const el = taskRefs.current[activeTaskId];
@@ -116,6 +116,16 @@ export default function ProjectTaskBoard({
     );
   };
 
+  // Are ALL tasks in this review round verified?
+  const isRoundFullyVerified = (reviewId: string | number) => {
+    const roundTasks = tasks.filter(
+      (t) => String(t.reviewId ?? "General") === String(reviewId),
+    );
+    return (
+      roundTasks.length > 0 && roundTasks.every((t) => t.status === "VERIFIED")
+    );
+  };
+
   // Set of review IDs that have been submitted
   const submittedMap = useMemo(() => {
     return new Set(
@@ -140,7 +150,6 @@ export default function ProjectTaskBoard({
           id: r.id,
           summary: r.summary,
           items: [],
-          // Build submissions array from the single revisionVersion for now
           submissions: r.revisionVersion ? [r.revisionVersion] : [],
         };
       });
@@ -168,6 +177,17 @@ export default function ProjectTaskBoard({
     submitRevisionForReview.mutate(
       { reviewId: submitTarget.reviewId, file, changeNote },
       { onSuccess: () => setSubmitTarget(null) },
+    );
+  };
+
+  const handleVerifyVersion = (reviewId: number) => {
+    verifyReviewRound.mutate(
+      { reviewId, projectId },
+      {
+        onSuccess: () => {
+          console.log("Review round verified successfully.");
+        },
+      },
     );
   };
 
@@ -233,19 +253,32 @@ export default function ProjectTaskBoard({
                   const round = columnData[reviewId];
                   const hasTasks = round.items.length > 0;
                   const fullyCompleted = isRoundFullyCompleted(reviewId);
+                  const fullyVerified = isRoundFullyVerified(reviewId);
                   const isSubmitted = submittedMap.has(Number(reviewId));
                   const hasSubmissions = round.submissions?.length > 0;
                   const isHistoryOpen = expandedHistory.has(reviewId);
 
-                  const showSubmitBanner =
+                  // Student Action Banner: Tasks are completely done but hasn't uploaded a version yet
+                  const showStudentSubmitBanner =
                     col === "COMPLETED" &&
                     isStudent &&
                     fullyCompleted &&
                     reviewId !== "General" &&
                     !isSubmitted;
 
-                  const isAwaitingVerification =
-                    isSubmitted && col === "COMPLETED";
+                  // Supervisor Action Banner: Student has uploaded/submitted the package version update
+                  const showSupervisorActionBanner =
+                    isSupervisor &&
+                    reviewId !== "General" &&
+                    isSubmitted &&
+                    !fullyVerified; // Check to prevent banner rendering inside verified status
+
+                  // Student Pending State indicator banner
+                  const showStudentPendingBanner =
+                    isStudent &&
+                    reviewId !== "General" &&
+                    isSubmitted &&
+                    !fullyVerified; // Check to prevent banner rendering inside verified status
 
                   const shouldShow =
                     hasTasks ||
@@ -263,11 +296,13 @@ export default function ProjectTaskBoard({
                         className={`
                           rounded-xl border overflow-hidden transition-all duration-200
                           ${
-                            fullyCompleted && !isSubmitted
-                              ? "border-emerald-200 shadow-sm shadow-emerald-100"
-                              : isSubmitted
-                                ? "border-amber-200 shadow-sm shadow-amber-100"
-                                : "border-slate-200"
+                            fullyVerified
+                              ? "border-indigo-100 bg-slate-50/20"
+                              : fullyCompleted && !isSubmitted
+                                ? "border-emerald-200 shadow-sm shadow-emerald-100"
+                                : isSubmitted
+                                  ? "border-amber-200 shadow-sm shadow-amber-100"
+                                  : "border-slate-200"
                           }
                         `}
                       >
@@ -276,23 +311,27 @@ export default function ProjectTaskBoard({
                           className={`
                             flex items-center justify-between px-4 py-2.5 border-b
                             ${
-                              fullyCompleted && !isSubmitted
-                                ? "bg-emerald-50 border-emerald-100"
-                                : isSubmitted
-                                  ? "bg-amber-50 border-amber-100"
-                                  : "bg-slate-50 border-slate-100"
+                              fullyVerified
+                                ? "bg-slate-50 border-slate-100"
+                                : fullyCompleted && !isSubmitted
+                                  ? "bg-emerald-50 border-emerald-100"
+                                  : isSubmitted
+                                    ? "bg-amber-50 border-amber-100"
+                                    : "bg-slate-50 border-slate-100"
                             }
                           `}
                         >
-                          {/* Left: dot + name + task count */}
+                          {/* Left Details */}
                           <div className="flex items-center gap-2">
                             <span
                               className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                isSubmitted
-                                  ? "bg-amber-400"
-                                  : fullyCompleted
-                                    ? "bg-emerald-400"
-                                    : "bg-slate-300"
+                                fullyVerified
+                                  ? "bg-indigo-500"
+                                  : isSubmitted
+                                    ? "bg-amber-400"
+                                    : fullyCompleted
+                                      ? "bg-emerald-400"
+                                      : "bg-slate-300"
                               }`}
                             />
                             <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
@@ -304,9 +343,8 @@ export default function ProjectTaskBoard({
                             </span>
                           </div>
 
-                          {/* Right: history toggle + status pill + delete */}
+                          {/* Right Controls */}
                           <div className="flex items-center gap-2">
-                            {/* Version history toggle */}
                             {reviewId !== "General" && hasSubmissions && (
                               <button
                                 onClick={() => toggleHistory(reviewId)}
@@ -325,43 +363,51 @@ export default function ProjectTaskBoard({
                               </button>
                             )}
 
-                            {/* Status pill */}
                             {reviewId !== "General" && (
                               <span
                                 className={`
                                   text-[10px] font-semibold px-2 py-0.5 rounded-full
                                   ${
-                                    isSubmitted
-                                      ? "bg-amber-100 text-amber-700"
-                                      : fullyCompleted
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-slate-100 text-slate-500"
+                                    fullyVerified
+                                      ? "bg-indigo-50 text-indigo-700 border border-indigo-100/80"
+                                      : isSubmitted
+                                        ? "bg-amber-100 text-amber-700"
+                                        : fullyCompleted
+                                          ? "bg-emerald-100 text-emerald-700"
+                                          : "bg-slate-100 text-slate-500"
                                   }
                                 `}
                               >
-                                {isSubmitted
-                                  ? "Pending Review"
-                                  : fullyCompleted
-                                    ? "Ready to Submit"
-                                    : "In Progress"}
+                                {fullyVerified
+                                  ? "Verified & Approved"
+                                  : isSubmitted
+                                    ? isSupervisor
+                                      ? "Awaiting Action"
+                                      : "Pending Review"
+                                    : fullyCompleted
+                                      ? isStudent
+                                        ? "Ready to Submit"
+                                        : "Awaiting Submission"
+                                      : "In Progress"}
                               </span>
                             )}
 
-                            {/* Supervisor delete */}
-                            {isSupervisor && reviewId !== "General" && (
-                              <button
-                                onClick={() =>
-                                  setConfirmDeleteReview({
-                                    id: round.id,
-                                    summary: round.summary,
-                                  })
-                                }
-                                className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                title="Delete revision round"
-                              >
-                                <Trash2 size={11} />
-                              </button>
-                            )}
+                            {isSupervisor &&
+                              reviewId !== "General" &&
+                              !fullyVerified && (
+                                <button
+                                  onClick={() =>
+                                    setConfirmDeleteReview({
+                                      id: round.id,
+                                      summary: round.summary,
+                                    })
+                                  }
+                                  className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                  title="Delete revision round"
+                                >
+                                  <Trash2 size={11} />
+                                </button>
+                              )}
                           </div>
                         </div>
 
@@ -394,7 +440,6 @@ export default function ProjectTaskBoard({
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
                               Version History
                             </p>
-
                             {[...round.submissions]
                               .sort(
                                 (a: any, b: any) =>
@@ -405,16 +450,13 @@ export default function ProjectTaskBoard({
                                   key={sub.id}
                                   className="flex items-start gap-3 bg-white rounded-lg border border-slate-100 px-3 py-2.5"
                                 >
-                                  {/* Version badge */}
                                   <div className="mt-0.5 w-6 h-6 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
                                     <span className="text-[9px] font-bold text-indigo-500">
                                       v{sub.versionNumber}
                                     </span>
                                   </div>
-
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
-                                      {/* File link */}
                                       <a
                                         href={sub.fileUrl}
                                         target="_blank"
@@ -428,8 +470,6 @@ export default function ProjectTaskBoard({
                                         {sub.publicId?.split("/").pop() ??
                                           `version-${sub.versionNumber}`}
                                       </a>
-
-                                      {/* Timestamp */}
                                       <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0">
                                         {new Date(
                                           sub.createdAt,
@@ -441,15 +481,11 @@ export default function ProjectTaskBoard({
                                         })}
                                       </span>
                                     </div>
-
-                                    {/* Change note */}
                                     {sub.changeNote && (
                                       <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">
                                         {sub.changeNote}
                                       </p>
                                     )}
-
-                                    {/* Trigger badge */}
                                     <span className="inline-block mt-1 text-[9px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
                                       {sub.trigger?.replace("_", " ") ??
                                         "Submission"}
@@ -460,11 +496,11 @@ export default function ProjectTaskBoard({
                           </div>
                         )}
 
-                        {/* ROUND FOOTER — student actions only */}
-                        {isStudent && reviewId !== "General" && (
+                        {/* BANNER ACTIONS SUMMARY CONTROLS */}
+                        {reviewId !== "General" && (
                           <>
-                            {/* Ready to submit */}
-                            {showSubmitBanner && (
+                            {/* Student Action: Ready to packages and submit update */}
+                            {showStudentSubmitBanner && (
                               <div className="flex items-center justify-between px-4 py-3 bg-emerald-50 border-t border-emerald-100">
                                 <div className="flex items-center gap-2.5">
                                   <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -506,8 +542,47 @@ export default function ProjectTaskBoard({
                               </div>
                             )}
 
-                            {/* Awaiting verification */}
-                            {isAwaitingVerification && (
+                            {/* Supervisor Approval Action Context */}
+                            {showSupervisorActionBanner && (
+                              <div className="flex items-center justify-between px-4 py-3 bg-indigo-50/70 border-t border-indigo-100">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                                  </div>
+                                  <div>
+                                    <p className="text-[11px] font-bold text-indigo-900">
+                                      Revision Version Awaiting Action
+                                    </p>
+                                    <p className="text-[10px] text-indigo-600">
+                                      Review the uploaded version update and
+                                      verify this round.
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    handleVerifyVersion(Number(reviewId))
+                                  }
+                                  disabled={verifyReviewRound.isPending}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[11px] font-semibold hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                  {verifyReviewRound.isPending ? (
+                                    <>
+                                      <Loader2
+                                        size={12}
+                                        className="animate-spin"
+                                      />
+                                      Verifying...
+                                    </>
+                                  ) : (
+                                    "Approve & Verify Version"
+                                  )}
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Awaiting Review state banner */}
+                            {showStudentPendingBanner && (
                               <div className="flex items-center justify-between px-4 py-3 bg-amber-50 border-t border-amber-100">
                                 <div className="flex items-center gap-2.5">
                                   <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
@@ -521,7 +596,7 @@ export default function ProjectTaskBoard({
                                       Awaiting supervisor review
                                     </p>
                                     <p className="text-[10px] text-amber-600">
-                                      Your revision has been submitted
+                                      Your revision version has been submitted
                                       successfully
                                     </p>
                                   </div>

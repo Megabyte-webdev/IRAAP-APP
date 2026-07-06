@@ -26,10 +26,18 @@ const getGradient = (id: number) => {
 const ProjectInfo: FC<{ project: Project }> = ({ project }) => {
   const gradient = useMemo(() => getGradient(project.id), [project.id]);
 
+  // Generate a clean, download-safe filename from the project title
   const fileName = useMemo(() => {
-    if (!project.fileUrl) return "Project Document.pdf";
-    return project.fileUrl.split("/").pop() || "Project Document.pdf";
-  }, [project.fileUrl]);
+    if (!project.title) return "Project-Document.pdf";
+
+    const cleanTitle = project.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+      .trim()
+      .replace(/\s+/g, "-"); // Replace spaces with hyphens
+
+    return `${cleanTitle || "project-document"}.pdf`;
+  }, [project.title]);
 
   return (
     <div className="flex flex-col h-full bg-white border border-slate-100">
@@ -121,19 +129,25 @@ const ProjectInfo: FC<{ project: Project }> = ({ project }) => {
 
           <a
             href={project.fileUrl}
+            download={fileName}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between p-2 border border-slate-200 bg-white rounded-xl hover:bg-slate-50 transition"
           >
             <div className="flex items-center gap-3">
-              <FileText size={18} className="text-slate-400" />
-              <div>
-                <p className="text-sm font-medium text-slate-800">{fileName}</p>
+              <FileText size={18} className="shrink-0 text-slate-400" />
+              <div className="max-w-50 sm:max-w-xs">
+                <p
+                  className="text-sm font-medium text-slate-800 line-clamp-1"
+                  title={fileName}
+                >
+                  {fileName}
+                </p>
                 <p className="text-[11px] text-slate-500">PDF Document</p>
               </div>
             </div>
 
-            <Download size={16} className="text-slate-400" />
+            <Download size={16} className="text-slate-400 shrink-0" />
           </a>
         </section>
       </div>

@@ -75,6 +75,7 @@ export const useProject = () => {
         return data?.data || []; // now includes tasks
       },
       enabled: !!projectId,
+      refetchOnWindowFocus: true,
     });
 
   const getProjectVersionHistory = (projectId: number) =>
@@ -94,6 +95,8 @@ export const useProject = () => {
         const { data } = await api.get(`/projects/${id}`);
         return data?.project || null;
       },
+      enabled: !!id,
+      refetchOnWindowFocus: true,
     });
 
   const submitRevisionForReview = useMutation({
@@ -132,7 +135,7 @@ export const useProject = () => {
               ? {
                   ...review,
                   revisionSubmitted: true,
-                  revisionVersionId: data.version.id,
+                  ...data,
                 }
               : review,
           ),
