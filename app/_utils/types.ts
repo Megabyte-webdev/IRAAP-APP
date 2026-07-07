@@ -120,8 +120,6 @@ export type SectionCompletion = {
   keywords: boolean;
 };
 
-export type ChatAction = "chat:send" | "call:schedule";
-
 export interface Message {
   id: number;
   conversationId: number;
@@ -129,6 +127,7 @@ export interface Message {
   content: string;
   msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
   metadata?: {
+    msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
     scheduledAt?: string;
     duration?: number;
     meetingId?: string;

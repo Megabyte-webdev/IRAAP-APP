@@ -4,7 +4,7 @@ import { ArrowUp, Plus, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import MediaUploadModal from "./MediaUploadViewer";
 import ScrollToBottomBtn from "./ScrollToBottomBtn";
-import { ChatAction, User } from "@/app/_utils/types";
+import { User } from "@/app/_utils/types";
 import { useAuth } from "@/app/_context/AuthContext";
 import { useChatUtils } from "@/app/_context/ChatContext";
 import { websocket } from "@/app/_services/websocket";
@@ -12,7 +12,6 @@ import { queryClient } from "@/app/_services/query-client";
 import {
   appendMessage,
   updateConversationLastMessage,
-  syncMessageWithCache,
 } from "@/app/helpers/chat-cache";
 import { FILE_ACCEPT_MAP, FileAcceptType } from "@/app/_utils/markup";
 import { chatFeatures } from "@/app/_utils/formatters";
@@ -109,11 +108,9 @@ const SendMessage = ({
 
   // Send
   const sendChatMessage = ({
-    type,
     content,
     metadata = {},
   }: {
-    type: ChatAction;
     content: string;
     metadata?: any;
   }) => {
@@ -134,7 +131,7 @@ const SendMessage = ({
       createdAt: now,
       replyToMessageId: replyTo?.id ?? null,
       readAt: null,
-      msgType: type == "chat:send" ? "TEXT" : "CALL_INVITE",
+      msgType: metadata.msgType,
       meetingId: null,
       meetingUrl: null,
       sender: {
@@ -168,7 +165,7 @@ const SendMessage = ({
     websocket.emit("chat:send", {
       recipientId: Number(selectedChat.id),
       clientId,
-      msgType: type,
+      msgType: metadata.msgType,
       content,
       metadata,
       replyToMessageId: replyTo?.id ?? null,
@@ -183,7 +180,6 @@ const SendMessage = ({
     if (!trimmed) return;
 
     sendChatMessage({
-      type: "chat:send",
       content: trimmed,
       metadata: {
         msgType: "TEXT",
@@ -224,7 +220,6 @@ const SendMessage = ({
     duration: number;
   }) => {
     sendChatMessage({
-      type: "call:schedule",
       content: "Scheduled a meeting",
       metadata: {
         msgType: "CALL_INVITE",
