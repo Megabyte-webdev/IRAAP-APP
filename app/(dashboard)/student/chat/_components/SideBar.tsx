@@ -20,14 +20,10 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const params = useMemo(
-    () => ({
-      page_size: 10,
-    }),
-    [],
-  );
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    getConversations();
 
-  const { data: conversations = [], isLoading } = getConversations();
+  const conversations = data?.pages.flatMap((page) => page.data) ?? [];
 
   const activeConversation = useMemo(() => {
     if (!selectedUser) return null;
@@ -56,7 +52,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
     if (!searchQuery) return baseList;
 
     return baseList.filter((conversation: any) =>
-      conversation.user?.fullName
+      conversation.participant?.fullName
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()),
     );
@@ -71,11 +67,11 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
 
-      const isBottom = scrollTop + clientHeight >= scrollHeight - 50;
+      const nearBottom = scrollTop + clientHeight >= scrollHeight - 100;
 
-      // if (isBottom && hasNextPage && !isFetchingNextPage) {
-      //   fetchNextPage();
-      // }
+      if (nearBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     };
 
     container.addEventListener("scroll", handleScroll);
@@ -83,8 +79,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, []);
-
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
   return (
     <div
       className={`w-80 min-w-80 h-full min-h-0 flex flex-col bg-white border-r-[0.53px] border-[#00000033] overflow-hidden
@@ -137,12 +132,11 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
           </div>
         )}
 
-        {/* LOADING MORE INDICATOR */}
-        {/* {isFetchingNextPage && (
-          <div className="text-center text-xs text-gray-400 py-2">
-            Loading more...
+        {isFetchingNextPage && (
+          <div className="text-center text-xs text-gray-400 py-3">
+            Loading more conversations...
           </div>
-        )} */}
+        )}
       </div>
 
       {/* MODAL */}

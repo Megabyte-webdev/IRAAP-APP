@@ -1,5 +1,15 @@
 import { Variants } from "framer-motion";
-import { Check, CheckCheck, FileText, GitBranch } from "lucide-react";
+import {
+  CalendarDays,
+  Camera,
+  Check,
+  CheckCheck,
+  File,
+  FileText,
+  GitBranch,
+  Image,
+  Video,
+} from "lucide-react";
 
 export const extractErrorMessage = (
   error:
@@ -269,3 +279,31 @@ export const getTriggerMeta = (trigger: string, isCurrent: boolean) => {
       };
   }
 };
+
+export const chatFeatures = [
+  {
+    type: "meeting",
+    icon: <CalendarDays size={12} className="text-primary" />,
+    label: "Schedule Meeting",
+  },
+  {
+    type: "image" as const,
+    icon: <Image size={12} className="text-[#007BFC]" />,
+    label: "Add Photos",
+  },
+  {
+    type: "video" as const,
+    icon: <Video size={12} className="text-[#FF2E74]" />,
+    label: "Add Videos",
+  },
+  {
+    type: "file" as const,
+    icon: <File size={12} className="text-[#333]" />,
+    label: "Files",
+  },
+  {
+    type: "camera" as const,
+    icon: <Camera size={12} className="text-[#FF2E74]" />,
+    label: "Camera",
+  },
+];

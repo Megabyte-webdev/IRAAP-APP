@@ -24,17 +24,10 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
 
   const observer = useRef<IntersectionObserver | null>(null);
 
-  const params = useMemo(
-    () => ({
-      page_size: 20,
-      name: search,
-    }),
-    [],
-  );
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    getChatableUsers();
 
-  const { data, isLoading } = getChatableUsers();
-
-  const users = data || [];
+  const users = data?.pages.flatMap((page) => page.data) ?? [];
 
   const filteredUsers = useMemo(() => {
     if (!search.trim()) return users;
@@ -44,22 +37,29 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
     );
   }, [users, search]);
 
-  // Infinite scroll trigger
-  // const lastUserRef = useCallback(
-  //   (node: HTMLDivElement | null) => {
+  const lastUserRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
 
-  //     if (observer.current) observer.current.disconnect();
+      if (!node) return;
 
-  //     observer.current = new IntersectionObserver((entries) => {
-  //       if (entries[0].isIntersecting && hasNextPage) {
-  //         fetchNextPage();
-  //       }
-  //     });
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        },
+        {
+          threshold: 0.5,
+        },
+      );
 
-  //     if (node) observer.current.observe(node);
-  //   },
-  //   [fetchNextPage, hasNextPage, isFetchingNextPage],
-  // );
+      observer.current.observe(node);
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage],
+  );
 
   if (!isOpen) return null;
 
@@ -91,7 +91,7 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search users..."
-                className="w-full border rounded-[10px] py-2.5 pl-10 pr-4 text-sm"
+                className="w-full border rounded-[10px] text-gray-600 outline-0 focus:outline-1 py-2.5 pl-10 pr-4 text-sm"
               />
             </div>
           </div>
@@ -107,11 +107,10 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                 {filteredUsers.map((user: any, index: number) => {
                   const isLast = index === filteredUsers.length - 1;
 
-                  const isOnline = user?.id ? !!onlineUsers?.[user.id] : false;
                   return (
                     <div
                       key={user.id}
-                      ref={isLast ? null : null}
+                      ref={isLast ? lastUserRef : null}
                       onClick={() =>
                         router.push(
                           `/${authDetails?.user?.role?.toLowerCase()}/chat/${user.id}`,
@@ -125,7 +124,7 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                         rounded="rounded-[10px] shrink-0"
                       />
 
-                      <div className="flex flex-col">
+                      <div className="flex flex-col text-black">
                         <span className="text-sm font-medium">
                           {user.fullName}
                         </span>
@@ -138,11 +137,11 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                   );
                 })}
 
-                {/* {isFetchingNextPage && (
-                <div className="py-4 text-center text-sm text-gray-400">
-                  Loading more users...
-                </div>
-              )} */}
+                {isFetchingNextPage && (
+                  <div className="py-4 text-center text-sm text-gray-400">
+                    Loading more users...
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center text-sm text-gray-400">
@@ -155,12 +154,12 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
           <div className="p-5 grid grid-cols-2 gap-2.25 mt-auto">
             <button
               onClick={onClose}
-              className="cursor-pointer py-2 border rounded-[10px]"
+              className="cursor-pointer py-2 border rounded-[10px] text-black"
             >
               Cancel
             </button>
 
-            <button className="cursor-pointer py-2 bg-[#1E4DFF] text-white rounded-[10px]">
+            <button className="cursor-pointer py-2 bg-primary hover:bg-[#5ab9ec] text-white rounded-[10px]">
               Start Chat
             </button>
           </div>

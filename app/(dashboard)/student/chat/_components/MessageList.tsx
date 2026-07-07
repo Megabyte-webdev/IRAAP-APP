@@ -20,9 +20,10 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { useChatUtils } from "@/app/_context/ChatContext";
 import useChat from "@/app/_hooks/use-chat";
 import { useMessageReadObserver } from "@/app/_hooks/useMessageReadObserver";
-import { User } from "@/app/_utils/types";
+import { Message, User } from "@/app/_utils/types";
 import { clearUnreadInCache } from "@/app/helpers/chat-cache";
 import { queryClient } from "@/app/_services/query-client";
+import MeetingMessage from "./MeetingMessage";
 
 interface Props {
   selectedUser?: User;
@@ -34,19 +35,6 @@ export type MessageListRef = {
   scrollToBottom: (behavior?: ScrollBehavior) => void;
   markVisibleUnreadAsRead: () => void;
 };
-
-interface Message {
-  id: number;
-  conversationId: number;
-  senderId: number;
-  content: string;
-  status: "SENT" | "DELIVERED" | "READ";
-  readAt: string | null;
-  createdAt: string;
-  sender: { id: number; fullName: string; role: string };
-  mediaType?: string;
-  mediaUrls?: string[];
-}
 
 const LOAD_MORE_THRESHOLD = 60;
 
@@ -71,7 +59,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       isFetchingNextPage,
     } = getMessages(Number(userId));
 
-    // ── Refs─
+    // Refs
     const containerRef = useRef<HTMLDivElement | null>(null);
     const hasScrolledInitiallyRef = useRef(false);
     const prevScrollHeightRef = useRef(0);
@@ -80,11 +68,11 @@ const MessageList = forwardRef<MessageListRef, Props>(
     const lastMessageIdRef = useRef<number | null>(null);
     const markedReadRef = useRef<Set<number>>(new Set());
 
-    // ── State
+    // State
     const [viewerOpen, setViewerOpen] = useState(false);
     const [viewerIndex, setViewerIndex] = useState(0);
 
-    // ── Derived data
+    // Derived data
     const flatMessages: Message[] =
       messagesData?.pages?.flatMap((page: any) => page?.data ?? []) ?? [];
 
@@ -152,7 +140,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
     const isTyping = typingUsers[Number(userId)];
     const conversationId = messagesData?.pages?.[0]?.conversationId;
 
-    // ── Intersection-observer based read receipts (WhatsApp style)
+    // Intersection-observer based read receipts (WhatsApp style)
     useMessageReadObserver({
       containerRef,
       messages: sortedMessages,
@@ -163,7 +151,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       enabled: !!userId && !!conversationId,
     });
 
-    // ── Helpers─
+    // Helpers
     const isNearBottom = () => {
       const el = containerRef.current;
       if (!el) return true;
@@ -196,7 +184,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       setTimeout(() => target.classList.remove("bg-yellow-100"), 800);
     };
 
-    // ── Reset on chat switch
+    // Reset on chat switch
     useEffect(() => {
       hasScrolledInitiallyRef.current = false;
       markedReadRef.current = new Set();
@@ -205,7 +193,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       clearUnreadInCache(queryClient, Number(userId));
     }, [userId]);
 
-    // ── Initial scroll to bottom
+    // Initial scroll to bottom
     useLayoutEffect(() => {
       const el = containerRef.current;
       if (!el || !sortedMessages.length || hasScrolledInitiallyRef.current)
@@ -253,7 +241,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       loadingOlderRef.current = false;
     }, [messagesData?.pages]);
 
-    // ── Auto scroll on new message
+    // Auto scroll on new message
     useLayoutEffect(() => {
       if (!hasScrolledInitiallyRef.current || loadingOlderRef.current) return;
       const last = sortedMessages.at(-1);
@@ -268,7 +256,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
         requestAnimationFrame(() => scrollToBottom("smooth"));
     }, [sortedMessages]);
 
-    // ── Unread count
+    // Unread count
     const unreadCount = useMemo(() => {
       const myId = Number(authDetails.user.id);
 
@@ -281,7 +269,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       onUnreadChange?.(unreadCount);
     }, [unreadCount]);
 
-    // ── Scroll handler ─
+    // Scroll handler
     const handleScroll = async () => {
       const el = containerRef.current;
       if (!el) return;
@@ -298,7 +286,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       }
     };
 
-    // ── Loading / empty
+    // Loading / empty
     const totalMessages =
       messagesData?.pages?.flatMap((p: any) => p?.data ?? []).length ?? 0;
 
@@ -325,7 +313,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
       );
     }
 
-    // ── Render──
+    // Render
     return (
       <div className="flex flex-col flex-1 overflow-hidden">
         <div
@@ -350,24 +338,32 @@ const MessageList = forwardRef<MessageListRef, Props>(
               </div>
 
               <div className="space-y-2">
-                {group.messages.map((msg) =>
-                  isMediaMessage(msg) ? (
-                    <ChatMediaMessage
-                      key={msg.id}
-                      msg={msg}
-                      onReply={() =>
-                        setReplyTo({
-                          id: String(msg.id),
-                          content: msg.content,
-                          senderId: msg.senderId,
-                          sender: msg.sender,
-                        })
-                      }
-                      onOpen={handleOpenImage}
-                      onRetry={() => {}}
-                      onScrollToMessage={scrollToMessage}
-                    />
-                  ) : (
+                {group.messages.map((msg) => {
+                  if (msg.msgType === "CALL_INVITE") {
+                    return <MeetingMessage key={msg.id} msg={msg} />;
+                  }
+
+                  if (isMediaMessage(msg)) {
+                    return (
+                      <ChatMediaMessage
+                        key={msg.id}
+                        msg={msg}
+                        onReply={() =>
+                          setReplyTo({
+                            id: String(msg.id),
+                            content: msg.content,
+                            senderId: msg.senderId,
+                            sender: msg.sender,
+                          })
+                        }
+                        onOpen={handleOpenImage}
+                        onRetry={() => {}}
+                        onScrollToMessage={scrollToMessage}
+                      />
+                    );
+                  }
+
+                  return (
                     <ChatMessage
                       selectedUser={selectedUser}
                       key={msg.id}
@@ -382,8 +378,8 @@ const MessageList = forwardRef<MessageListRef, Props>(
                       }
                       onScrollToMessage={scrollToMessage}
                     />
-                  ),
-                )}
+                  );
+                })}
               </div>
             </div>
           ))}

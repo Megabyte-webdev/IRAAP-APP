@@ -56,7 +56,12 @@ const navItems: NavItem[] = [
     roles: ["SUPERVISOR"],
     icon: ClipboardCheck,
   },
-  { name: "Students", href: "/students", roles: ["ADMIN"], icon: Users },
+  {
+    name: "Students",
+    href: "/students",
+    roles: ["ADMIN", "SUPERVISOR"],
+    icon: Users,
+  },
   {
     name: "Supervisors",
     href: "/supervisors",

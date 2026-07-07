@@ -70,9 +70,6 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
   };
 
   const goToChat = async () => {
-    //resetUnread(chatUser.id);
-    //await prewarmMessages(chatUser.id);
-
     router.push(
       `/${authDetails?.user?.role.toLowerCase()}/chat/${chatUser.id}`,
     );
@@ -87,7 +84,7 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
       <UserImage user={chatUser} />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h4 className="font-medium text-sm truncate pr-10 ">
+          <h4 className="font-medium text-sm truncate pr-10 text-black">
             {chatUser.fullName}
           </h4>
           <span className="text-[10px] text-gray-400">

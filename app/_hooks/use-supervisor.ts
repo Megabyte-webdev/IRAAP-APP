@@ -25,6 +25,16 @@ const useSupervisor = () => {
       },
     });
 
+  const getAssignedStudents = () =>
+    useQuery({
+      queryKey: ["supervisor-students"],
+      queryFn: async () => {
+        const { data } = await api.get("/supervisor/students");
+        return data?.students;
+      },
+      refetchOnReconnect: "always",
+    });
+
   const createReviewWithTasks = useMutation({
     mutationFn: async ({
       projectId,
@@ -115,10 +125,11 @@ const useSupervisor = () => {
     onSuccess: () => {
       onSuccess({
         title: "Status Updated",
-        message: `Project has been marked as ${status.replace("_", " ")}.`,
+        message: "Project status update completed successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["supervisor-projects"] });
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["supervisor-students"] });
     },
     onError: (err) => {
       onFailure({
@@ -144,13 +155,10 @@ const useSupervisor = () => {
         title: "Task Deleted",
         message: "The task was successfully removed from the project.",
       });
-      // Refresh the specific project board
       queryClient.setQueryData(
         ["project-reviews", projectId],
         (oldData: any) => {
           if (!oldData) return [];
-
-          // Map through the revision rounds and filter the task out of the correct round
           return oldData.map((review: any) => ({
             ...review,
             tasks: review.tasks.filter(
@@ -184,13 +192,11 @@ const useSupervisor = () => {
         ["project-reviews", projectId],
         (oldData: any) => {
           if (!oldData) return [];
-
           return oldData.filter(
             (review: any) => Number(review.id) !== Number(reviewId),
           );
         },
       );
-
       queryClient.invalidateQueries({ queryKey: ["supervisor-stats"] });
     },
     onError: (err) =>
@@ -200,6 +206,7 @@ const useSupervisor = () => {
   return {
     getSupervisorProjects,
     getSupervisorStats,
+    getAssignedStudents,
     createReviewWithTasks,
     verifyReviewRound,
     updateProjectStatus,

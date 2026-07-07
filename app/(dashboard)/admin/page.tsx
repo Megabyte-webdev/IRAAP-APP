@@ -27,11 +27,10 @@ export default function AdminDashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-          Command Center
-        </h1>
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <p className="text-slate-500">
-          Overview of system health and student allocations.
+          Welcome to the admin dashboard. Here you can view key statistics and
+          manage student assignments efficiently.
         </p>
       </div>
       {/* Stats Grid */}
@@ -58,7 +57,9 @@ export default function AdminDashboard() {
         <div className="p-6 border-b border-slate-200">
           <h2 className="text-xl font-semibold">Bulk Student Assignment</h2>
           <p className="text-slate-500 text-sm">
-            Select students and assign them to a supervisor in one click.
+            Use the matchmaker tool below to assign students to supervisors in
+            bulk. Select a supervisor and choose the students you want to
+            assign, then click "Assign" to complete the process.
           </p>
         </div>
         <BulkAssignTable />

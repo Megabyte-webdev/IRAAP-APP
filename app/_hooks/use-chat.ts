@@ -5,20 +5,60 @@ import { api } from "../_lib/api-client";
 
 export const useChat = () => {
   const getConversations = () =>
-    useQuery({
+    useInfiniteQuery({
       queryKey: ["conversations"],
-      queryFn: async () => {
-        const { data } = await api.get("/chat/conversations");
-        return data?.data || [];
+
+      queryFn: async ({ pageParam = 1 }) => {
+        const { data } = await api.get("/chat/conversations", {
+          params: {
+            page: pageParam,
+            limit: 20,
+          },
+        });
+
+        return data;
       },
+
+      initialPageParam: 1,
+
+      getNextPageParam: (lastPage) => {
+        const { pagination } = lastPage;
+
+        if (!pagination) return undefined;
+
+        return pagination.page < pagination.totalPages
+          ? pagination.page + 1
+          : undefined;
+      },
+
+      refetchOnMount: true,
     });
 
   const getChatableUsers = () =>
-    useQuery({
+    useInfiniteQuery({
       queryKey: ["chatUsers"],
-      queryFn: async () => {
-        const { data } = await api.get("/chat/users");
-        return data?.data || [];
+
+      queryFn: async ({ pageParam = 1 }) => {
+        const { data } = await api.get("/chat/users", {
+          params: {
+            page: pageParam,
+            limit: 20,
+          },
+        });
+
+        return data;
+      },
+
+      initialPageParam: 1,
+
+      getNextPageParam: (lastPage) => {
+        const { pagination } = lastPage;
+
+        if (!pagination) return undefined;
+
+        return pagination.page < pagination.totalPages
+          ? pagination.page + 1
+          : undefined;
       },
     });
 
@@ -35,20 +75,29 @@ export const useChat = () => {
   const getMessages = (userId: number) =>
     useInfiniteQuery({
       queryKey: ["messages", userId],
-      // v5 requires initialPageParam — this is the cursor for the first fetch
-      // null means "no cursor yet, fetch the latest 30 messages"
+
       initialPageParam: null as number | null,
+
       queryFn: async ({ pageParam }) => {
-        const params = new URLSearchParams({ limit: "30" });
-        if (pageParam) params.set("before", String(pageParam));
+        const params = new URLSearchParams({
+          limit: "30",
+        });
+
+        if (pageParam) {
+          params.set("before", String(pageParam));
+        }
+
         const { data } = await api.get(
           `/chat/messages/${userId}?${params.toString()}`,
         );
+
         return data;
       },
-      // nextCursor is null when there are no older pages left
-      getNextPageParam: (lastPage: any) =>
-        lastPage.pagination.nextCursor ?? null,
+
+      getNextPageParam: (lastPage: any) => {
+        return lastPage?.pagination?.nextCursor ?? undefined;
+      },
+
       enabled: !!userId,
     });
 

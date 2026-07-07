@@ -1,24 +1,22 @@
 "use client";
 
-import {
-  ArrowUp,
-  Plus,
-  Image,
-  Camera,
-  Video,
-  File,
-  Loader2,
-  X,
-} from "lucide-react";
+import { ArrowUp, Plus, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import MediaUploadModal from "./MediaUploadViewer";
 import ScrollToBottomBtn from "./ScrollToBottomBtn";
-import { User } from "@/app/_utils/types";
+import { ChatAction, User } from "@/app/_utils/types";
 import { useAuth } from "@/app/_context/AuthContext";
 import { useChatUtils } from "@/app/_context/ChatContext";
 import { websocket } from "@/app/_services/websocket";
 import { queryClient } from "@/app/_services/query-client";
-import { appendMessage } from "@/app/helpers/chat-cache";
+import {
+  appendMessage,
+  updateConversationLastMessage,
+  syncMessageWithCache,
+} from "@/app/helpers/chat-cache";
+import { FILE_ACCEPT_MAP, FileAcceptType } from "@/app/_utils/markup";
+import { chatFeatures } from "@/app/_utils/formatters";
+import ScheduleMeetingModal from "./ScheduleMeetingModal";
 
 interface SendMessageProps {
   selectedChat?: User;
@@ -26,16 +24,6 @@ interface SendMessageProps {
   onScrollToBottom?: any;
   unreadCount?: number;
 }
-
-type FileAcceptType = "image" | "video" | "file" | "camera" | "all";
-
-const FILE_ACCEPT_MAP: Record<FileAcceptType, string> = {
-  image: "image/*,image/heic,image/heif",
-  video: "video/mp4,video/quicktime,video/x-m4v,video/*",
-  file: ".pdf,.doc,.docx,.zip,.xls,.xlsx,.ppt,.pptx,.txt,.csv",
-  camera: "image/*;capture=camera",
-  all: "image/*,video/*,.pdf,.doc,.docx,.zip",
-};
 
 const SendMessage = ({
   selectedChat,
@@ -45,6 +33,7 @@ const SendMessage = ({
 }: SendMessageProps) => {
   const { authDetails } = useAuth();
   const { replyTo, setReplyTo } = useChatUtils();
+  const [showMeetingModal, setShowMeetingModal] = useState(false);
 
   const [isFocused, setIsFocused] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -70,7 +59,7 @@ const SendMessage = ({
     };
   }, []);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // Helpers
 
   const autoResize = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
@@ -91,7 +80,7 @@ const SendMessage = ({
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
-  // ── Typing ───────────────────────────────────────────────────────────────
+  // Typing
 
   const stopTyping = () => {
     if (!selectedChat || !isTypingRef.current) return;
@@ -118,85 +107,89 @@ const SendMessage = ({
     typingTimeoutRef.current = setTimeout(stopTyping, 1500);
   };
 
-  // ── Send ─────────────────────────────────────────────────────────────────
-
-  const handleSend = async () => {
+  // Send
+  const sendChatMessage = ({
+    type,
+    content,
+    metadata = {},
+  }: {
+    type: ChatAction;
+    content: string;
+    metadata?: any;
+  }) => {
     if (!selectedChat) return;
 
-    const trimmed = message.trim();
+    const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
 
-    // Text message
-    if (trimmed && pendingFiles.length === 0) {
-      const clientId = crypto.randomUUID();
-      const optimisticMessage = {
-        id: clientId,
-        conversationId: -1,
-        senderId: authDetails.user.id,
-        content: trimmed,
-        status: "PENDING",
-        createdAt: new Date().toISOString(),
-        sender: {
-          id: authDetails.user.id,
-          fullName: authDetails.user.fullName,
-          role: authDetails.user.role,
-        },
-        replyTo: replyTo
-          ? {
-              id: replyTo.id,
-              content: replyTo.content,
-              senderId: replyTo.senderId,
-              createdAt: replyTo.createdAt,
-            }
-          : null,
-      };
+    const optimisticMessage = {
+      id: clientId,
+      clientId,
+      conversationId: -1,
+      senderId: Number(authDetails.user.id),
+      receiverId: Number(selectedChat.id),
+      content,
+      metadata,
+      status: "PENDING",
+      createdAt: now,
+      replyToMessageId: replyTo?.id ?? null,
+      readAt: null,
+      msgType: type == "chat:send" ? "TEXT" : "CALL_INVITE",
+      meetingId: null,
+      meetingUrl: null,
+      sender: {
+        id: Number(authDetails.user.id),
+        fullName: authDetails.user.fullName,
+        role: authDetails.user.role,
+      },
+      replyTo: replyTo
+        ? {
+            id: replyTo.id,
+            content: replyTo.content,
+            senderId: replyTo.senderId,
+            createdAt: replyTo.createdAt,
+          }
+        : null,
+    };
 
-      queryClient.setQueryData(["messages", selectedChat.id], (old: any) =>
-        appendMessage(old, optimisticMessage),
-      );
+    queryClient.setQueryData(
+      ["messages", Number(selectedChat.id)],
+      (old: any) => appendMessage(old, optimisticMessage),
+    );
 
-      queryClient.setQueryData(["conversations"], (old: any) => {
-        if (!old) return old;
+    updateConversationLastMessage(
+      queryClient,
+      optimisticMessage,
+      Number(authDetails.user.id),
+    );
 
-        return old.map((c: any) =>
-          c.participant.id === selectedChat.id
-            ? {
-                ...c,
-                lastMessage: optimisticMessage,
-                updatedAt: optimisticMessage.createdAt,
-              }
-            : c,
-        );
-      });
+    websocket.emit("chat:send", {
+      recipientId: Number(selectedChat.id),
+      clientId,
+      msgType: type,
+      content,
+      metadata,
+      replyToMessageId: replyTo?.id ?? null,
+    });
 
-      websocket.emit("chat:send", {
-        recipientId: Number(selectedChat.id),
-        content: trimmed,
-        clientId,
-        replyToMessageId: replyTo?.id ?? null,
-      });
-      resetInput();
-      return;
-    }
-
-    // Media (future — upload then send)
-    if (pendingFiles.length > 0) {
-      const filesToSend = [...pendingFiles];
-      const caption = trimmed;
-
-      resetInput();
-      setIsSendingMedia(true);
-
-      try {
-        // TODO: upload files, then emit chat:send with mediaUrls
-        console.log("Media send not yet implemented", filesToSend, caption);
-      } finally {
-        setIsSendingMedia(false);
-      }
-    }
+    resetInput();
   };
 
-  // ── File handling ─────────────────────────────────────────────────────────
+  const handleSend = () => {
+    const trimmed = message.trim();
 
+    if (!trimmed) return;
+
+    sendChatMessage({
+      type: "chat:send",
+      content: trimmed,
+      metadata: {
+        msgType: "TEXT",
+      },
+    });
+  };
+
+  // File handling
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -221,12 +214,31 @@ const SendMessage = ({
     e.target.value = "";
   };
 
+  const handleScheduleMeeting = ({
+    scheduledAt,
+    duration,
+  }: {
+    scheduledAt: string;
+    duration: number;
+  }) => {
+    sendChatMessage({
+      type: "call:schedule",
+      content: "Scheduled a meeting",
+      metadata: {
+        msgType: "CALL_INVITE",
+        scheduledAt,
+        duration,
+        meetingTitle: `Meeting with ${selectedChat?.fullName}`,
+      },
+    });
+
+    setShowMeetingModal(false);
+  };
+
   const canSend = message.trim().length > 0 || pendingFiles.length > 0;
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
-    <div className="w-full fixed bottom-0 z-10 md:relative py-2 px-3 md:px-6 border-t border-b border-[#00000033] bg-white">
+    <div className="w-full fixed bottom-0 z-10 md:relative py-2 px-3 md:px-6 border-t border-b border-[#00000033] text-black bg-white">
       {pendingFiles.length > 0 && (
         <MediaUploadModal
           files={pendingFiles}
@@ -270,31 +282,18 @@ const SendMessage = ({
       {/* Attachment menu */}
       {showMenu && (
         <div className="absolute bottom-16 left-3 md:left-6 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-1 flex flex-col gap-1 z-50">
-          {[
-            {
-              type: "image" as const,
-              icon: <Image size={12} className="text-[#007BFC]" />,
-              label: "Add Photos",
-            },
-            {
-              type: "video" as const,
-              icon: <Video size={12} className="text-[#FF2E74]" />,
-              label: "Add Videos",
-            },
-            {
-              type: "file" as const,
-              icon: <File size={12} className="text-[#333]" />,
-              label: "Files",
-            },
-            {
-              type: "camera" as const,
-              icon: <Camera size={12} className="text-[#FF2E74]" />,
-              label: "Camera",
-            },
-          ].map(({ type, icon, label }) => (
+          {chatFeatures.map(({ type, icon, label }: any) => (
             <button
               key={type}
-              onClick={() => openFilePicker(type)}
+              onClick={() => {
+                if (type === "meeting") {
+                  setShowMenu(false);
+                  setShowMeetingModal(true);
+                  return;
+                }
+
+                openFilePicker(type);
+              }}
               className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#f5f0f0] rounded-lg text-[13px]"
             >
               {icon}
@@ -379,6 +378,12 @@ const SendMessage = ({
         onScrollToBottom={onScrollToBottom}
         isVisible={showScrollButton}
         unreadCount={unreadCount}
+      />
+
+      <ScheduleMeetingModal
+        open={showMeetingModal}
+        onClose={() => setShowMeetingModal(false)}
+        onSchedule={handleScheduleMeeting}
       />
     </div>
   );

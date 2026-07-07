@@ -31,3 +31,13 @@ export const getNextStatus = (task: Task, role: string) => {
 
   return null;
 };
+
+export type FileAcceptType = "image" | "video" | "file" | "camera" | "all";
+
+export const FILE_ACCEPT_MAP: Record<FileAcceptType, string> = {
+  image: "image/*,image/heic,image/heif",
+  video: "video/mp4,video/quicktime,video/x-m4v,video/*",
+  file: ".pdf,.doc,.docx,.zip,.xls,.xlsx,.ppt,.pptx,.txt,.csv",
+  camera: "image/*;capture=camera",
+  all: "image/*,video/*,.pdf,.doc,.docx,.zip",
+};

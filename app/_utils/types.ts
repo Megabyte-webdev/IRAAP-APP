@@ -17,10 +17,10 @@ export interface Project {
 }
 
 export interface Stats {
-  projects: Number;
-  projectReviews: Number;
-  approved: Number;
-  revisions: Number;
+  projects: number | string;
+  projectReviews: number | string;
+  approved: number | string;
+  revisions: number | string;
 }
 
 export interface ReviewTask {
@@ -119,3 +119,24 @@ export type SectionCompletion = {
   upload: boolean;
   keywords: boolean;
 };
+
+export type ChatAction = "chat:send" | "call:schedule";
+
+export interface Message {
+  id: number;
+  conversationId: number;
+  senderId: number;
+  content: string;
+  msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
+  metadata?: {
+    scheduledAt?: string;
+    duration?: number;
+    meetingId?: string;
+  };
+  status: "SENT" | "DELIVERED" | "READ";
+  readAt: string | null;
+  createdAt: string;
+  sender: { id: number; fullName: string; role: string };
+  mediaType?: string;
+  mediaUrls?: string[];
+}

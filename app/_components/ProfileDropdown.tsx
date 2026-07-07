@@ -17,7 +17,6 @@ const ProfileDropdown = ({ fullMode = false }) => {
 
   return (
     <div className="relative text-gray-700">
-      {/* Profile Trigger */}
       <div
         className="flex items-center gap-2 ml-2 font-medium cursor-pointer select-none"
         onClick={() => setIsOpen(!isOpen)}
@@ -55,14 +54,13 @@ const ProfileDropdown = ({ fullMode = false }) => {
       {/* Dropdown Menu */}
       {isOpen && (
         <>
-          {/* Overlay to close dropdown when clicking outside */}
           <div
-            className="fixed inset-0 z-999"
+            className="absolute inset-0 z-999"
             onClick={() => setIsOpen(false)}
           />
 
           <div className="absolute z-1000 right-0 mt-2 w-48 bg-white font-medium border border-gray-100 rounded-xl shadow-xl overflow-hidden">
-            <ul className="py-2 text-sm text-gray-700">
+            <ul className=" text-sm text-gray-700">
               {/* Dashboard Link - Based on Role */}
               <Link
                 href={`/${user?.role?.toLowerCase()}`}
@@ -80,6 +78,17 @@ const ProfileDropdown = ({ fullMode = false }) => {
               >
                 <FiUser size={18} className="text-gray-400" /> Profile
               </Link>
+              <hr className="my-1 border-gray-200" />
+
+              <li
+                className="px-4 py-2.5 flex items-center gap-2 text-red-500 hover:bg-red-100 cursor-pointer transition-colors"
+                onClick={() => {
+                  setIsOpen(false);
+                  logout.mutate();
+                }}
+              >
+                <FiLogOut size={18} /> Logout
+              </li>
             </ul>
           </div>
         </>

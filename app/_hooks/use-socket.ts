@@ -56,12 +56,10 @@ export const useSocketConnection = ({
   }, []);
 
   useEffect(() => {
-    // Incoming message from another user
     const onMessage = (event: any) => {
       const msg = event.payload;
       const qc = queryClientRef.current;
 
-      // Update cache
       appendToCache(qc, msg.senderId, msg);
 
       updateConversationLastMessage(qc, msg, authUserRef.current);
@@ -70,7 +68,6 @@ export const useSocketConnection = ({
 
       const isCurrentConversation = activeUserRef.current === msg.senderId;
 
-      // Show notification
       if (!isOwnMessage && !isCurrentConversation) {
         showChatNotification({
           senderId: msg.senderId,
