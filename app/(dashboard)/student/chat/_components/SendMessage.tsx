@@ -148,8 +148,6 @@ const SendMessage = ({
           }
         : null,
     };
-    console.log("optimistic", optimisticMessage);
-    console.log("Main msg", content);
 
     queryClient.setQueryData(
       ["messages", Number(selectedChat.id)],
@@ -225,7 +223,7 @@ const SendMessage = ({
         msgType: "CALL_INVITE",
         scheduledAt,
         duration,
-        meetingTitle: `Meeting with ${selectedChat?.fullName}`,
+        meetingTitle: `Meeting Scheduled`,
       },
     });
 

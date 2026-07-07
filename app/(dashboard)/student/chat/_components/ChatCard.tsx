@@ -25,6 +25,39 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
       return `Start a conversation`;
     }
 
+    const metadata = lastMessage.metadata;
+    if (metadata?.msgType === "CALL_INVITE") {
+      const scheduledDate = metadata.scheduledAt
+        ? new Date(metadata.scheduledAt)
+        : null;
+
+      return (
+        <span className="inline-flex items-center gap-1 truncate">
+          <LuVideo className="text-[13px]" />
+
+          <span className="truncate">
+            Meeting
+            {scheduledDate && (
+              <>
+                {" "}
+                •{" "}
+                {scheduledDate.toLocaleDateString([], {
+                  day: "numeric",
+                  month: "short",
+                })}{" "}
+                at{" "}
+                {scheduledDate.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </>
+            )}
+            {metadata.duration && ` • ${metadata.duration} min`}
+          </span>
+        </span>
+      );
+    }
+
     const caption = lastMessage.caption?.trim();
     const body = lastMessage.content?.trim();
     const mediaType = lastMessage.media_type;

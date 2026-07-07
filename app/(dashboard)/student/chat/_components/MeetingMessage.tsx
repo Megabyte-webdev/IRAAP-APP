@@ -227,11 +227,11 @@ const MeetingMessage = ({
               onClick={() => window.open(meetingUrl, "_blank")}
               className={`
       w-full mt-3 px-3 py-2 rounded-lg text-xs font-semibold
-      transition-all active:scale-95
+      transition-all active:scale-95 cursor-pointer
       ${
         isSender
           ? "bg-white/20 hover:bg-white/30 text-white"
-          : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          : "bg-primary hover:bg-[#07b2e6] text-white shadow-sm"
       }
     `}
             >

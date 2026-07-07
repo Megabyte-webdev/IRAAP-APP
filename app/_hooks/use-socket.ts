@@ -183,13 +183,13 @@ export const useSocketConnection = ({
     const onReadBulk = (event: any) => {
       const qc = queryClientRef.current;
       const messageIds: number[] = event.payload?.messageIds ?? [];
-      const senderId: number = event.payload?.senderId; // ✅ use this
+      const senderId: number = event.payload?.senderId;
 
       qc.setQueriesData({ queryKey: ["messages"] }, (old: any) =>
         updateMessageStatusBulk(old, messageIds, "READ"),
       );
 
-      qc.setQueryData(["conversations"], (old: any) => {
+      qc.setQueryData(["conversations"], (old: any[]) => {
         if (!old) return old;
         return old.map((convo: any) => {
           if (convo.participant?.id !== senderId) return convo;

@@ -1,10 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 
-/**
- * Normalizes an optimistic message to match server response structure
- * Server sends back: { id, type, status, metadata, senderId, createdAt, content, ... }
- * We need to ensure all fields are present
- */
 export function normalizeMessage(msg: any) {
   const metadata = msg.metadata ?? {};
 
@@ -50,9 +45,6 @@ export function normalizeMessage(msg: any) {
   };
 }
 
-/**
- * Create initial cache structure if it doesn't exist
- */
 export function initializeCacheIfNeeded(old: any) {
   if (!old) {
     return {
@@ -68,9 +60,6 @@ export function initializeCacheIfNeeded(old: any) {
   return old;
 }
 
-/**
- * Append a new message to the paginated messages cache
- */
 export const appendMessage = (old: any, message: any) => {
   // Initialize if cache doesn't exist
   if (!old) {
@@ -102,10 +91,6 @@ export const appendMessage = (old: any, message: any) => {
   };
 };
 
-/**
- * Replace a pending optimistic message with the actual server response
- * Matches by clientId or temporary id
- */
 export const replacePendingMessage = (old: any, payload: any) => {
   if (!old?.pages) return old;
 
@@ -126,18 +111,12 @@ export const replacePendingMessage = (old: any, payload: any) => {
   };
 };
 
-/**
- * Append message to cache (alternative signature)
- */
 export function appendToCache(qc: QueryClient, userId: number, msg: any) {
   qc.setQueryData(["messages", userId], (old: any) => {
     return appendMessage(old, msg);
   });
 }
 
-/**
- * Update a single message status (DELIVERED, READ)
- */
 export function updateMessageStatus(
   old: any,
   messageId: number | string,
@@ -156,9 +135,6 @@ export function updateMessageStatus(
   };
 }
 
-/**
- * Update multiple messages status (bulk read receipts)
- */
 export function updateMessageStatusBulk(
   old: any,
   messageIds: (number | string)[],
@@ -179,10 +155,6 @@ export function updateMessageStatusBulk(
   };
 }
 
-/**
- * Update conversations cache when a new message arrives
- * Matches participant by id and updates lastMessage + unreadCount
- */
 export const updateConversationLastMessage = (
   qc: QueryClient,
   msg: any,
