@@ -340,7 +340,21 @@ const MessageList = forwardRef<MessageListRef, Props>(
               <div className="space-y-2">
                 {group.messages.map((msg) => {
                   if (msg.msgType === "CALL_INVITE") {
-                    return <MeetingMessage key={msg.id} msg={msg} />;
+                    return (
+                      <MeetingMessage
+                        key={msg.id}
+                        msg={msg}
+                        selectedUser={selectedUser}
+                        onReply={() =>
+                          setReplyTo({
+                            id: String(msg.id),
+                            content: msg.content,
+                            senderId: msg.senderId,
+                            sender: msg.sender,
+                          })
+                        }
+                      />
+                    );
                   }
 
                   if (isMediaMessage(msg)) {

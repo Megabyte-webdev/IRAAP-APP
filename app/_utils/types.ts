@@ -139,4 +139,5 @@ export interface Message {
   sender: { id: number; fullName: string; role: string };
   mediaType?: string;
   mediaUrls?: string[];
+  replyTo?: any;
 }

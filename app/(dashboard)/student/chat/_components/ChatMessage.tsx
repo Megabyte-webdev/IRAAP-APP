@@ -53,7 +53,7 @@ const ChatMessage = ({
     }
   };
 
-  // ── Highlight on scroll-to ───────────────────────────────────────────────
+  // ── Highlight on scroll-to
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       if (e.detail?.messageId === msg.id) {

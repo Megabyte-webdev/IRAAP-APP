@@ -5,15 +5,21 @@ import { getMessageLayout, renderCheck } from "@/app/_utils/formatters";
 import { Video, Users, Calendar } from "lucide-react";
 import SwipeableMessage from "./SwipeableMessage";
 import { useAuth } from "@/app/_context/AuthContext";
-import { Message } from "@/app/_utils/types";
+import { Message, User } from "@/app/_utils/types";
 import { LuClock } from "react-icons/lu";
+import ReplyPreview from "./ReplyPreview";
 
 interface MeetingMessageProps {
   msg: Message;
   onReply?: () => void;
+  selectedUser?: User;
 }
 
-const MeetingMessage = ({ msg, onReply }: MeetingMessageProps) => {
+const MeetingMessage = ({
+  msg,
+  onReply,
+  selectedUser,
+}: MeetingMessageProps) => {
   const { authDetails } = useAuth();
   const isSender = Number(msg.senderId) === Number(authDetails?.user?.id);
   const styles = getMessageLayout(isSender);
@@ -51,6 +57,36 @@ const MeetingMessage = ({ msg, onReply }: MeetingMessageProps) => {
   const title = meetingData?.meetingTitle || "Meeting Scheduled";
   const meetingUrl = meetingData?.meetingUrl || "#";
   const participants = meetingData?.participants || 0;
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const joinOpensAt = scheduledDate
+    ? new Date(scheduledDate.getTime() - 5 * 60 * 1000)
+    : null;
+
+  const meetingEndsAt = scheduledDate
+    ? new Date(scheduledDate.getTime() + duration * 60 * 1000)
+    : null;
+
+  const joinClosesAt = meetingEndsAt
+    ? new Date(meetingEndsAt.getTime() + 15 * 60 * 1000)
+    : null;
+
+  const canJoin =
+    !!joinOpensAt &&
+    !!joinClosesAt &&
+    now >= joinOpensAt &&
+    now <= joinClosesAt;
+
+  const isUpcoming = !!joinOpensAt && now < joinOpensAt;
+  const isEnded = !!joinClosesAt && now > joinClosesAt;
 
   // Render status indicator
   const renderStatus = () => {
@@ -90,16 +126,28 @@ const MeetingMessage = ({ msg, onReply }: MeetingMessageProps) => {
         data-message-id={msg.id}
         className={`
           ${styles.bubble}
-          relative rounded-xl overflow-hidden text-sm
+          relative rounded-[10px] text-[13px]
           transition-colors duration-300
           ${isHighlighted ? "ring-2 ring-orange/60 bg-orange/10" : ""}
         `}
         style={{
           boxShadow: "0px 0px 1.5px 0px #00000040",
-          minWidth: "280px",
-          maxWidth: "360px",
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
+          whiteSpace: "pre-wrap",
+          padding: msg.replyTo ? "6px" : "10px",
+          borderTopLeftRadius: msg.replyTo && !isSender ? "0" : undefined,
+          borderTopRightRadius: msg.replyTo && isSender ? "0" : undefined,
         }}
       >
+        {msg.replyTo && (
+          <ReplyPreview
+            reply={msg.replyTo}
+            isSender={isSender}
+            selectedUser={selectedUser}
+            // onScrollToMessage={onScrollToMessage}
+          />
+        )}
         {/* Meeting Card Header */}
         <div
           className={`
@@ -108,10 +156,10 @@ const MeetingMessage = ({ msg, onReply }: MeetingMessageProps) => {
             ${isSender ? "border-blue-400" : "border-blue-200"}
           `}
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <Video
               size={16}
-              className={isSender ? "text-white" : "text-blue-600"}
+              className={`shrink-0 ${isSender ? "text-white" : "text-blue-600"}`}
             />
             <p
               className={`font-semibold text-sm ${
@@ -174,22 +222,50 @@ const MeetingMessage = ({ msg, onReply }: MeetingMessageProps) => {
           )}
 
           {/* Join Button */}
-          <button
-            onClick={() => {
-              window.open(meetingUrl, "_blank");
-            }}
-            className={`
-              w-full mt-3 px-3 py-2 rounded-lg text-xs font-semibold
-              transition-all active:scale-95
-              ${
-                isSender
-                  ? "bg-white/20 hover:bg-white/30 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-              }
-            `}
-          >
-            Join Meeting →
-          </button>
+          {canJoin ? (
+            <button
+              onClick={() => window.open(meetingUrl, "_blank")}
+              className={`
+      w-full mt-3 px-3 py-2 rounded-lg text-xs font-semibold
+      transition-all active:scale-95
+      ${
+        isSender
+          ? "bg-white/20 hover:bg-white/30 text-white"
+          : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+      }
+    `}
+            >
+              Join Meeting
+            </button>
+          ) : (
+            <div
+              className={`
+      w-full mt-3 rounded-lg px-3 py-2 text-center
+      ${isSender ? "bg-white/10 text-blue-100" : "bg-gray-100 text-gray-600"}
+    `}
+            >
+              {isUpcoming ? (
+                <>
+                  <p className="text-xs font-medium">
+                    Meeting hasn't started yet.
+                  </p>
+                  <p className="mt-1 text-[11px] opacity-80">
+                    You can join 5 minutes before the scheduled start time.
+                  </p>
+                </>
+              ) : isEnded ? (
+                <>
+                  <p className="text-xs font-medium">Meeting has ended.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-medium">
+                    Waiting for meeting availability...
+                  </p>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Timestamp & Status */}
