@@ -80,7 +80,7 @@ export const useChat = () => {
 
       queryFn: async ({ pageParam }) => {
         const params = new URLSearchParams({
-          limit: "30",
+          limit: "10",
         });
 
         if (pageParam) {

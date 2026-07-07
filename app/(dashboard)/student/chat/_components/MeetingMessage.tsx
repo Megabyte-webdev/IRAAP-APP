@@ -241,7 +241,7 @@ const MeetingMessage = ({
             <div
               className={`
       w-full mt-3 rounded-lg px-3 py-2 text-center
-      ${isSender ? "bg-white/10 text-blue-100" : "bg-gray-100 text-gray-600"}
+      ${isSender ? "bg-white/20 text-blue-100" : "bg-gray-200 text-gray-600"}
     `}
             >
               {isUpcoming ? (

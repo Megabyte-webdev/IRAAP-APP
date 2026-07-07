@@ -73,11 +73,16 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
               <h2 className="text-sm font-medium text-black">Start New Chat</h2>
 
               <p className="text-[13px] text-[#00000080]">
-                Search for contacts to start a conversation
+                {authDetails?.user?.role === "STUDENT"
+                  ? "Search for your supervisor or fellow students to start a conversation"
+                  : "Search for students or supervisors to start a conversation"}
               </p>
             </div>
 
-            <button onClick={onClose}>
+            <button
+              onClick={onClose}
+              className="hover:bg-gray-200 rounded-full p-2 cursor-pointer"
+            >
               <X className="size-5" />
             </button>
           </div>
@@ -107,6 +112,9 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                 {filteredUsers.map((user: any, index: number) => {
                   const isLast = index === filteredUsers.length - 1;
 
+                  const roleLabel =
+                    user.role === "SUPERVISOR" ? "Supervisor" : "Student";
+
                   return (
                     <div
                       key={user.id}
@@ -124,14 +132,28 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                         rounded="rounded-[10px] shrink-0"
                       />
 
-                      <div className="flex flex-col text-black">
-                        <span className="text-sm font-medium">
-                          {user.fullName}
-                        </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-black truncate">
+                            {user.fullName}
+                          </span>
 
-                        <span className="text-xs text-gray-400">
-                          {user.username && `@${user.username}`}
-                        </span>
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              user.role === "SUPERVISOR"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {roleLabel}
+                          </span>
+                        </div>
+
+                        {user.username && (
+                          <span className="text-xs text-gray-400">
+                            @{user.username}
+                          </span>
+                        )}
                       </div>
                     </div>
                   );

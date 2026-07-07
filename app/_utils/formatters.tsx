@@ -291,19 +291,19 @@ export const chatFeatures = [
     icon: <Image size={12} className="text-[#007BFC]" />,
     label: "Add Photos",
   },
-  {
-    type: "video" as const,
-    icon: <Video size={12} className="text-[#FF2E74]" />,
-    label: "Add Videos",
-  },
-  {
-    type: "file" as const,
-    icon: <File size={12} className="text-[#333]" />,
-    label: "Files",
-  },
-  {
-    type: "camera" as const,
-    icon: <Camera size={12} className="text-[#FF2E74]" />,
-    label: "Camera",
-  },
+  // {
+  //   type: "video" as const,
+  //   icon: <Video size={12} className="text-[#FF2E74]" />,
+  //   label: "Add Videos",
+  // },
+  // {
+  //   type: "file" as const,
+  //   icon: <File size={12} className="text-[#333]" />,
+  //   label: "Files",
+  // },
+  // {
+  //   type: "camera" as const,
+  //   icon: <Camera size={12} className="text-[#FF2E74]" />,
+  //   label: "Camera",
+  // },
 ];

@@ -244,7 +244,9 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100">
           <h4 className="font-bold text-rose-900 mb-1">Deadlines</h4>
-          <p className="font-semibold text-rose-700">Draft 3 Submission</p>
+          <p className="font-semibold text-rose-700 text-sm">
+            Draft 3 Submission
+          </p>
           <p className="text-sm text-rose-600">April 22</p>
         </div>
 
@@ -252,20 +254,23 @@ export default function StudentDashboard() {
           <h4 className="font-bold text-emerald-900 mb-2">
             Assigned Supervisor
           </h4>
-          <div className="flex items-center gap-2 text-emerald-700 font-medium">
+          <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm">
             <User size={18} />
             {user?.supervisorName || "Not assigned"}
           </div>
-          <button className="text-sm text-emerald-600 mt-2 flex items-center gap-1 hover:underline font-medium">
+          <Link
+            href={`student/chat/${user.supervisorId}`}
+            className="text-sm text-emerald-600 mt-2 flex items-center gap-1 hover:underline font-medium"
+          >
             <MessageSquare size={14} />
             Send Message →
-          </button>
+          </Link>
         </div>
 
         <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100">
           <h4 className="font-bold text-amber-900 mb-2">University Guides</h4>
           <div className="space-y-1 text-sm text-amber-700 underline">
-            <p className="cursor-pointer hover:text-amber-900">
+            <p className="cursor-pointer hover:text-amber-900 text-sm">
               Format Guidelines.pdf
             </p>
             <p className="cursor-pointer hover:text-amber-900">

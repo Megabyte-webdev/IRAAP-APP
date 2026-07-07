@@ -279,24 +279,29 @@ const SendMessage = ({
       {/* Attachment menu */}
       {showMenu && (
         <div className="absolute bottom-16 left-3 md:left-6 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-1 flex flex-col gap-1 z-50">
-          {chatFeatures.map(({ type, icon, label }: any) => (
-            <button
-              key={type}
-              onClick={() => {
-                if (type === "meeting") {
-                  setShowMenu(false);
-                  setShowMeetingModal(true);
-                  return;
-                }
+          {chatFeatures
+            .filter(
+              ({ type }) =>
+                type !== "meeting" || authDetails?.user?.role === "SUPERVISOR",
+            )
+            .map(({ type, icon, label }: any) => (
+              <button
+                key={type}
+                onClick={() => {
+                  if (type === "meeting") {
+                    setShowMenu(false);
+                    setShowMeetingModal(true);
+                    return;
+                  }
 
-                openFilePicker(type);
-              }}
-              className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#f5f0f0] rounded-lg text-[13px]"
-            >
-              {icon}
-              <span>{label}</span>
-            </button>
-          ))}
+                  openFilePicker(type);
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#f5f0f0] rounded-lg text-[13px]"
+              >
+                {icon}
+                <span>{label}</span>
+              </button>
+            ))}
         </div>
       )}
 
