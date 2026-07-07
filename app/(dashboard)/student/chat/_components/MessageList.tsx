@@ -339,7 +339,7 @@ const MessageList = forwardRef<MessageListRef, Props>(
 
               <div className="space-y-2">
                 {group.messages.map((msg) => {
-                  if (msg.msgType === "CALL_INVITE") {
+                  if (msg.metadata?.msgType === "CALL_INVITE") {
                     return (
                       <MeetingMessage
                         key={msg.id}
