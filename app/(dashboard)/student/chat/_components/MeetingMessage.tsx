@@ -56,7 +56,7 @@ const MeetingMessage = ({
   const duration = meetingData?.duration || 0;
   const title = meetingData?.meetingTitle || "Meeting Scheduled";
   const meetingUrl = meetingData?.meetingUrl || "#";
-  const participants = meetingData?.participants || 0;
+  const participants = meetingData?.participants || 2;
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
