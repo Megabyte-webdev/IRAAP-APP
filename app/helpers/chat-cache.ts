@@ -6,27 +6,46 @@ import { QueryClient } from "@tanstack/react-query";
  * We need to ensure all fields are present
  */
 export function normalizeMessage(msg: any) {
+  const metadata = msg.metadata ?? {};
+
   return {
     id: msg.id,
     clientId: msg.clientId ?? null,
     conversationId: msg.conversationId ?? -1,
+
     senderId: msg.senderId,
-    receiverId: msg.receiverId,
+    receiverId: msg.receiverId ?? null,
+
     content: msg.content,
-    type: msg.type ?? "TEXT",
-    messageType: msg.messageType ?? msg.type,
-    metadata: msg.metadata ?? {},
+
+    msgType: metadata.msgType ?? msg.msgType ?? msg.type ?? "TEXT",
+
+    metadata: {
+      msgType: metadata.msgType ?? msg.msgType ?? msg.type ?? "TEXT",
+
+      meetingId:
+        metadata.meetingId ?? msg.meetingId ?? msg.externalMeetingId ?? null,
+
+      meetingUrl:
+        metadata.meetingUrl ?? msg.meetingUrl ?? msg.externalMeetingUrl ?? null,
+
+      scheduledAt: metadata.scheduledAt ?? null,
+      duration: metadata.duration ?? null,
+      meetingTitle: metadata.meetingTitle ?? null,
+    },
+
     status: msg.status ?? "PENDING",
     createdAt: msg.createdAt,
+
     replyToMessageId: msg.replyToMessageId ?? null,
     readAt: msg.readAt ?? null,
-    externalMeetingId: msg.externalMeetingId ?? null,
-    externalMeetingUrl: msg.externalMeetingUrl ?? null,
+
     sender: msg.sender ?? {
       id: msg.senderId,
       fullName: "Unknown",
       role: "STUDENT",
     },
+
     replyTo: msg.replyTo ?? null,
   };
 }
