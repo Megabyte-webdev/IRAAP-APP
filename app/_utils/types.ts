@@ -117,7 +117,8 @@ export interface ChatUser {
 export type SectionCompletion = {
   details: boolean;
   upload: boolean;
-  keywords: boolean;
+  keywords?: boolean;
+  abstract?: boolean;
 };
 
 export interface Message {
@@ -140,3 +141,15 @@ export interface Message {
   mediaUrls?: string[];
   replyTo?: any;
 }
+
+export interface Publication {
+  id: string;
+  title: string;
+  abstract: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  fileUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type FilterStatus = "ALL" | "PENDING" | "APPROVED" | "REJECTED";

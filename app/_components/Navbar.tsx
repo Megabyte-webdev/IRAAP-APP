@@ -12,7 +12,7 @@ export default function Navbar() {
   const { authDetails } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
+    <header className="w-full fixed top-0 z-999 border-b bg-background/80 backdrop-blur">
       <div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
         <Link href="/">
           <Image

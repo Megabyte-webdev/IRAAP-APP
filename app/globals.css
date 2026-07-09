@@ -33,6 +33,8 @@
 
   /* Custom Grid Utility */
   --grid-template-columns-responsive: repeat(auto-fill, minmax(200px, 1fr));
+
+  --grid-template-columns-card: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 /* Ensure all fixed items are definitely on top */

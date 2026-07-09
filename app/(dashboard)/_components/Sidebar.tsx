@@ -16,6 +16,7 @@ import {
   Users,
   GraduationCap,
   MessageSquare,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
@@ -67,6 +68,12 @@ const navItems: NavItem[] = [
     href: "/supervisors",
     roles: ["ADMIN"],
     icon: GraduationCap,
+  },
+  {
+    name: "Publications",
+    href: "/publications",
+    roles: ["STUDENT", "ADMIN"],
+    icon: BookOpen,
   },
   { name: "Archive Search", href: "/repository", roles: "ALL", icon: Search },
 ];

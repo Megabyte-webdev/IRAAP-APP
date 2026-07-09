@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
 import { extractErrorMessage } from "../_lib/utils";
 import { ReviewTask } from "../_utils/types";
@@ -18,7 +23,7 @@ export const useProject = () => {
         title: "Submission Received",
         message: "Your project has been submitted and is now awaiting review.",
       });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["my-projects"] });
     },
     onError: (error: any) => {
       onFailure({
@@ -46,7 +51,7 @@ export const useProject = () => {
         title: "Changes Saved",
         message: "Your project details have been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["my-projects"] });
     },
     onError: (error: any) => {
       onFailure({
@@ -60,7 +65,7 @@ export const useProject = () => {
 
   const getProjects: any = () =>
     useQuery({
-      queryKey: ["projects"],
+      queryKey: ["my-projects"],
       queryFn: async () => {
         const { data } = await api.get("/projects/submissions");
         return data?.projects || [];
@@ -149,10 +154,49 @@ export const useProject = () => {
     },
   });
 
+  const getAllProjects = (
+    filters: {
+      status?: string;
+      categoryId?: number;
+      limit?: number;
+      title?: string;
+      year?: number;
+      researchArea?: string;
+      methodology?: string;
+      researchType?: string;
+      keyword?: string | string[]; // Map frontend selected tags here
+    } = {},
+  ) => {
+    const { limit = 20, status = "APPROVED", ...restFilters } = filters;
+
+    return useInfiniteQuery({
+      queryKey: ["all-projects", status, limit, restFilters],
+      initialPageParam: 1,
+      queryFn: async ({ pageParam }) => {
+        const { data } = await api.get("/projects", {
+          params: {
+            page: pageParam,
+            limit,
+            status,
+            ...restFilters,
+          },
+        });
+        return data;
+      },
+      getNextPageParam: (lastPage) => {
+        const { page, totalPages } = lastPage.pagination;
+        return page < totalPages ? page + 1 : undefined;
+      },
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+    });
+  };
+
   return {
     submitProject,
     updateProject,
     getProjects,
+    getAllProjects,
     getProjectVersionHistory,
     getProjectById,
     getProjectReviews,

@@ -18,21 +18,17 @@ export default function AdminArchiveContent({ initialParams }: any) {
   const pathname = usePathname();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 1. Local input state (for immediate typing feedback)
-  const [filters, setFilters] = useState({
-    title: initialParams.get("title") || "",
-    year: initialParams.get("year") || "",
-    researchArea: initialParams.get("researchArea") || "",
-    methodology: initialParams.get("methodology") || "",
-  });
+  const searchFilters = {
+    title: initialParams?.title || "",
+    year: initialParams?.year || "",
+    researchArea: initialParams?.researchArea || "",
+    methodology: initialParams?.methodology || "",
+  };
+
+  const [filters, setFilters] = useState(searchFilters);
 
   const { getSearchResults } = useSearch();
-  const { data: projects = [], isLoading } = getSearchResults({
-    title: initialParams.get("title") || "",
-    year: initialParams.get("year") || "",
-    researchArea: initialParams.get("researchArea") || "",
-    methodology: initialParams.get("methodology") || "",
-  });
+  const { data: projects = [], isLoading } = getSearchResults(searchFilters);
 
   const debouncedUpdateUrl = useMemo(
     () =>

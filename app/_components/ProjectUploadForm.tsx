@@ -31,6 +31,9 @@ export default function ProjectForm({
     initialData?.methodology || "",
   );
   const [category, setCategory] = useState(initialData?.categoryId || "");
+  const [researchType, setResearchType] = useState(
+    initialData?.researchType || "",
+  );
   const [file, setFile] = useState<File | null>(null);
   const [keywords, setKeywords] = useState<string[]>(
     initialData?.keywords || [],
@@ -50,7 +53,7 @@ export default function ProjectForm({
 
   useEffect(() => {
     const state = {
-      details: !!(title && abstract && methodology && category),
+      details: !!(title && abstract && methodology && category && researchType),
       upload: !!(file || isEditing),
       keywords: !!(keywords.length > 0 || researchArea),
     };
@@ -61,6 +64,7 @@ export default function ProjectForm({
     abstract,
     methodology,
     category,
+    researchType,
     file,
     keywords,
     researchArea,
@@ -73,6 +77,7 @@ export default function ProjectForm({
       setAbstract(initialData.abstract || "");
       setMethodology(initialData.methodology || "");
       setCategory(initialData.categoryId || "");
+      setResearchType(initialData.researchType || "");
       setKeywords(initialData.keywords || []);
       setResearchArea(initialData.researchArea || "");
     }
@@ -100,9 +105,8 @@ export default function ProjectForm({
   };
 
   const addKeyword = (keyword: string) => {
-    // split by comma or space
     const parts = keyword
-      .split(/[,]+/) // split on any space or comma
+      .split(/[,]+/)
       .map((k) => k.trim())
       .filter(Boolean);
 
@@ -133,13 +137,13 @@ export default function ProjectForm({
     }
   };
 
-  // ---------------- SUBMIT ----------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (
       !title ||
       !abstract ||
       !category ||
+      !researchType ||
       !methodology ||
       (!file && !isEditing)
     ) {
@@ -152,7 +156,7 @@ export default function ProjectForm({
     formData.append("abstract", abstract);
     formData.append("methodology", methodology);
     formData.append("categoryId", category);
-
+    formData.append("researchType", researchType);
     formData.append("researchArea", researchArea);
     formData.append(
       "submissionYear",
@@ -174,6 +178,7 @@ export default function ProjectForm({
             setAbstract("");
             setMethodology("");
             setCategory("");
+            setResearchType("");
             setFile(null);
             setKeywords([]);
             setCurrentKeyword("");
@@ -240,25 +245,50 @@ export default function ProjectForm({
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 uppercase">
-              Category <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-indigo-400 transition appearance-none"
-              required
-            >
-              <option value="" disabled>
-                Select a category
-              </option>
-              {categories?.map((cat: { id: string; name: string }) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 uppercase">
+                Category <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-indigo-400 transition appearance-none"
+                required
+              >
+                <option value="" disabled>
+                  Select a category
                 </option>
-              ))}
-            </select>
+                {categories?.map((cat: { id: string; name: string }) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 uppercase">
+                Research Type <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={researchType}
+                onChange={(e) => setResearchType(e.target.value)}
+                className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-indigo-400 transition appearance-none"
+                required
+              >
+                <option value="" disabled>
+                  Select a type
+                </option>
+                <option value="BSC_PROJECT">B.Sc Project</option>
+                <option value="MSC_THESIS">M.Sc Thesis</option>
+                <option value="PHD_DISSERTATION">Ph.D Dissertation</option>
+                <option value="JOURNAL">Journal</option>
+                <option value="INDEPENDENT_RESEARCH">
+                  Independent Research
+                </option>
+              </select>
+            </div>
           </div>
         </div>
       </section>
@@ -267,7 +297,7 @@ export default function ProjectForm({
       <section className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
           <FileUp size={14} className="text-primary" />
-          <h2 className="text-xs font-bold uppercasest text-slate-600">
+          <h2 className="text-xs font-bold uppercase text-slate-600">
             Document upload
           </h2>
         </div>
@@ -319,7 +349,7 @@ export default function ProjectForm({
       <section className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
           <Tag size={14} className="text-primary" />
-          <h2 className="text-xs font-bold uppercasest text-slate-600">
+          <h2 className="text-xs font-bold uppercase text-slate-600">
             Keywords & research area
           </h2>
         </div>
