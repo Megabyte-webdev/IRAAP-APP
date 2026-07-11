@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./_context/Providers";
-import { ToastContainer } from "react-toastify";
 import { generatePageMetadata } from "./_lib/metadata";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -20,14 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
-        <Providers>
-          {children}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-          />
-        </Providers>
+        <Providers>{children}</Providers>
 
         {/* ALL MODALS WILL RENDER HERE, OUTSIDE THE DASHBOARD FLOW */}
         <div id="modal-root" className="relative z-9999" />

@@ -24,10 +24,10 @@ export default function UploadPage() {
   const completedCount = Object.values(completion).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-10 lg:px-12">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 px-4 py-10 lg:px-12 text-slate-900 dark:text-slate-100 transition-colors">
       <div className="max-w-5xl mx-auto">
         {/* Page header */}
-        <div className="mb-10 border-b border-slate-200 pb-8">
+        <div className="mb-10 border-b border-slate-200 dark:border-slate-800 pb-8">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-1.5 rounded-lg bg-primary">
               <FolderOpen size={14} className="text-white" />
@@ -36,10 +36,10 @@ export default function UploadPage() {
               IRAP Repository
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Submit research project
           </h1>
-          <p className="mt-1.5 text-sm text-slate-500 max-w-lg">
+          <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 max-w-lg">
             Complete all sections below to publish your project to the
             repository. Fields marked * are required.
           </p>
@@ -48,10 +48,10 @@ export default function UploadPage() {
         {/* Two-column layout */}
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Mobile progress */}
-          <div className="lg:hidden sticky top-0 z-20 bg-[#F8FAFC] pb-4">
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div className="lg:hidden sticky top-0 z-20 bg-[#F8FAFC] dark:bg-slate-900 pb-4">
+            <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                   Progress
                 </span>
                 <span className="text-xs font-bold text-primary">
@@ -59,7 +59,7 @@ export default function UploadPage() {
                 </span>
               </div>
 
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-4">
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4">
                 <div
                   className="h-full bg-primary transition-all duration-500"
                   style={{
@@ -76,10 +76,10 @@ export default function UploadPage() {
                     <div
                       key={key}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-full whitespace-nowrap text-xs",
+                        "flex items-center gap-2 px-3 py-2 rounded-full whitespace-nowrap text-xs transition-colors",
                         done
-                          ? "bg-indigo-100 text-primary"
-                          : "bg-slate-100 text-slate-500",
+                          ? "bg-indigo-100 dark:bg-indigo-950/50 text-primary dark:text-indigo-300"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400",
                       )}
                     >
                       {done ? <Check size={12} /> : <Icon size={12} />}
@@ -95,7 +95,7 @@ export default function UploadPage() {
           <aside className="hidden lg:block lg:w-52 shrink-0">
             <div className="lg:sticky lg:top-8">
               <div className="flex items-center justify-between mb-4 px-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                   Sections
                 </p>
                 <span className="text-[10px] font-bold text-primary">
@@ -104,7 +104,7 @@ export default function UploadPage() {
               </div>
 
               {/* Progress track */}
-              <div className="h-1 w-full bg-slate-100 rounded-full mb-5 overflow-hidden">
+              <div className="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{
@@ -121,13 +121,17 @@ export default function UploadPage() {
                       key={key}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                        done ? "bg-indigo-50" : "hover:bg-slate-50",
+                        done
+                          ? "bg-indigo-50 dark:bg-indigo-950/30"
+                          : "hover:bg-slate-50 dark:hover:bg-slate-800/50",
                       )}
                     >
                       <div
                         className={cn(
                           "w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all duration-200",
-                          done ? "bg-primary" : "bg-slate-100",
+                          done
+                            ? "bg-primary"
+                            : "bg-slate-100 dark:bg-slate-800",
                         )}
                       >
                         {done ? (
@@ -137,13 +141,18 @@ export default function UploadPage() {
                             strokeWidth={3}
                           />
                         ) : (
-                          <Icon size={12} className="text-slate-400" />
+                          <Icon
+                            size={12}
+                            className="text-slate-400 dark:text-slate-500"
+                          />
                         )}
                       </div>
                       <span
                         className={cn(
                           "text-xs font-medium transition-colors duration-200",
-                          done ? "text-primary" : "text-slate-500",
+                          done
+                            ? "text-primary dark:text-indigo-300"
+                            : "text-slate-500 dark:text-slate-400",
                         )}
                       >
                         {label}

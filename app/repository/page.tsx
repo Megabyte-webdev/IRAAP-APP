@@ -1,6 +1,4 @@
 import { Suspense } from "react";
-import RepositoryList from "../_components/RepositoryList";
-import Navbar from "../_components/Navbar";
 import Footer from "../_components/Footer";
 import { generatePageMetadata } from "../_lib/metadata";
 
@@ -21,8 +19,6 @@ export default function RepositoryPage({ searchParams }: any) {
         </div>
       }
     >
-      <Navbar />
-      <RepositoryList searchParams={searchParams} />
       <Footer />
     </Suspense>
   );

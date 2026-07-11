@@ -86,7 +86,7 @@ export function Sidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
-  const { authDetails, isLoading: authLoading, logout } = useAuth();
+  const { authDetails, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = authDetails?.user;
@@ -110,7 +110,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 h-full flex flex-col bg-white text-white transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-tertiary ",
+          "fixed inset-y-0 left-0 z-50 h-full flex flex-col bg-white dark:bg-[#1E293B] text-slate-900 dark:text-slate-100 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-slate-200 dark:border-slate-800",
           isOpen
             ? "translate-x-0 max-w-64 w-full shadow-lg"
             : "-translate-x-full",
@@ -121,15 +121,15 @@ export function Sidebar({
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "absolute -right-4 top-20 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-tertiary bg-white text-gray-700 transition-all lg:flex",
-            "hover:scale-110 active:scale-95 shadow-sm",
+            "absolute -right-4 top-20 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all lg:flex",
+            "hover:scale-110 active:scale-95 shadow-sm cursor-pointer",
           )}
         >
-          {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
 
-        {/* Header */}
-        <div className="flex h-18 items-center  border-b border-tertiary overflow-hidden">
+        {/* Header Branding */}
+        <div className="flex h-18 items-center border-b border-slate-200 dark:border-slate-800 overflow-hidden">
           <div
             className={cn(
               "w-full transition-opacity duration-300 flex justify-center items-center px-6",
@@ -137,23 +137,23 @@ export function Sidebar({
             )}
           >
             <Image
-              alt="IRAP"
+              alt="IRAP Logo"
               src="/irap-logo.png"
               width={150}
               height={150}
-              className="h-14 w-auto"
+              className="h-10 w-auto opacity-90 transition-all"
             />
           </div>
           <button
             onClick={onClose}
-            className="ml-auto mr-4 lg:hidden text-red-500 cursor-pointer"
+            className="ml-auto mr-4 lg:hidden text-red-500 hover:text-red-600 cursor-pointer p-1"
           >
             <X size={24} />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1.5 p-3 pt-7 pr-5 overflow-y-auto overflow-x-hidden">
+        {/* Navigation Items Container */}
+        <nav className="flex-1 space-y-1 p-3 pt-6 overflow-y-auto overflow-x-hidden">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const fullHref = `${rolePrefix}${item.href}`;
@@ -170,14 +170,16 @@ export function Sidebar({
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
                   isActive
                     ? "bg-primary text-white"
-                    : "text-gray-700 hover:bg-primary/30",
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60",
                 )}
               >
                 <Icon
                   size={20}
                   className={cn(
-                    "shrink-0",
-                    isActive ? "text-white" : "text-gray-700",
+                    "shrink-0 transition-colors",
+                    isActive
+                      ? "text-white"
+                      : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200",
                   )}
                 />
                 <span
@@ -195,14 +197,14 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="mt-auto border-t border-primary/50 p-4">
+        {/* Bottom Profile Information & Footer Controls */}
+        <div className="mt-auto border-t border-slate-200 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/20">
           {!isCollapsed && (
             <div className="mb-4 px-2 overflow-hidden transition-all duration-300">
-              <p className="truncate text-sm font-semibold text-white">
+              <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {user?.fullName}
               </p>
-              <p className="text-[10px] text-blue-500 uppercase font-bold">
+              <p className="text-[10px] text-primary uppercase font-bold tracking-wider mt-0.5">
                 {user?.role}
               </p>
             </div>
@@ -211,7 +213,7 @@ export function Sidebar({
           <button
             onClick={logout}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-950/20 group",
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/20 group cursor-pointer",
               isCollapsed && "lg:justify-center lg:px-0",
             )}
           >

@@ -1,6 +1,5 @@
 "use client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./AuthContext";
 import { ThemeProvider } from "next-themes";
 import { ChatProvider } from "./ChatContext";
@@ -13,8 +12,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
+      storageKey="iraap-theme"
       disableTransitionOnChange
     >
       <AuthProvider>
@@ -22,7 +22,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <NotificationProvider>
             <QueryClientProvider client={queryClient}>
               <SocketConnect>{children}</SocketConnect>
-
               <ToastContainer
                 position="top-right"
                 autoClose={5000}

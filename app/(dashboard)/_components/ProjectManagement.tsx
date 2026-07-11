@@ -17,7 +17,7 @@ import ActivityFeed from "@/app/(dashboard)/_components/ActivityFeed";
 import { useAuth } from "@/app/_context/AuthContext";
 
 const ProjectManagement = () => {
-  const { projectId } = useParams();
+  const { projectId }: any = useParams();
   const searchParams = useSearchParams();
   const activeTaskId = searchParams.get("task");
   const { authDetails } = useAuth();
@@ -50,18 +50,20 @@ const ProjectManagement = () => {
 
   if (isProjectLoading)
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
+      <div className="flex h-screen items-center justify-center bg-white dark:bg-slate-950 transition-colors">
         <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
 
   if (!project)
     return (
-      <div className="p-20 text-center text-slate-500">Project Not Found</div>
+      <div className="p-20 text-center text-slate-500 dark:text-slate-400">
+        Project Not Found
+      </div>
     );
 
   return (
-    <div className="flex h-[calc(100dvh-80px)] w-full bg-[#F8FAFC]  text-slate-900 selection:bg-primary/50 lg:pl-4 overflow-hidden">
+    <div className="flex h-[calc(100dvh-80px)] w-full bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-slate-100 selection:bg-primary/50 lg:pl-4 overflow-hidden transition-colors">
       {/* MOBILE OVERLAY */}
       {isMobileMenuOpen && (
         <div
@@ -73,7 +75,7 @@ const ProjectManagement = () => {
       {/* LEFT SIDEBAR (COLLAPSIBLE) */}
       <aside
         className={`
-        fixed inset-y-0 left-0 lg:z-auto w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 lg:z-auto w-72 bg-white dark:bg-[#1E293B] border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out
         lg:relative lg:translate-x-0
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}
@@ -81,7 +83,7 @@ const ProjectManagement = () => {
         <div className="lg:hidden absolute right-4 top-4 overflow-y-auto">
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 bg-slate-100 rounded-full"
+            className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-700 dark:text-slate-300"
           >
             <X size={16} />
           </button>
@@ -90,12 +92,12 @@ const ProjectManagement = () => {
       </aside>
 
       {/* MAIN WORKSPACE */}
-      <main className="sticky top-0 flex flex-1 flex-col min-w-0 bg-[#F1F5F9]/50 overflow-y-auto">
+      <main className="sticky top-0 flex flex-1 flex-col min-w-0 bg-[#F1F5F9]/50 dark:bg-slate-950/20 overflow-y-auto">
         {/* Header */}
-        <header className="sticky top-0 z-20 h-14 border-b border-slate-200 bg-white flex items-center justify-between px-4 lg:px-8 shrink-0">
+        <header className="sticky top-0 z-20 h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between px-4 lg:px-8 shrink-0 transition-colors">
           <div className="flex items-center gap-3">
             <button
-              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <ClipboardList size={20} />
@@ -104,18 +106,18 @@ const ProjectManagement = () => {
               <div className="hidden md:block p-1.5 bg-primary rounded-lg text-white">
                 <LayoutDashboard size={16} />
               </div>
-              <h1 className="text-sm font-bold text-slate-800 line-clamp-1">
+              <h1 className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
                 {project.title}
               </h1>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 border border-primary/50 rounded text-[10px] font-bold text-primary uppercase tracking-tighter">
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 border border-primary/50 rounded text-[10px] font-bold text-primary dark:text-indigo-400 uppercase tracking-tighter">
               <ShieldCheck size={12} /> {role}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
               onClick={() => setIsActivityOpen(!isActivityOpen)}
             >
               <Activity size={18} />
@@ -124,11 +126,11 @@ const ProjectManagement = () => {
         </header>
 
         {/* Board Area */}
-        <div className="flex-1 p-4 lg:p-8 ">
+        <div className="flex-1 p-4 lg:p-8">
           <ProjectTaskBoard
             tasks={allTasks}
             loading={isReviewLoading}
-            projectId={project.id}
+            projectId={projectId}
             reviews={reviews}
             activeTaskId={activeTaskId}
           />
@@ -138,19 +140,18 @@ const ProjectManagement = () => {
       {/* RIGHT ACTIVITY FEED (DRAWER ON MOBILE) */}
       <aside
         className={`
-    fixed inset-y-0 right-0 z-70 w-80 bg-white border-l border-slate-200 
-    transform transition-transform duration-300
-    flex flex-col                          
-    ${isActivityOpen ? "translate-x-0" : "translate-x-full"}
-  `}
+        fixed inset-y-0 right-0 z-70 w-80 bg-white dark:bg-[#1E293B] border-l border-slate-200 dark:border-slate-800 
+        transform transition-transform duration-300 flex flex-col                      
+        ${isActivityOpen ? "translate-x-0" : "translate-x-full"}
+      `}
       >
         {/* Fixed header */}
-        <div className="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-slate-100">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+        <div className="h-14 shrink-0 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Updates
           </h3>
           <button
-            className="p-1 hover:bg-slate-100 rounded"
+            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-500 dark:text-slate-400"
             onClick={() => setIsActivityOpen(false)}
           >
             <X size={16} />
