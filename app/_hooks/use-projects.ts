@@ -80,7 +80,7 @@ export const useProject = () => {
         return data?.data || []; // now includes tasks
       },
       enabled: !!projectId,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: "always",
     });
 
   const getProjectVersionHistory = (projectId: number) =>
@@ -98,10 +98,10 @@ export const useProject = () => {
       queryKey: ["project", id],
       queryFn: async () => {
         const { data } = await api.get(`/projects/${id}`);
-        return data?.project || null;
+        return data?.project?.[0] || null;
       },
       enabled: !!id,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: "always",
     });
 
   const submitRevisionForReview = useMutation({
@@ -127,8 +127,8 @@ export const useProject = () => {
     },
 
     onSuccess: (data) => {
-      const reviewId = data?.version?.linkedReviewId;
-      const projectId = data?.version?.projectId;
+      const reviewId = data?.revisionVersion?.linkedReviewId;
+      const projectId = data?.projectId;
 
       queryClient.setQueryData(["project-reviews", projectId], (old: any) => {
         if (!old?.data) return old;
@@ -139,7 +139,7 @@ export const useProject = () => {
             review.id === reviewId
               ? {
                   ...review,
-                  revisionSubmitted: true,
+                  revisionSubmitted: data?.revisionSubmitted || true,
                   ...data,
                 }
               : review,
@@ -164,7 +164,7 @@ export const useProject = () => {
       researchArea?: string;
       methodology?: string;
       researchType?: string;
-      keyword?: string | string[]; // Map frontend selected tags here
+      keyword?: string | string[];
     } = {},
   ) => {
     const { limit = 20, status = "APPROVED", ...restFilters } = filters;
@@ -192,14 +192,52 @@ export const useProject = () => {
     });
   };
 
+  const releaseProject = useMutation({
+    mutationFn: async (projectId: number) => {
+      const { data } = await api.get(`/projects/${projectId}/release`);
+      return data;
+    },
+    onSuccess: (_, projectId) => {
+      queryClient.setQueryData(["project", projectId], (oldProject: any) => {
+        if (!oldProject) return oldProject;
+
+        return {
+          ...oldProject,
+          isSignaledForPublication: true,
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    },
+  });
+
+  const publishProject = useMutation({
+    mutationFn: async (projectId: number) => {
+      const response = await api.post(`/projects/${projectId}/publish`);
+
+      return response.data;
+    },
+
+    onSuccess: (_, projectId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["project", projectId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["projects"],
+      });
+    },
+  });
+
   return {
     submitProject,
     updateProject,
     getProjects,
+    releaseProject,
     getAllProjects,
     getProjectVersionHistory,
     getProjectById,
     getProjectReviews,
     submitRevisionForReview,
+    publishProject,
   };
 };

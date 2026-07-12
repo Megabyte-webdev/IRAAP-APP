@@ -5,6 +5,7 @@ import { Bell, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import ProfileDropdown from "@/app/_components/ProfileDropdown";
+import ThemeButton from "@/app/_components/ThemeButton";
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { authDetails, isLoading: authLoading } = useAuth();
@@ -67,6 +68,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
       {/* Right section */}
       <div className="flex items-center gap-2">
+        <ThemeButton />
         {/* Notification bell */}
         <div className="relative">
           <button

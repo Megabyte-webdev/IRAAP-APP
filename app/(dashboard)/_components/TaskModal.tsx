@@ -1,76 +1,56 @@
 "use client";
 
 import Portal from "@/app/_components/Portal";
-import { useAuth } from "@/app/_context/AuthContext";
 import { statusConfig } from "@/app/_utils/markup";
-import { Task, TaskStatus } from "@/app/_utils/types";
-import {
-  X,
-  CheckCircle,
-  MessageSquare,
-  Trash2,
-  Send,
-  PlayCircle,
-  RotateCcw,
-  Loader2,
-} from "lucide-react";
+import { Task } from "@/app/_utils/types";
+import { X, MessageSquare } from "lucide-react";
 
 interface TaskModalProps {
   task: Task;
   onClose: () => void;
-  onUpdateStatus: (taskId: number, status: TaskStatus) => void;
-  onDelete?: (taskId: number) => void;
-  isLoading?: boolean;
 }
 
-const TaskModal = ({
-  task,
-  onClose,
-  onUpdateStatus,
-  onDelete,
-  isLoading,
-}: TaskModalProps) => {
-  const { authDetails } = useAuth();
-  const role = authDetails?.user?.role;
-  const isSupervisor = role === "SUPERVISOR";
+const TaskModal = ({ task, onClose }: TaskModalProps) => {
   const statusDetails = statusConfig[task?.status];
-
-  // Supervisor can only act if student has finished ('COMPLETED')
-  const canSupervisorAction = task.status === "COMPLETED";
 
   return (
     <Portal>
       <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
+        {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+          className="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={onClose}
         />
 
-        <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-          <div className="flex items-center justify-between p-6 border-b border-slate-100">
+        {/* Modal Content */}
+        <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-transparent dark:border-slate-800 animate-in zoom-in-95 duration-200">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800/60">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+              <div className="h-8 w-8 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                 <MessageSquare size={18} />
               </div>
-              <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase">
-                {isSupervisor ? "Supervisor Review" : "Task Details"}
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 tracking-tight uppercase">
+                Task Details
               </h3>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition"
             >
               <X size={20} />
             </button>
           </div>
 
+          {/* Body */}
           <div className="p-8 max-h-[65vh] overflow-y-auto">
-            <h1 className="text-xl font-extrabold text-slate-900 mb-4">
+            <h1 className="text-xl font-extrabold text-slate-900 dark:text-slate-50 mb-4">
               {task.title}
             </h1>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                   Current Status
                 </span>
                 <span
@@ -82,125 +62,23 @@ const TaskModal = ({
             </div>
 
             <div className="space-y-3">
-              <h5 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+              <h5 className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Description
               </h5>
-              <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 leading-relaxed">
+              <div className="p-5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 {task.description || "No description provided."}
               </div>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-            <div>
-              {isSupervisor && (
-                <button
-                  onClick={() => onDelete?.(Number(task.id))}
-                  disabled={isLoading}
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
-                >
-                  <Trash2 size={16} /> Delete
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {isSupervisor && (
-                <>
-                  <button
-                    onClick={() => onUpdateStatus(Number(task.id), "PENDING")}
-                    disabled={isLoading || !canSupervisorAction}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                    title={
-                      !canSupervisorAction
-                        ? "Task must be submitted before rejecting"
-                        : ""
-                    }
-                  >
-                    {isLoading ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <RotateCcw size={16} />
-                    )}
-                    Reject
-                  </button>
-                  <button
-                    onClick={() => onUpdateStatus(Number(task.id), "VERIFIED")}
-                    disabled={isLoading || !canSupervisorAction}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-md disabled:bg-slate-300 disabled:shadow-none disabled:cursor-not-allowed"
-                    title={
-                      !canSupervisorAction
-                        ? "Task must be submitted before verifying"
-                        : ""
-                    }
-                  >
-                    {isLoading ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <CheckCircle size={16} />
-                    )}
-                    Verify & Close
-                  </button>
-                </>
-              )}
-
-              {!isSupervisor && (
-                <div className="flex flex-col items-end gap-3 w-full">
-                  {task.status === "IN_PROGRESS" && (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() =>
-                          onUpdateStatus(Number(task.id), "COMPLETED")
-                        }
-                        disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md transition disabled:opacity-50"
-                      >
-                        <Send size={16} /> Mark as Completed
-                      </button>
-                    </div>
-                  )}
-
-                  {task.status === "COMPLETED" && (
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-xs font-bold text-slate-400 italic">
-                        Task Finished!
-                      </span>
-                      <button
-                        onClick={() =>
-                          onUpdateStatus(Number(task.id), "IN_PROGRESS")
-                        }
-                        disabled={isLoading}
-                        className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition border border-indigo-100"
-                      >
-                        {isLoading ? (
-                          <Loader2 size={12} className="animate-spin" />
-                        ) : (
-                          <RotateCcw size={12} />
-                        )}
-                        Recall to Edit
-                      </button>
-                    </div>
-                  )}
-
-                  {task.status === "PENDING" && (
-                    <button
-                      onClick={() =>
-                        onUpdateStatus(Number(task.id), "IN_PROGRESS")
-                      }
-                      disabled={isLoading}
-                      className="cursor-pointer flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-md transition"
-                    >
-                      {isLoading ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <PlayCircle size={16} />
-                      )}
-                      Start Task
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+          {/* Footer (Simplified Actionless layout) */}
+          <div className="p-6 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>

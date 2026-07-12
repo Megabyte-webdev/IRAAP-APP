@@ -26,13 +26,7 @@ const MeetingMessage = ({
   const [isHighlighted, setIsHighlighted] = useState(false);
 
   // Parse meeting metadata
-  const meetingData = msg.metadata as {
-    scheduledAt?: string;
-    duration?: number;
-    meetingTitle?: string;
-    meetingUrl?: string;
-    participants?: number;
-  } | null;
+  const meetingData = msg.meeting;
 
   const scheduledDate = meetingData?.scheduledAt
     ? new Date(meetingData.scheduledAt)
@@ -54,9 +48,9 @@ const MeetingMessage = ({
     : "—";
 
   const duration = meetingData?.duration || 0;
-  const title = meetingData?.meetingTitle || "Meeting Scheduled";
+  const title = meetingData?.title || "Meeting Scheduled";
   const meetingUrl = meetingData?.meetingUrl || "#";
-  const participants = meetingData?.participants || 2;
+  const participants = 2;
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -216,7 +210,7 @@ const MeetingMessage = ({
                 }`}
               >
                 {participants}{" "}
-                {participants === 1 ? "participant" : "participants"}
+                {participants < 2 ? "participant" : "participants"}
               </p>
             </div>
           )}

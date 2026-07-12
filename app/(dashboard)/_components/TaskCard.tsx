@@ -28,57 +28,11 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
   const role = authDetails?.user?.role;
   const isSupervisor = role === "SUPERVISOR";
   const { verifyReviewRound, deleteTask } = useSupervisor();
-  const { updateTaskByStudent } = useStudent();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const statusDetails = statusConfig[task.status];
-
-  const isAnyMutationPending =
-    verifyReviewRound.isPending ||
-    deleteTask.isPending ||
-    updateTaskByStudent.isPending;
-
-  const handleUpdateStatus = (taskId: number, newStatus: TaskStatus) => {
-    const options = {
-      onSuccess: () => {
-        let title = "Status Updated";
-        let message = `Task is now ${newStatus.toLowerCase().replace("_", " ")}.`;
-
-        if (newStatus === "PENDING" && !isSupervisor) {
-          title = "Task Reset";
-          message = "The task has been moved back to the pending queue.";
-        } else if (newStatus === "IN_PROGRESS") {
-          if (task.status === "COMPLETED") {
-            title = "Submission Recalled";
-            message = "Task moved back to 'In Progress' for further editing.";
-          } else {
-            title = "Task Started";
-            message = "Time to get to work! Status set to 'In Progress'.";
-          }
-        } else if (newStatus === "COMPLETED") {
-          title = "Great Work!";
-          message = "Task submitted. Your supervisor has been notified.";
-        }
-
-        onSuccess({ title, message });
-        setIsModalOpen(false);
-      },
-    };
-
-    if (
-      newStatus === "VERIFIED" ||
-      (task.status === "COMPLETED" && newStatus === "PENDING")
-    ) {
-      verifyReviewRound.mutate({ reviewId: taskId, projectId }, options);
-    } else {
-      updateTaskByStudent.mutate(
-        { taskId, status: newStatus as any, projectId },
-        options,
-      );
-    }
-  };
 
   const confirmDelete = () => {
     deleteTask.mutate(
@@ -96,22 +50,16 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
     <>
       <div
         ref={setRef}
-        onClick={() => !isAnyMutationPending && setIsModalOpen(true)}
+        onClick={() => setIsModalOpen(true)}
         className={`group relative flex flex-col h-full cursor-pointer rounded-xl border transition-all duration-200 active:scale-[0.98]
     ${
       active
-        ? "bg-indigo-50 border-indigo-400 shadow-lg shadow-indigo-100 pl-4.5 animate-pulse hover:animate-none"
-        : "bg-white border-slate-200 pl-5 hover:shadow-md hover:border-indigo-200 hover:bg-gray-50/50"
+        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-400 dark:border-indigo-600 shadow-lg shadow-indigo-100 dark:shadow-indigo-900/30 pl-4.5 animate-pulse hover:animate-none"
+        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/50 pl-5 hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700/50 hover:bg-gray-50/50 dark:hover:bg-slate-700/30"
     }
     p-5 pr-5 pt-5 pb-5
   `}
       >
-        {isAnyMutationPending && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/40 z-10 rounded-xl">
-            <Loader2 className="animate-spin text-indigo-600" size={20} />
-          </div>
-        )}
-
         {/* Replaced Priority with Status Badge */}
         <div className="mb-4">
           <span
@@ -121,20 +69,20 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
           </span>
         </div>
 
-        <h4 className="text-sm font-bold text-slate-800 mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
           {task.title}
         </h4>
 
         {task.description && (
-          <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed">
             {task.description}
           </p>
         )}
 
         <div className="flex-1" />
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-          <div className="flex items-center gap-1.5 text-slate-400">
+        <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-slate-700/50">
+          <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
             <Calendar size={13} />
             <span className="text-[10px] font-semibold">
               {new Date(task.createdAt || Date.now()).toLocaleDateString(
@@ -145,7 +93,7 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
           </div>
           <div className="flex items-center gap-2">
             {task.status === "VERIFIED" ? (
-              <div className="flex items-center gap-1.5 text-emerald-600">
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                 <span className="text-[10px] font-bold uppercase tracking-wider">
                   Verified
                 </span>
@@ -154,7 +102,7 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
             ) : (
               <ArrowRightCircle
                 size={18}
-                className="text-slate-300 group-hover:text-indigo-500 transition-colors"
+                className="text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors"
               />
             )}
           </div>
@@ -162,21 +110,15 @@ const TaskCard = ({ task, projectId, active, setRef }: TaskCardProps) => {
       </div>
 
       {isModalOpen && (
-        <TaskModal
-          task={task}
-          onClose={() => setIsModalOpen(false)}
-          onUpdateStatus={handleUpdateStatus}
-          onDelete={() => setIsConfirmOpen(true)}
-          isLoading={isAnyMutationPending}
-        />
+        <TaskModal task={task} onClose={() => setIsModalOpen(false)} />
       )}
 
       <ConfirmationModal
         isOpen={isConfirmOpen}
         title="Delete Task"
-        message={`Are you sure you want to delete "${task.title}"?`}
+        description={`Are you sure you want to delete "${task.title}"?`}
         onConfirm={confirmDelete}
-        onCancel={() => setIsConfirmOpen(false)}
+        onClose={() => setIsConfirmOpen(false)}
         isLoading={deleteTask.isPending}
       />
     </>

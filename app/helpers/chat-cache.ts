@@ -1,7 +1,72 @@
 import { QueryClient } from "@tanstack/react-query";
 
+interface CreateOptimisticMessageArgs {
+  clientId: string | number;
+  content: string;
+  msgType: string; // e.g., 'TEXT', 'MEDIA', 'MEETING'
+  authDetails: {
+    user: { id: string | number; fullName: string; role: string };
+  };
+  selectedChat: { id: string | number };
+  meeting?: any;
+  replyTo?: {
+    id: number;
+    content: string;
+    senderId: number;
+    createdAt: string | Date;
+  } | null;
+}
+
+export function createOptimisticMessage({
+  clientId,
+  content,
+  msgType,
+  authDetails,
+  selectedChat,
+  meeting = null,
+  replyTo = null,
+}: CreateOptimisticMessageArgs) {
+  const now = new Date().toISOString();
+  const userId = Number(authDetails?.user?.id);
+
+  return {
+    id: clientId,
+    clientId,
+    conversationId: -1,
+
+    senderId: userId,
+    receiverId: Number(selectedChat?.id),
+
+    content,
+    msgType,
+
+    meeting,
+
+    status: "PENDING" as const,
+    createdAt: now,
+    readAt: null,
+
+    replyToMessageId: replyTo?.id ?? null,
+
+    sender: {
+      id: userId,
+      fullName: authDetails?.user?.fullName ?? "You",
+      role: authDetails?.user?.role ?? "USER",
+    },
+
+    replyTo: replyTo
+      ? {
+          id: replyTo.id,
+          content: replyTo.content,
+          senderId: replyTo.senderId,
+          createdAt: replyTo.createdAt,
+        }
+      : null,
+  };
+}
+
 export function normalizeMessage(msg: any) {
-  const metadata = msg.metadata ?? {};
+  const meeting = msg.meeting ?? {};
 
   return {
     id: msg.id,
@@ -13,27 +78,18 @@ export function normalizeMessage(msg: any) {
 
     content: msg.content,
 
-    msgType: metadata.msgType ?? msg.msgType ?? msg.type ?? "TEXT",
+    msgType: msg.msgType ?? "TEXT",
 
-    metadata: {
-      msgType: metadata.msgType ?? msg.msgType ?? msg.type ?? "TEXT",
-
-      meetingId:
-        metadata.meetingId ?? msg.meetingId ?? msg.externalMeetingId ?? null,
-
-      meetingUrl:
-        metadata.meetingUrl ?? msg.meetingUrl ?? msg.externalMeetingUrl ?? null,
-
-      scheduledAt: metadata.scheduledAt ?? null,
-      duration: metadata.duration ?? null,
-      meetingTitle: metadata.meetingTitle ?? null,
+    meeting: {
+      msgType: "CALL_INVITE",
+      ...meeting,
     },
 
     status: msg.status ?? "PENDING",
     createdAt: msg.createdAt,
+    readAt: msg.readAt ?? null,
 
     replyToMessageId: msg.replyToMessageId ?? null,
-    readAt: msg.readAt ?? null,
 
     sender: msg.sender ?? {
       id: msg.senderId,

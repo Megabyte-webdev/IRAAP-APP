@@ -17,10 +17,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       storageKey="iraap-theme"
       disableTransitionOnChange
     >
-      <AuthProvider>
-        <ChatProvider>
-          <NotificationProvider>
-            <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ChatProvider>
+            <NotificationProvider>
               <SocketConnect>{children}</SocketConnect>
               <ToastContainer
                 position="top-right"
@@ -29,10 +29,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 pauseOnHover
                 newestOnTop
               />
-            </QueryClientProvider>
-          </NotificationProvider>
-        </ChatProvider>
-      </AuthProvider>
+            </NotificationProvider>
+          </ChatProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

@@ -12,6 +12,8 @@ import {
   History,
   FileText,
   CheckCircle2,
+  ArrowRight,
+  Play,
 } from "lucide-react";
 import TaskCard from "./TaskCard";
 import NewReviewModal from "./NewReviewModal";
@@ -21,6 +23,7 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { ReviewTask, Task } from "@/app/_utils/types";
 import { useProject } from "@/app/_hooks/use-projects";
 import SubmitRevisionModal from "@/app/modals/SubmitRevisionModal";
+import useStudent from "@/app/_hooks/use-student";
 
 type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "VERIFIED";
 
@@ -49,6 +52,7 @@ export default function ProjectTaskBoard({
   const { deleteReview, verifyReviewRound } = useSupervisor();
   const { authDetails } = useAuth();
   const { submitRevisionForReview } = useProject();
+  const { updateAllReviewTasksByStudent } = useStudent();
   const isSupervisor = authDetails?.user?.role === "SUPERVISOR";
   const isStudent = authDetails?.user?.role === "STUDENT";
 
@@ -68,6 +72,11 @@ export default function ProjectTaskBoard({
     new Set(),
   );
 
+  // Tracks which specific review round row is currently mutating state asynchronously
+  const [mutatingReviewId, setMutatingReviewId] = useState<
+    string | number | null
+  >(null);
+
   const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isActiveTask = (taskId: number | string) =>
@@ -81,13 +90,34 @@ export default function ProjectTaskBoard({
     });
   };
 
+  const handleAdvanceAllTasksInRound = (
+    reviewId: string | number,
+    currentStatus: TaskStatus,
+  ) => {
+    const currentIndex = columns.indexOf(currentStatus);
+    if (currentIndex === -1 || currentIndex === columns.length - 1) return;
+
+    const nextStatus = columns[currentIndex + 1];
+    setMutatingReviewId(reviewId);
+
+    updateAllReviewTasksByStudent.mutate(
+      {
+        reviewId: Number(reviewId),
+        projectId,
+        status: nextStatus,
+      },
+      {
+        onSettled: () => setMutatingReviewId(null),
+      },
+    );
+  };
+
   useEffect(() => {
     if (!activeTaskId) return;
     const el = taskRefs.current[activeTaskId];
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [activeTaskId]);
 
-  // Expand column containing active task
   useEffect(() => {
     if (!activeTaskId) return;
     const task = tasks.find((t) => t.id === Number(activeTaskId));
@@ -95,7 +125,6 @@ export default function ProjectTaskBoard({
     setCollapsed((prev) => ({ ...prev, [task.status]: false }));
   }, [activeTaskId, tasks]);
 
-  // Scroll after column expands
   useEffect(() => {
     if (!activeTaskId) return;
     const el = taskRefs.current[activeTaskId];
@@ -106,7 +135,6 @@ export default function ProjectTaskBoard({
     return () => clearTimeout(timer);
   }, [activeTaskId, collapsed]);
 
-  // Are ALL tasks in this review round completed?
   const isRoundFullyCompleted = (reviewId: string | number) => {
     const roundTasks = tasks.filter(
       (t) => String(t.reviewId ?? "General") === String(reviewId),
@@ -116,7 +144,6 @@ export default function ProjectTaskBoard({
     );
   };
 
-  // Are ALL tasks in this review round verified?
   const isRoundFullyVerified = (reviewId: string | number) => {
     const roundTasks = tasks.filter(
       (t) => String(t.reviewId ?? "General") === String(reviewId),
@@ -126,14 +153,12 @@ export default function ProjectTaskBoard({
     );
   };
 
-  // Set of review IDs that have been submitted
   const submittedMap = useMemo(() => {
     return new Set(
       reviews?.filter((r: any) => r.revisionSubmitted).map((r: any) => r.id),
     );
   }, [reviews]);
 
-  // Group tasks by column and review round, also attach submissions
   const groupedTasks = useMemo(() => {
     const groups: Record<string, any> = {};
 
@@ -181,12 +206,12 @@ export default function ProjectTaskBoard({
   };
 
   const handleVerifyVersion = (reviewId: number) => {
+    setMutatingReviewId(reviewId);
     verifyReviewRound.mutate(
       { reviewId, projectId },
       {
-        onSuccess: () => {
-          console.log("Review round verified successfully.");
-        },
+        onSettled: () => setMutatingReviewId(null),
+        onSuccess: () => console.log("Review round verified successfully."),
       },
     );
   };
@@ -194,7 +219,10 @@ export default function ProjectTaskBoard({
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center w-full">
-        <Loader2 className="animate-spin text-indigo-400" size={24} />
+        <Loader2
+          className="animate-spin text-indigo-400 dark:text-indigo-500"
+          size={24}
+        />
       </div>
     );
   }
@@ -203,11 +231,13 @@ export default function ProjectTaskBoard({
     <div className="flex flex-col gap-4 pb-20 max-w-5xl mx-auto">
       {/* BOARD HEADER */}
       <div className="flex justify-between items-center px-1">
-        <h2 className="text-sm font-bold text-slate-800">Task Board</h2>
+        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+          Task Board
+        </h2>
         {isSupervisor && (
           <button
             onClick={() => setIsReviewModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 dark:bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 dark:hover:bg-indigo-700 transition-colors"
           >
             <Plus size={14} />
             New Revision Round
@@ -224,31 +254,37 @@ export default function ProjectTaskBoard({
         return (
           <div
             key={col}
-            className="bg-white/50 rounded-xl border border-slate-200/60 shadow-sm overflow-hidden"
+            className="bg-white/50 dark:bg-slate-800/30 rounded-xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm dark:shadow-slate-900/20 overflow-hidden"
           >
             {/* COLUMN HEADER */}
-            <div className="flex items-center bg-white pr-4">
+            <div className="flex items-center bg-white dark:bg-slate-800 pr-4">
               <button
                 onClick={() => setCollapsed((p) => ({ ...p, [col]: !p[col] }))}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 flex-1 text-left transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex-1 text-left transition-colors"
               >
                 {isCollapsed ? (
-                  <ChevronRight size={16} className="text-slate-400" />
+                  <ChevronRight
+                    size={16}
+                    className="text-slate-400 dark:text-slate-500"
+                  />
                 ) : (
-                  <ChevronDown size={16} className="text-slate-400" />
+                  <ChevronDown
+                    size={16}
+                    className="text-slate-400 dark:text-slate-500"
+                  />
                 )}
-                <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <h3 className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {col.replace("_", " ")}
                 </h3>
               </button>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/40 px-2 py-0.5 rounded-full">
                 <Hash size={10} /> {totalInCol}
               </div>
             </div>
 
             {/* COLUMN BODY */}
             {!isCollapsed && (
-              <div className="p-3 bg-[#F8FAFC]/50 border-t border-slate-100 space-y-4">
+              <div className="p-3 bg-[#F8FAFC]/50 dark:bg-slate-900/20 border-t border-slate-100 dark:border-slate-700/50 space-y-4">
                 {Object.keys(columnData).map((reviewId) => {
                   const round = columnData[reviewId];
                   const hasTasks = round.items.length > 0;
@@ -258,7 +294,17 @@ export default function ProjectTaskBoard({
                   const hasSubmissions = round.submissions?.length > 0;
                   const isHistoryOpen = expandedHistory.has(reviewId);
 
-                  // Student Action Banner: Tasks are completely done but hasn't uploaded a version yet
+                  const dynamicRoundTasks = tasks.filter(
+                    (t) => String(t.reviewId ?? "General") === String(reviewId),
+                  );
+                  const roundHasAnyTasksTotal = dynamicRoundTasks.length > 0;
+
+                  // Banner Condition Rules
+                  const showStartRoundBanner =
+                    isStudent && col === "PENDING" && hasTasks;
+                  const showCompleteRoundBanner =
+                    isStudent && col === "IN_PROGRESS" && hasTasks;
+
                   const showStudentSubmitBanner =
                     col === "COMPLETED" &&
                     isStudent &&
@@ -266,43 +312,53 @@ export default function ProjectTaskBoard({
                     reviewId !== "General" &&
                     !isSubmitted;
 
-                  // Supervisor Action Banner: Student has uploaded/submitted the package version update
                   const showSupervisorActionBanner =
+                    col === "COMPLETED" &&
                     isSupervisor &&
                     reviewId !== "General" &&
                     isSubmitted &&
-                    !fullyVerified; // Check to prevent banner rendering inside verified status
+                    !fullyVerified;
 
-                  // Student Pending State indicator banner
                   const showStudentPendingBanner =
+                    col === "COMPLETED" &&
                     isStudent &&
                     reviewId !== "General" &&
                     isSubmitted &&
-                    !fullyVerified; // Check to prevent banner rendering inside verified status
+                    !fullyVerified;
 
                   const shouldShow =
                     hasTasks ||
-                    (col === "PENDING" &&
-                      !tasks.some(
-                        (t) => String(t.reviewId) === String(reviewId),
-                      ));
+                    (!roundHasAnyTasksTotal && col === "PENDING") ||
+                    (col === "COMPLETED" &&
+                      reviewId !== "General" &&
+                      (showStudentSubmitBanner ||
+                        showSupervisorActionBanner ||
+                        showStudentPendingBanner));
 
                   if (!shouldShow) return null;
 
+                  // Evaluate row mutation locks
+                  const isThisRowMutating =
+                    String(mutatingReviewId) === String(reviewId);
+                  const isBatchUpdating =
+                    isThisRowMutating &&
+                    updateAllReviewTasksByStudent.isPending;
+                  const isRoundVerifying =
+                    isThisRowMutating && verifyReviewRound.isPending;
+
                   return (
                     <div key={reviewId}>
-                      {/* ROUND CARD */}
                       <div
                         className={`
                           rounded-xl border overflow-hidden transition-all duration-200
                           ${
                             fullyVerified
-                              ? "border-indigo-100 bg-slate-50/20"
+                              ? "border-indigo-100 dark:border-indigo-900/40 bg-slate-50/20 dark:bg-indigo-900/10"
                               : fullyCompleted && !isSubmitted
-                                ? "border-emerald-200 shadow-sm shadow-emerald-100"
+                                ? "border-emerald-200 dark:border-emerald-900/40 shadow-sm shadow-emerald-100 dark:shadow-emerald-900/20"
                                 : isSubmitted
-                                  ? "border-amber-200 shadow-sm shadow-amber-100"
-                                  : "border-slate-200"
+                                  ? "border-amber-200 dark:border-amber-900/40 shadow-sm shadow-amber-100 dark:shadow-amber-900/20"
+                                  : "border-slate-200 dark:border-slate-700/50"
                           }
                         `}
                       >
@@ -312,38 +368,36 @@ export default function ProjectTaskBoard({
                             flex items-center justify-between px-4 py-2.5 border-b
                             ${
                               fullyVerified
-                                ? "bg-slate-50 border-slate-100"
+                                ? "bg-slate-50 dark:bg-indigo-900/15 border-slate-100 dark:border-indigo-900/30"
                                 : fullyCompleted && !isSubmitted
-                                  ? "bg-emerald-50 border-emerald-100"
+                                  ? "bg-emerald-50 dark:bg-emerald-900/15 border-emerald-100 dark:border-emerald-900/30"
                                   : isSubmitted
-                                    ? "bg-amber-50 border-amber-100"
-                                    : "bg-slate-50 border-slate-100"
+                                    ? "bg-amber-50 dark:bg-amber-900/15 border-amber-100 dark:border-amber-900/30"
+                                    : "bg-slate-50 dark:bg-slate-700/30 border-slate-100 dark:border-slate-700/50"
                             }
                           `}
                         >
-                          {/* Left Details */}
                           <div className="flex items-center gap-2">
                             <span
                               className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                 fullyVerified
-                                  ? "bg-indigo-500"
+                                  ? "bg-indigo-500 dark:bg-indigo-400"
                                   : isSubmitted
-                                    ? "bg-amber-400"
+                                    ? "bg-amber-400 dark:bg-amber-400"
                                     : fullyCompleted
-                                      ? "bg-emerald-400"
-                                      : "bg-slate-300"
+                                      ? "bg-emerald-400 dark:bg-emerald-400"
+                                      : "bg-slate-300 dark:bg-slate-500"
                               }`}
                             />
-                            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">
                               {round.summary}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-medium">
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                               · {round.items.length} task
                               {round.items.length !== 1 ? "s" : ""}
                             </span>
                           </div>
 
-                          {/* Right Controls */}
                           <div className="flex items-center gap-2">
                             {reviewId !== "General" && hasSubmissions && (
                               <button
@@ -352,8 +406,8 @@ export default function ProjectTaskBoard({
                                   flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors
                                   ${
                                     isHistoryOpen
-                                      ? "bg-indigo-100 text-indigo-600"
-                                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                      ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300"
+                                      : "bg-slate-100 dark:bg-slate-700/40 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/60"
                                   }
                                 `}
                               >
@@ -369,12 +423,12 @@ export default function ProjectTaskBoard({
                                   text-[10px] font-semibold px-2 py-0.5 rounded-full
                                   ${
                                     fullyVerified
-                                      ? "bg-indigo-50 text-indigo-700 border border-indigo-100/80"
+                                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-800/50"
                                       : isSubmitted
-                                        ? "bg-amber-100 text-amber-700"
+                                        ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
                                         : fullyCompleted
-                                          ? "bg-emerald-100 text-emerald-700"
-                                          : "bg-slate-100 text-slate-500"
+                                          ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
+                                          : "bg-slate-100 dark:bg-slate-700/40 text-slate-500 dark:text-slate-400"
                                   }
                                 `}
                               >
@@ -398,11 +452,11 @@ export default function ProjectTaskBoard({
                                 <button
                                   onClick={() =>
                                     setConfirmDeleteReview({
-                                      id: round.id,
+                                      id: Number(round.id),
                                       summary: round.summary,
                                     })
                                   }
-                                  className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                  className="p-1 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                   title="Delete revision round"
                                 >
                                   <Trash2 size={11} />
@@ -412,7 +466,7 @@ export default function ProjectTaskBoard({
                         </div>
 
                         {/* TASKS BODY */}
-                        <div className="p-3 bg-white">
+                        <div className="p-3 bg-white dark:bg-slate-800">
                           {hasTasks ? (
                             <div className="grid grid-cols-responsive gap-3">
                               {round.items.map((task: Task) => (
@@ -428,84 +482,79 @@ export default function ProjectTaskBoard({
                               ))}
                             </div>
                           ) : (
-                            <div className="py-6 flex items-center justify-center text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                            <div className="py-6 flex items-center justify-center text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest">
                               No tasks in this stage
                             </div>
                           )}
                         </div>
 
-                        {/* VERSION HISTORY PANEL */}
-                        {isHistoryOpen && hasSubmissions && (
-                          <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-3 space-y-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                              Version History
-                            </p>
-                            {[...round.submissions]
-                              .sort(
-                                (a: any, b: any) =>
-                                  b.versionNumber - a.versionNumber,
-                              )
-                              .map((sub: any) => (
-                                <div
-                                  key={sub.id}
-                                  className="flex items-start gap-3 bg-white rounded-lg border border-slate-100 px-3 py-2.5"
-                                >
-                                  <div className="mt-0.5 w-6 h-6 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
-                                    <span className="text-[9px] font-bold text-indigo-500">
-                                      v{sub.versionNumber}
-                                    </span>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2">
-                                      <a
-                                        href={sub.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-[11px] font-semibold text-slate-700 hover:text-indigo-600 truncate flex items-center gap-1 transition-colors"
-                                      >
-                                        <FileText
-                                          size={10}
-                                          className="shrink-0"
-                                        />
-                                        {sub.publicId?.split("/").pop() ??
-                                          `version-${sub.versionNumber}`}
-                                      </a>
-                                      <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0">
-                                        {new Date(
-                                          sub.createdAt,
-                                        ).toLocaleDateString("en-GB", {
-                                          day: "numeric",
-                                          month: "short",
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                        })}
-                                      </span>
-                                    </div>
-                                    {sub.changeNote && (
-                                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">
-                                        {sub.changeNote}
-                                      </p>
-                                    )}
-                                    <span className="inline-block mt-1 text-[9px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
-                                      {sub.trigger?.replace("_", " ") ??
-                                        "Submission"}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
+                        {/* GLOBAL ACTIONS WRAPPER BANNER */}
+                        {showStartRoundBanner && (
+                          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-700/50">
+                            <div>
+                              <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                Round Pending Execution
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Move all tasks in this round to In Progress
+                                status.
+                              </p>
+                            </div>
+                            <button
+                              disabled={isBatchUpdating}
+                              onClick={() =>
+                                handleAdvanceAllTasksInRound(reviewId, col)
+                              }
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[11px] font-semibold hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4 disabled:opacity-75 disabled:cursor-not-allowed"
+                            >
+                              {isBatchUpdating ? (
+                                <Loader2 size={11} className="animate-spin" />
+                              ) : (
+                                <Play size={11} fill="currentColor" />
+                              )}
+                              Start Round Tasks
+                            </button>
                           </div>
                         )}
 
-                        {/* BANNER ACTIONS SUMMARY CONTROLS */}
+                        {showCompleteRoundBanner && (
+                          <div className="flex items-center justify-between px-4 py-3 bg-indigo-50/40 dark:bg-indigo-900/10 border-t border-slate-100 dark:border-slate-700/50">
+                            <div>
+                              <p className="text-[11px] font-bold text-indigo-950 dark:text-indigo-300">
+                                Batch Transition Check
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Advance all currently remaining tasks into the
+                                Completed container.
+                              </p>
+                            </div>
+                            <button
+                              disabled={isBatchUpdating}
+                              onClick={() =>
+                                handleAdvanceAllTasksInRound(reviewId, col)
+                              }
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 dark:bg-slate-700 text-white dark:text-slate-200 rounded-lg text-[11px] font-semibold hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors whitespace-nowrap ml-4 disabled:opacity-75 disabled:cursor-not-allowed"
+                            >
+                              {isBatchUpdating ? (
+                                <Loader2 size={11} className="animate-spin" />
+                              ) : (
+                                <>
+                                  Mark All Completed
+                                  <ArrowRight size={11} />
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+
                         {reviewId !== "General" && (
                           <>
-                            {/* Student Action: Ready to packages and submit update */}
                             {showStudentSubmitBanner && (
-                              <div className="flex items-center justify-between px-4 py-3 bg-emerald-50 border-t border-emerald-100">
+                              <div className="flex items-center justify-between px-4 py-3 bg-emerald-50 dark:bg-emerald-900/15 border-t border-emerald-100 dark:border-emerald-900/30">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                  <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
                                     <svg
-                                      className="w-3.5 h-3.5 text-emerald-600"
+                                      className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
                                       fill="none"
                                       viewBox="0 0 24 24"
                                       stroke="currentColor"
@@ -519,10 +568,10 @@ export default function ProjectTaskBoard({
                                     </svg>
                                   </div>
                                   <div>
-                                    <p className="text-[11px] font-bold text-emerald-800">
+                                    <p className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
                                       All tasks completed
                                     </p>
-                                    <p className="text-[10px] text-emerald-600">
+                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400">
                                       Submit your revision for supervisor review
                                     </p>
                                   </div>
@@ -530,7 +579,7 @@ export default function ProjectTaskBoard({
                                 <button
                                   onClick={() =>
                                     setSubmitTarget({
-                                      reviewId: round.id,
+                                      reviewId: Number(round.id),
                                       summary: round.summary,
                                     })
                                   }
@@ -542,68 +591,37 @@ export default function ProjectTaskBoard({
                               </div>
                             )}
 
-                            {/* Supervisor Approval Action Context */}
                             {showSupervisorActionBanner && (
-                              <div className="flex items-center justify-between px-4 py-3 bg-indigo-50/70 border-t border-indigo-100">
+                              <div className="flex items-center justify-between px-4 py-3 bg-indigo-50/70 dark:bg-indigo-900/15 border-t border-indigo-100 dark:border-indigo-900/30">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                                  <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                                   </div>
                                   <div>
-                                    <p className="text-[11px] font-bold text-indigo-900">
+                                    <p className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300">
                                       Revision Version Awaiting Action
                                     </p>
-                                    <p className="text-[10px] text-indigo-600">
+                                    <p className="text-[10px] text-indigo-600 dark:text-indigo-400">
                                       Review the uploaded version update and
                                       verify this round.
                                     </p>
                                   </div>
                                 </div>
                                 <button
+                                  disabled={isRoundVerifying}
                                   onClick={() =>
                                     handleVerifyVersion(Number(reviewId))
                                   }
-                                  disabled={verifyReviewRound.isPending}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[11px] font-semibold hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[11px] font-semibold hover:bg-indigo-700 transition-colors whitespace-nowrap ml-4 disabled:opacity-75 disabled:cursor-not-allowed"
                                 >
-                                  {verifyReviewRound.isPending ? (
-                                    <>
-                                      <Loader2
-                                        size={12}
-                                        className="animate-spin"
-                                      />
-                                      Verifying...
-                                    </>
-                                  ) : (
-                                    "Approve & Verify Version"
-                                  )}
-                                </button>
-                              </div>
-                            )}
-
-                            {/* Awaiting Review state banner */}
-                            {showStudentPendingBanner && (
-                              <div className="flex items-center justify-between px-4 py-3 bg-amber-50 border-t border-amber-100">
-                                <div className="flex items-center gap-2.5">
-                                  <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                                  {isRoundVerifying && (
                                     <Loader2
-                                      size={12}
-                                      className="text-amber-500 animate-spin"
+                                      size={11}
+                                      className="animate-spin"
                                     />
-                                  </div>
-                                  <div>
-                                    <p className="text-[11px] font-bold text-amber-800">
-                                      Awaiting supervisor review
-                                    </p>
-                                    <p className="text-[10px] text-amber-600">
-                                      Your revision version has been submitted
-                                      successfully
-                                    </p>
-                                  </div>
-                                </div>
-                                <span className="text-[10px] font-semibold text-amber-600 bg-amber-100 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                  Under Review
-                                </span>
+                                  )}
+                                  Verify & Approve Round
+                                </button>
                               </div>
                             )}
                           </>
@@ -619,27 +637,34 @@ export default function ProjectTaskBoard({
       })}
 
       {/* MODALS */}
-      <NewReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        projectId={projectId}
-      />
+      {isReviewModalOpen && (
+        <NewReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          projectId={projectId}
+        />
+      )}
 
-      <ConfirmationModal
-        isOpen={!!confirmDeleteReview}
-        title="Delete Revision Round?"
-        message={`This will permanently delete "${confirmDeleteReview?.summary}"`}
-        onConfirm={handleDeleteReview}
-        onCancel={() => setConfirmDeleteReview(null)}
-        isLoading={deleteReview.isPending}
-      />
+      {confirmDeleteReview && (
+        <ConfirmationModal
+          isOpen={!!confirmDeleteReview}
+          onClose={() => setConfirmDeleteReview(null)}
+          onConfirm={handleDeleteReview}
+          title="Delete Revision Round"
+          description={`Are you sure you want to delete "${confirmDeleteReview.summary}"? All tasks attached will be lost permanently.`}
+          isLoading={deleteReview.isPending}
+        />
+      )}
 
-      <SubmitRevisionModal
-        isOpen={!!submitTarget}
-        onClose={() => setSubmitTarget(null)}
-        onSubmit={handleSubmitRevision}
-        isLoading={submitRevisionForReview.isPending}
-      />
+      {submitTarget && (
+        <SubmitRevisionModal
+          isOpen={!!submitTarget}
+          onClose={() => setSubmitTarget(null)}
+          onSubmit={handleSubmitRevision}
+          reviewSummary={submitTarget.summary}
+          isLoading={submitRevisionForReview.isPending}
+        />
+      )}
     </div>
   );
 }

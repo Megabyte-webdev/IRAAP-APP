@@ -83,21 +83,39 @@ const useSupervisor = () => {
       const { data } = await api.patch(`/reviews/${reviewId}/approve`);
       return data;
     },
-    onSuccess: (_, { reviewId, projectId }: any) => {
+    onSuccess: (data, { reviewId, projectId }) => {
       queryClient.setQueryData(
         ["project-reviews", projectId],
         (oldData: any) => {
           if (!oldData) return [];
-          return oldData.map((review: any) => ({
-            ...review,
-            tasks: review.tasks.filter(
-              (t: any) => Number(t.id) !== Number(reviewId),
-            ),
-          }));
+
+          return oldData.map((review: any) => {
+            if (Number(review.id) !== Number(reviewId)) {
+              return review;
+            }
+
+            return {
+              ...review,
+              tasks: review.tasks.map((task: any) => ({
+                ...task,
+                status: "VERIFIED",
+                verifiedAt: new Date().toISOString(),
+              })),
+            };
+          });
         },
       );
+
+      queryClient.invalidateQueries({
+        queryKey: ["project", projectId],
+      });
       queryClient.invalidateQueries({
         queryKey: ["project-reviews", projectId],
+      });
+
+      onSuccess({
+        title: "Review Verified",
+        message: "All tasks in this review have been verified.",
       });
     },
     onError: (err) => {

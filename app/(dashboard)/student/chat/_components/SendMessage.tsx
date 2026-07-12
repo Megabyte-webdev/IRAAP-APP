@@ -11,6 +11,7 @@ import { websocket } from "@/app/_services/websocket";
 import { queryClient } from "@/app/_services/query-client";
 import {
   appendMessage,
+  createOptimisticMessage,
   updateConversationLastMessage,
 } from "@/app/helpers/chat-cache";
 import { FILE_ACCEPT_MAP, FileAcceptType } from "@/app/_utils/markup";
@@ -109,63 +110,52 @@ const SendMessage = ({
   // Send
   const sendChatMessage = ({
     content,
-    metadata = {},
+    msgType = "TEXT",
+    meeting,
   }: {
     content: string;
-    metadata?: any;
+    msgType?: "TEXT" | "CALL_INVITE" | "FILE";
+    meeting?: {
+      scheduledAt: string;
+      duration: number;
+      title: string;
+      description?: string;
+      isOpen?: boolean;
+    };
   }) => {
     if (!selectedChat) return;
 
     const clientId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    const optimisticMessage = {
-      id: clientId,
+    const optimisticMsg = createOptimisticMessage({
       clientId,
-      conversationId: -1,
-      senderId: Number(authDetails.user.id),
-      receiverId: Number(selectedChat.id),
       content,
-      metadata,
-      status: "PENDING",
-      createdAt: now,
-      replyToMessageId: replyTo?.id ?? null,
-      readAt: null,
-      msgType: metadata.msgType,
-      meetingId: null,
-      meetingUrl: null,
-      sender: {
-        id: Number(authDetails.user.id),
-        fullName: authDetails.user.fullName,
-        role: authDetails.user.role,
-      },
-      replyTo: replyTo
-        ? {
-            id: replyTo.id,
-            content: replyTo.content,
-            senderId: replyTo.senderId,
-            createdAt: replyTo.createdAt,
-          }
-        : null,
-    };
+      msgType,
+      authDetails,
+      selectedChat,
+      replyTo,
+      meeting,
+    });
+    console.log(optimisticMsg);
 
     queryClient.setQueryData(
       ["messages", Number(selectedChat.id)],
-      (old: any) => appendMessage(old, optimisticMessage),
+      (old: any) => appendMessage(old, optimisticMsg),
     );
 
     updateConversationLastMessage(
       queryClient,
-      optimisticMessage,
+      optimisticMsg,
       Number(authDetails.user.id),
     );
 
     websocket.emit("chat:send", {
       recipientId: Number(selectedChat.id),
       clientId,
-      msgType: metadata.msgType,
       content,
-      metadata,
+      msgType,
+      meeting,
       replyToMessageId: replyTo?.id ?? null,
     });
 
@@ -179,9 +169,7 @@ const SendMessage = ({
 
     sendChatMessage({
       content: trimmed,
-      metadata: {
-        msgType: "TEXT",
-      },
+      msgType: "TEXT",
     });
   };
 
@@ -219,11 +207,11 @@ const SendMessage = ({
   }) => {
     sendChatMessage({
       content: "Scheduled a meeting",
-      metadata: {
-        msgType: "CALL_INVITE",
+      msgType: "CALL_INVITE",
+      meeting: {
         scheduledAt,
         duration,
-        meetingTitle: `Meeting Scheduled`,
+        title: "Meeting Scheduled",
       },
     });
 

@@ -9,12 +9,15 @@ import {
   Activity,
   LayoutDashboard,
   ClipboardList,
+  Globe,
+  ArrowUpRight,
 } from "lucide-react";
 import { useProject } from "@/app/_hooks/use-projects";
 import ProjectInfo from "@/app/(dashboard)/_components/ProjectInfo";
 import ProjectTaskBoard from "@/app/(dashboard)/_components/ProjectTaskBoard";
 import ActivityFeed from "@/app/(dashboard)/_components/ActivityFeed";
 import { useAuth } from "@/app/_context/AuthContext";
+import PublicationButton from "../student/projects/_components/PublicationButton";
 
 const ProjectManagement = () => {
   const { projectId }: any = useParams();
@@ -26,12 +29,14 @@ const ProjectManagement = () => {
   const [isActivityOpen, setIsActivityOpen] = useState(false);
 
   const { getProjectById, getProjectReviews } = useProject();
+
   const { data: project, isLoading: isProjectLoading } = getProjectById(
     Number(projectId),
   );
   const { data: reviews = [], isLoading: isReviewLoading } = getProjectReviews(
     Number(projectId),
   );
+
   const allTasks = useMemo(() => {
     if (!Array.isArray(reviews)) return [];
 
@@ -75,7 +80,7 @@ const ProjectManagement = () => {
       {/* LEFT SIDEBAR (COLLAPSIBLE) */}
       <aside
         className={`
-        fixed inset-y-0 left-0 lg:z-auto w-72 bg-white dark:bg-[#1E293B] border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-999 lg:z-auto w-72 bg-white dark:bg-[#1E293B] border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out
         lg:relative lg:translate-x-0
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}
@@ -95,27 +100,52 @@ const ProjectManagement = () => {
       <main className="sticky top-0 flex flex-1 flex-col min-w-0 bg-[#F1F5F9]/50 dark:bg-slate-950/20 overflow-y-auto">
         {/* Header */}
         <header className="sticky top-0 z-20 h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between px-4 lg:px-8 shrink-0 transition-colors">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <ClipboardList size={20} />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="hidden md:block p-1.5 bg-primary rounded-lg text-white">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="hidden md:block p-1.5 bg-primary rounded-lg text-white shrink-0">
                 <LayoutDashboard size={16} />
               </div>
               <h1 className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
                 {project.title}
               </h1>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 border border-primary/50 rounded text-[10px] font-bold text-primary dark:text-indigo-400 uppercase tracking-tighter">
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 border border-primary/50 rounded text-[10px] font-bold text-primary dark:text-indigo-400 uppercase tracking-tighter shrink-0">
               <ShieldCheck size={12} /> {role}
             </div>
+
+            {/* Dynamic Status Badges for Release State */}
+            {project.isSignaledForPublication && (
+              <div className="hidden md:flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter shrink-0">
+                <Globe size={12} /> Released for Publication
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 ml-2">
+            {/* ACTION TRIGGER: SUPERVISOR MANUALLY RELEASES THE PROJECT */}
+            {role === "SUPERVISOR" &&
+              project.status === "VERIFIED" &&
+              !project.isSignaledForPublication && (
+                <PublicationButton
+                  projectId={Number(projectId)}
+                  action="AUTHORIZE"
+                />
+              )}
+
+            {/* ACTION TRIGGER: STUDENT PORTAL FINAL ARCHIVAL SUBMISSION SUBMIT BUTTON */}
+            {role === "STUDENT" && project.isSignaledForPublication && (
+              <PublicationButton
+                projectId={Number(projectId)}
+                action="PUBLISH"
+              />
+            )}
+
             <button
               className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
               onClick={() => setIsActivityOpen(!isActivityOpen)}
@@ -124,6 +154,16 @@ const ProjectManagement = () => {
             </button>
           </div>
         </header>
+
+        {/* Global Informational Notification Banner for Students */}
+        {role === "STUDENT" && project.isSignaledForPublication && (
+          <div className="bg-emerald-500/10 border-b border-emerald-500/20 px-4 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+            <span>
+              Your supervisor has explicitly cleared this version! You are now
+              authorized to publish this research.
+            </span>
+          </div>
+        )}
 
         {/* Board Area */}
         <div className="flex-1 p-4 lg:p-8">
@@ -159,7 +199,7 @@ const ProjectManagement = () => {
         </div>
 
         {/* Scrollable body — takes remaining height */}
-        <div className="flex-1 overflow-y-auto p-6 min-h-0">
+        <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-white dark:bg-black">
           <ActivityFeed reviews={reviews} loading={isReviewLoading} />
         </div>
       </aside>

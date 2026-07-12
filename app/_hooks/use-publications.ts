@@ -55,7 +55,7 @@ export const usePublication = () => {
         return data?.publications || [];
       },
 
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: "always",
     });
 
   // Get public approved publications

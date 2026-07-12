@@ -15,6 +15,28 @@ export interface Project {
   createdAt: string;
   keywords?: string[];
 }
+export interface ProjectDetails {
+  id: number;
+  title: string;
+  abstract: string;
+  fileUrl: string;
+  submissionYear: number;
+  category?: string;
+
+  student?: {
+    id: number;
+    fullName: string;
+    email: string;
+  };
+
+  supervisor?: {
+    id: number;
+    fullName: string;
+    email: string;
+  };
+
+  keywords?: string[];
+}
 
 export interface Stats {
   projects: number | string;
@@ -127,12 +149,16 @@ export interface Message {
   senderId: number;
   content: string;
   msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
-  metadata?: {
-    msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
+  meeting?: {
+    id?: number;
+    msgType: "CALL_INVITE";
+    title?: string;
+    description?: string | null;
     scheduledAt?: string;
     duration?: number;
     meetingId?: string;
-  };
+    meetingUrl?: string;
+  } | null;
   status: "SENT" | "DELIVERED" | "READ";
   readAt: string | null;
   createdAt: string;

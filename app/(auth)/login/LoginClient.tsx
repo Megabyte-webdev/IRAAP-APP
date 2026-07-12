@@ -145,7 +145,7 @@ function LoginForm() {
       </button>
 
       {/* GOOGLE SIGN IN */}
-      <button
+      {/* <button
         type="button"
         className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-background text-sm font-medium transition hover:bg-muted dark:hover:bg-slate-800/50 focus-visible:outline-none"
       >
@@ -170,10 +170,10 @@ function LoginForm() {
         <span className="text-xs font-semibold text-foreground/80 dark:text-slate-300">
           Sign in with Google
         </span>
-      </button>
+      </button> */}
 
       {/* FOOTER LINK */}
-      <div className="text-center pt-2">
+      {/* <div className="text-center pt-2">
         <p className="text-xs text-muted-foreground">
           Don't have an account?{" "}
           <Link
@@ -183,7 +183,7 @@ function LoginForm() {
             Sign up
           </Link>
         </p>
-      </div>
+      </div> */}
     </form>
   );
 }

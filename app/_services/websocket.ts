@@ -146,8 +146,6 @@ class WebSocketService {
     });
 
     this.socket.addEventListener("close", (event) => {
-      console.log("[WS close]", event.code, event.reason); // ← add this
-      console.log("[WS url]", process.env.NEXT_PUBLIC_WS_URL); //
       this.stopPing();
 
       if (event.code === 4001 || event.code === 4003) {
@@ -185,6 +183,7 @@ class WebSocketService {
         handlers.forEach((cb) =>
           cb({
             type: parsed.type,
+            client_id: parsed.client_id,
             data: parsed.data,
             payload: parsed.payload,
           }),

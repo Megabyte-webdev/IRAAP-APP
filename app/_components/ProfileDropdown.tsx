@@ -113,7 +113,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
                 className="px-4 py-2.5 flex items-center gap-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition-colors"
                 onClick={() => {
                   setIsOpen(false);
-                  logout.mutate();
+                  logout();
                 }}
               >
                 <FiLogOut size={18} />
