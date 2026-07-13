@@ -6,7 +6,11 @@ import MeetingCard from "./_components/MeetingCard";
 
 export default function MeetingsPage() {
   const { getUserSchedules } = useChat();
-  const { data: meetings = [], isLoading } = getUserSchedules();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    getUserSchedules();
+  console.log("Infinite data:", data);
+
+  const meetings = data?.pages.flatMap((page) => page.data) ?? [];
 
   if (isLoading) {
     return (
@@ -35,44 +39,35 @@ export default function MeetingsPage() {
       </div>
 
       {meetings.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
-          <Video className="mx-auto h-12 w-12 text-slate-300" />
-          <h3 className="mt-4 text-sm font-semibold text-slate-900">
-            No sessions scheduled
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            You don't have any upcoming video synchronization windows listed.
-          </p>
-        </div>
+        <div>No sessions scheduled</div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* List Layout */}
-          <div className="space-y-4 md:col-span-2">
-            {meetings.map((meeting: Meeting) => (
-              <MeetingCard key={meeting.id} meeting={meeting} />
-            ))}
-          </div>
+        <>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="space-y-4 md:col-span-2">
+              {meetings.map((meeting: Meeting) => (
+                <MeetingCard key={meeting.id} meeting={meeting} />
+              ))}
 
-          {/* Mini Insights Sidebar Widget */}
-          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-5 h-fit space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Schedule Overview
-            </h4>
-            <div className="rounded-lg bg-white p-4 border border-slate-100 shadow-sm">
-              <div className="text-3xl font-bold text-slate-900">
-                {meetings.length}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Total sync sessions currently pending call verification blocks.
-              </p>
+              {hasNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="w-full rounded-lg border px-4 py-2"
+                >
+                  {isFetchingNextPage ? "Loading..." : "Load more meetings"}
+                </button>
+              )}
             </div>
-            <div className="text-xs text-slate-400 leading-relaxed bg-blue-50/50 border border-blue-100 p-3 rounded-lg">
-              <strong>Pro-tip:</strong> Room connection links become accessible
-              directly through this interface roughly 10 minutes prior to the
-              designated slot start time.
+
+            <div className="rounded-xl border p-5 h-fit">
+              <h4>Schedule Overview</h4>
+
+              <div className="text-3xl font-bold">{meetings.length}</div>
+
+              <p>Total sessions loaded</p>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

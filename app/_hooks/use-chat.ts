@@ -104,15 +104,32 @@ export const useChat = () => {
     });
 
   const getUserSchedules = () =>
-    useQuery({
+    useInfiniteQuery({
       queryKey: ["meetings"],
-      queryFn: async () => {
-        const { data } = await api.get(`/meetings`);
-        return data?.data || null;
+
+      queryFn: async ({ pageParam = 1 }) => {
+        const { data } = await api.get(`/meetings`, {
+          params: {
+            page: pageParam,
+            limit: 20,
+          },
+        });
+
+        return data;
       },
+
+      initialPageParam: 1,
+
+      getNextPageParam: (lastPage) => {
+        if (!lastPage.pagination.hasMore) {
+          return undefined;
+        }
+
+        return lastPage.pagination.page + 1;
+      },
+
       enabled: !!authDetails,
     });
-
   const transmitMessage = () => {};
   return {
     getConversations,
