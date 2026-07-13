@@ -82,8 +82,8 @@ const TaskList = ({
     urgentState?.label === "In Progress";
 
   return (
-    <div className="col-span-12 lg:col-span-4">
-      <div className="lg:sticky lg:top-8 flex flex-col h-[calc(100dvh-100px)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm py-4">
+    <div className="col-span-12 md:col-span-5">
+      <div className="md:sticky md:top-8 flex flex-col h-[calc(100dvh-100px)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm py-4">
         {/* HEADER */}
         <div className="relative flex flex-wrap gap-2 items-center justify-between mb-4 pr-7 mx-4">
           <div className="flex items-center gap-2">

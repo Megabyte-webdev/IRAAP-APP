@@ -83,7 +83,6 @@ export default function Projects() {
     );
   }
 
-  // PROJECT LIST VIEW
   if (!selectedProjectId) {
     return (
       <ProjectList
@@ -93,7 +92,6 @@ export default function Projects() {
     );
   }
 
-  // DETAILED PROJECT VIEW
   return (
     <ProjectDetailView
       currentProject={currentProject}

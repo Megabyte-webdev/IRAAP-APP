@@ -225,9 +225,9 @@ export default function ProjectDetailView({
         </div>
       </div>
 
-      <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
+      <div className="flex flex-col-reverse md:grid md:grid-cols-12 gap-8">
         {/* LEFT - CHAPTERS */}
-        <div className="col-span-12 lg:col-span-8 space-y-8">
+        <div className="col-span-12 md:col-span-7 space-y-8">
           {chapters.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 p-12 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800">
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">

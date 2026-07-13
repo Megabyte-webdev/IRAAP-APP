@@ -129,6 +129,7 @@ export const useChat = () => {
       },
 
       enabled: !!authDetails,
+      refetchOnWindowFocus: "always",
     });
   const transmitMessage = () => {};
   return {
