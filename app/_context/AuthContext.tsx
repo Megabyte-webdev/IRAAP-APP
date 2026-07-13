@@ -12,7 +12,6 @@ import { authService, setupInterceptors } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onPrompt, onSuccess } from "../_utils/Notification";
-import { jwtDecode } from "jwt-decode";
 import { refreshTokenCall } from "../_lib/api-client";
 import { websocket } from "../_services/websocket";
 import { useQueryClient } from "@tanstack/react-query";
@@ -53,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !exp || Date.now() > exp - 30_000;
   };
 
-  // ---------------- SAFE LOGOUT ----------------
   const safeLogout = useCallback(async () => {
     if (logoutLockRef.current) return;
     logoutLockRef.current = true;
@@ -61,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
 
     setAuthDetails(null);
-    localStorage.removeItem("authUser");
+    localStorage.removeItem("iraapUser");
     localStorage.removeItem("ws_token");
     websocket.disconnect();
 
@@ -76,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthDetails((prev: any) => {
       if (!prev) return prev;
       const updated = { ...prev, access_token: token };
-      localStorage.setItem("authUser", JSON.stringify(updated));
+      localStorage.setItem("iraapUser", JSON.stringify(updated));
       websocket.reconnectWithToken(token);
       return updated;
     });
@@ -193,7 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [authDetails?.access_token, handleRefresh, scheduleRefresh]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("authUser");
+    const stored = localStorage.getItem("iraapUser");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -202,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           websocket.connect(parsed.access_token);
         }
       } catch {
-        localStorage.removeItem("authUser");
+        localStorage.removeItem("iraapUser");
       }
     }
 
@@ -286,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/login");
 
       // Force a refresh to clear any sensitive data in the React state/memory
-      window.location.href = "/login";
+      //window.location.href = "/login";
     } catch (err) {
       onFailure({
         title: "Logout Error",

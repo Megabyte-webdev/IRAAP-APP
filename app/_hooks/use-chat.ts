@@ -2,8 +2,10 @@
 
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
+import { useAuth } from "../_context/AuthContext";
 
 export const useChat = () => {
+  const { authDetails } = useAuth();
   const getConversations = () =>
     useInfiniteQuery({
       queryKey: ["conversations"],
@@ -101,6 +103,16 @@ export const useChat = () => {
       enabled: !!userId,
     });
 
+  const getUserSchedules = () =>
+    useQuery({
+      queryKey: ["meetings"],
+      queryFn: async () => {
+        const { data } = await api.get(`/meetings`);
+        return data?.data || null;
+      },
+      enabled: !!authDetails,
+    });
+
   const transmitMessage = () => {};
   return {
     getConversations,
@@ -108,6 +120,7 @@ export const useChat = () => {
     getChatUserById,
     getMessages,
     transmitMessage,
+    getUserSchedules,
   };
 };
 

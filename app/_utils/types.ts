@@ -179,3 +179,31 @@ export interface Publication {
 }
 
 export type FilterStatus = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
+
+export interface UserProfile {
+  id: number;
+  fullName: string;
+  email: string;
+  role?: string;
+}
+
+export interface Meeting {
+  id: number;
+  meetingId: string;
+  title: string;
+  description: string | null;
+  meetingUrl: string;
+  scheduledAt: string; // ISO String from backend
+  duration: number; // in minutes
+  status: "scheduled" | "completed" | "cancelled";
+  conversationId: number;
+  creator: {
+    id: number;
+    fullName: string;
+    role: string;
+  };
+  participants: {
+    student: UserProfile;
+    supervisor: UserProfile;
+  };
+}

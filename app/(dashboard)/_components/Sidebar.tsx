@@ -17,6 +17,7 @@ import {
   GraduationCap,
   MessageSquare,
   BookOpen,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
@@ -50,6 +51,12 @@ const navItems: NavItem[] = [
     href: "/projects",
     roles: ["STUDENT"],
     icon: FolderOpen,
+  },
+  {
+    name: "Meetings",
+    href: "/meetings",
+    roles: ["STUDENT", "SUPERVISOR"],
+    icon: CalendarDays,
   },
   {
     name: "Review Queue",

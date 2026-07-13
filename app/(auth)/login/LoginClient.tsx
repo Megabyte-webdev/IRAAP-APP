@@ -112,7 +112,7 @@ function LoginForm() {
       </div>
 
       {/* REMEMBER & FORGOT */}
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex gap-2 items-center justify-between pt-1">
         <label
           htmlFor="rememberMe"
           className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none"
@@ -191,7 +191,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="min-h-screen w-full bg-muted dark:bg-[#0F172A] text-foreground flex items-center justify-center antialiased p-4 md:p-6 lg:p-8">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] rounded-4xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div className="w-max lg:max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] rounded-4xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
         {/* LEFT SIDE: ILLUSTRATION CONTAINER */}
         <div className="hidden lg:block p-4">
           <div className="w-full h-full min-h-145 relative rounded-[1.75rem] bg-muted/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 flex flex-col justify-between p-10 overflow-hidden">
@@ -251,7 +251,7 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT SIDE: AUTH FORM */}
-        <div className="flex items-center justify-center p-6 sm:p-12 md:p-16">
+        <div className="flex items-center justify-center p-6 md:p-16">
           <div className="w-full max-w-90 flex flex-col items-center">
             {/* Logo Wrapper */}
             <Link href="/" className="flex justify-center mb-6 outline-none">

@@ -61,7 +61,7 @@ export const ConnectionStatusToast = () => {
           transition={{ type: "spring", stiffness: 420, damping: 30 }}
           className="
             fixed top-4 left-1/2 -translate-x-1/2
-            z-[9999]
+            z-9999
             px-3 py-1.5
             rounded-full
             bg-background text-foreground

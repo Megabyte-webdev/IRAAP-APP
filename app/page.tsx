@@ -8,13 +8,10 @@ import {
   AlertCircle,
   ChevronDown,
   X,
-  Sun,
-  Moon,
 } from "lucide-react";
 import ProjectCard from "./_components/ProjectCard";
 import { useProject } from "./_hooks/use-projects";
 import ProfileDropdown from "./_components/ProfileDropdown";
-import { useTheme } from "next-themes";
 import { useAuth } from "./_context/AuthContext";
 import Link from "next/link";
 import ProjectCardSkeleton from "./_components/ProjectCardSkeleton";
@@ -26,15 +23,7 @@ export default function ArchiveDashboard() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { theme, resolvedTheme, setTheme } = useTheme();
   const { authDetails } = useAuth();
-  useEffect(() => {
-    console.log({
-      theme,
-      resolvedTheme,
-      html: document.documentElement.className,
-    });
-  }, [theme, resolvedTheme]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -224,7 +213,7 @@ export default function ArchiveDashboard() {
           )}
 
           {isError && (
-            <div className="rounded-xl border border-red-200 dark:border-red-950/50 bg-red-50 dark:bg-red-950/20 p-6 flex gap-4">
+            <div className="rounded-xl border border-red-200 dark:border-red-950/50 bg-red-50 dark:bg-red-950/20 p-6 flex items-center gap-4">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 shrink-0" />
               <div>
                 <h3 className="text-sm font-semibold text-red-900 dark:text-red-200 mb-0.5">

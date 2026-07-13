@@ -7,7 +7,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const user = JSON.parse(localStorage.getItem("authUser") || "null");
+    const user = JSON.parse(localStorage.getItem("iraapUser") || "null");
 
     const token = user?.token;
 
@@ -63,10 +63,10 @@ api.interceptors.response.use(
         const { data } = await api.post("/auth/refresh-token");
 
         const newToken = data.token;
-        const user = JSON.parse(localStorage.getItem("authUser") || "{}");
+        const user = JSON.parse(localStorage.getItem("iraapUser") || "{}");
 
         localStorage.setItem(
-          "authUser",
+          "iraapUser",
           JSON.stringify({
             ...user,
             token: newToken,
@@ -78,7 +78,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem("authUser");
+        localStorage.removeItem("iraapUser");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
