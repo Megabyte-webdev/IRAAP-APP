@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateAccessToken = useCallback((token: string) => {
     setAuthDetails((prev: any) => {
       if (!prev) return prev;
-      const updated = { ...prev, access_token: token };
+      const updated = { ...prev, token: token };
       localStorage.setItem("iraapUser", JSON.stringify(updated));
       websocket.reconnectWithToken(token);
       return updated;
@@ -116,7 +116,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return refreshInFlight.current;
   };
 
-  // ---------------- TOKEN REFRESH HANDLER ----------------
   const handleRefresh = useCallback(async (): Promise<string | null> => {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       console.warn("[AUTH] offline → skip refresh");
@@ -154,7 +153,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (Date.now() > exp) {
           handleRefresh();
         } else {
-          // Expires within 60s — schedule for actual expiry minus a buffer
           const urgentDelay = Math.max(exp - Date.now() - 5_000, 0);
           refreshTimerRef.current = setTimeout(
             () => handleRefresh(),
@@ -169,26 +167,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const token = authDetails?.access_token;
+    const token = authDetails?.token;
     if (!token) return;
     scheduleRefresh(token);
     return () => {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
-  }, [authDetails?.access_token, scheduleRefresh]);
+  }, [authDetails?.token, scheduleRefresh]);
 
-  // ---------------- VISIBILITY FIX ----------------
   useEffect(() => {
     const onVisible = async () => {
       if (document.visibilityState !== "visible") return;
-      const token = authDetails?.access_token;
+      const token = authDetails?.token;
       if (!token) return;
       if (isExpired(token)) await handleRefresh();
       else scheduleRefresh(token);
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [authDetails?.access_token, handleRefresh, scheduleRefresh]);
+  }, [authDetails?.token, handleRefresh, scheduleRefresh]);
 
   useEffect(() => {
     const stored = localStorage.getItem("iraapUser");
@@ -196,8 +193,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const parsed = JSON.parse(stored);
         setAuthDetails(parsed);
-        if (parsed?.access_token) {
-          websocket.connect(parsed.access_token);
+        if (parsed?.token) {
+          websocket.connect(parsed.token);
         }
       } catch {
         localStorage.removeItem("iraapUser");
@@ -219,10 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setIsLoading(false), 50);
 
     return () => {
-      // FIX (Bug 4): clean up the websocket handler on unmount
       websocket.onAuthFailure = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Login function now accepts optional callbackUrl

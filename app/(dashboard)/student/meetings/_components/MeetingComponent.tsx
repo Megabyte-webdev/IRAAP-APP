@@ -23,7 +23,7 @@ export default function MeetingComponent() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8 animate-pulse">
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div className="space-y-2">
             <div className="h-8 w-64 rounded bg-slate-200" />
             <div className="h-4 w-96 rounded bg-slate-200" />
@@ -60,9 +60,9 @@ export default function MeetingComponent() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8">
       {/* Header Row */}
-      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-start border-b border-slate-100 pb-6">
+      <div className="mb-8 flex flex-wrap justify-between gap-4 md:items-start border-b border-slate-100 pb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
             Research & Supervision Sessions
@@ -72,7 +72,7 @@ export default function MeetingComponent() {
             live project reviews.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:bg-blue-800">
+        <button className="w-max flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:bg-blue-800">
           <Calendar className="mr-2 h-4.5 w-4.5" />
           Schedule New Session
         </button>
@@ -96,9 +96,9 @@ export default function MeetingComponent() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3 md:items-start ">
           {/* Main Meeting Cards Feed */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4 md:col-span-2 order-2 md:order-0">
             {meetings.map((meeting: Meeting) => (
               <MeetingCard key={meeting.id} meeting={meeting} />
             ))}
@@ -126,7 +126,7 @@ export default function MeetingComponent() {
           </div>
 
           {/* 4. Styled Sidebar Panel */}
-          <div className="space-y-4">
+          <div className=" space-y-4 self-start md:sticky md:top-6">
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 pb-3 border-b border-slate-100">
                 <LayoutGrid className="h-3.5 w-3.5 text-slate-400" />
