@@ -12,7 +12,7 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
   const router = useRouter();
   const { authDetails } = useAuth();
   const { typingUsers } = useChatUtils();
-  const chatUser = chat?.participant;
+  const chatUser = chat?.user;
   const currentUserId = authDetails?.user?.id;
 
   const isTyping = chatUser?.id ? !!typingUsers?.[chatUser.id] : false;
@@ -112,7 +112,7 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
     <div
       onClick={() => goToChat()}
       key={chatUser?.id}
-      className={`relative flex items-center gap-3 pt-3.25 pb-4.75 px-1 cursor-pointer hover:bg-gray-50 border-b-[0.53px] border-[#00000033] h-15.75 ${Number(userId) === Number(chatUser.id) ? "bg-gray-100" : ""}`}
+      className={`relative flex items-center gap-3 pt-3.25 pb-4.75 px-1 cursor-pointer hover:bg-gray-50 border-b-[0.53px] border-[#00000033] h-15.75 ${Number(userId) === Number(chatUser?.id) ? "bg-gray-100" : ""}`}
     >
       <UserImage user={chatUser} />
       <div className="flex-1 min-w-0">

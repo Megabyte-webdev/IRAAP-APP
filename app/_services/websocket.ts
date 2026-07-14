@@ -103,6 +103,14 @@ class WebSocketService {
     if (!url) return;
 
     this.token = token;
+    console.log("[WS CONNECT]", {
+      force,
+      hasSocket: !!this.socket,
+      readyState: this.socket?.readyState,
+      state: this.state,
+      token: this.token?.slice(0, 20),
+      stack: new Error().stack,
+    });
 
     if (this.socket) {
       const state = this.socket.readyState;

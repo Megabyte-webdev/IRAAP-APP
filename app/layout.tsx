@@ -5,7 +5,7 @@ import { generatePageMetadata } from "./_lib/metadata";
 
 export const metadata: Metadata = generatePageMetadata({
   title:
-    "OOU · Institutional Repository for Academic Projects | Department of Computer Engineering",
+    "Institutional Repository for Academic Projects | Department of Computer Engineering",
   description:
     "The official digital repository for final year project submissions, facilitating seamless collaboration between students and supervisors at the Department of Computer Engineering, Olabisi Onabanjo University.",
   path: "/",

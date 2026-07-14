@@ -217,31 +217,64 @@ export const updateConversationLastMessage = (
   authUserId?: number,
 ) => {
   qc.setQueryData(["conversations"], (old: any) => {
-    if (!old?.pages) {
-      return old;
+    if (!old?.pages?.length) return old;
+
+    const pages = [...old.pages];
+    const firstPage = { ...pages[0] };
+    const conversations = [...firstPage.data];
+
+    const index = conversations.findIndex(
+      (conversation: any) =>
+        conversation.id === msg.conversationId ||
+        String(conversation.user?.id) === String(msg.senderId),
+    );
+
+    const lastMessage = {
+      ...msg,
+      metadata: {
+        msgType: msg.msgType,
+      },
+    };
+
+    if (index !== -1) {
+      const existing = conversations[index];
+
+      conversations.splice(index, 1);
+
+      conversations.unshift({
+        ...existing,
+        lastMessage,
+        updatedAt: msg.createdAt,
+        unreadCount:
+          String(msg.senderId) === String(authUserId)
+            ? (existing.unreadCount ?? 0)
+            : (existing.unreadCount ?? 0) + 1,
+      });
+    } else {
+      // Only create if truly new
+      conversations.unshift({
+        id: msg.conversationId,
+
+        user: {
+          id: msg.sender.id,
+          fullName: msg.sender.fullName,
+          role: msg.sender.role,
+        },
+
+        lastMessage,
+
+        updatedAt: msg.createdAt,
+
+        unreadCount: msg.senderId === authUserId ? 0 : 1,
+      });
     }
+
+    firstPage.data = conversations;
+    pages[0] = firstPage;
 
     return {
       ...old,
-      pages: old.pages.map((page: any) => ({
-        ...page,
-        data: page.data.map((conversation: any) => {
-          const participantId = conversation.participant?.id;
-
-          // Check if this message belongs to this conversation
-          const isConversation =
-            participantId === msg.senderId || participantId === msg.receiverId;
-
-          if (!isConversation) {
-            return conversation;
-          }
-
-          return {
-            ...conversation,
-            lastMessage: msg,
-          };
-        }),
-      })),
+      pages,
     };
   });
 };
@@ -255,7 +288,7 @@ export function clearUnreadInCache(qc: QueryClient, participantId: number) {
       pages: old.pages.map((page: any) => ({
         ...page,
         data: page.data.map((conversation: any) =>
-          conversation.participant?.id === participantId
+          conversation.user?.id === participantId
             ? {
                 ...conversation,
                 unreadCount: 0,

@@ -29,14 +29,14 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
     if (!selectedUser) return null;
 
     const existing = conversations?.find(
-      (c: any) => c.participant?.id === selectedUser.id,
+      (c: any) => c.user?.id === selectedUser.id,
     );
 
     if (existing) return null;
 
     return {
       id: `temp-${selectedUser.id}`,
-      participant: {
+      user: {
         ...selectedUser,
       },
     };
@@ -52,7 +52,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
     if (!searchQuery) return baseList;
 
     return baseList.filter((conversation: any) =>
-      conversation.participant?.fullName
+      conversation.user?.fullName
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()),
     );
@@ -124,7 +124,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
           </div>
         ) : filteredConversations.length > 0 ? (
           filteredConversations.map((chat: ChatUser) => (
-            <ChatCard key={chat?.participant?.id} chat={chat} />
+            <ChatCard key={chat?.user?.id} chat={chat} />
           ))
         ) : (
           <div className="text-center mt-10 text-gray-400 text-sm">

@@ -130,7 +130,7 @@ export interface User {
 
 export interface ChatUser {
   id: number;
-  participant: User;
+  user: User;
   lastMessage: any;
   unreadCount: number | null;
   updatedAt: string;

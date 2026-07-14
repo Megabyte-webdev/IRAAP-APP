@@ -182,25 +182,45 @@ export const useSocketConnection = ({
     // Read bulk
     const onReadBulk = (event: any) => {
       const qc = queryClientRef.current;
+
       const messageIds: number[] = event.payload?.messageIds ?? [];
       const senderId: number = event.payload?.senderId;
 
+      // Update message statuses
       qc.setQueriesData({ queryKey: ["messages"] }, (old: any) =>
         updateMessageStatusBulk(old, messageIds, "READ"),
       );
 
-      qc.setQueryData(["conversations"], (old: any[]) => {
-        if (!old) return old;
-        return old.map((convo: any) => {
-          if (convo.participant?.id !== senderId) return convo;
-          return {
-            ...convo,
-            unreadCount: 0,
-            lastMessage: convo.lastMessage
-              ? { ...convo.lastMessage, status: "READ" }
-              : convo.lastMessage,
-          };
-        });
+      // Update conversation unread count
+      qc.setQueryData(["conversations"], (old: any) => {
+        if (!old?.pages) return old;
+
+        return {
+          ...old,
+
+          pages: old.pages.map((page: any) => ({
+            ...page,
+
+            data: page.data.map((conversation: any) => {
+              if (conversation.user?.id !== senderId) {
+                return conversation;
+              }
+
+              return {
+                ...conversation,
+
+                unreadCount: 0,
+
+                lastMessage: conversation.lastMessage
+                  ? {
+                      ...conversation.lastMessage,
+                      status: "READ",
+                    }
+                  : null,
+              };
+            }),
+          })),
+        };
       });
     };
 
