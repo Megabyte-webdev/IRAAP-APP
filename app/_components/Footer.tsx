@@ -27,19 +27,19 @@ export default function Footer() {
           </h5>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="hover:text-blue-600 transition">
+              <Link href="/archive" className="hover:text-blue-600 transition">
                 Archive
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-600 transition">
+              <Link href="#" className="hover:text-blue-600 transition">
                 Features
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-600 transition">
+              <Link href="#" className="hover:text-blue-600 transition">
                 Get Started
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -49,14 +49,14 @@ export default function Footer() {
           </h5>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="hover:text-blue-600 transition">
+              <Link href="#" className="hover:text-blue-600 transition">
                 Platform Guide
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-600 transition">
+              <Link href="#" className="hover:text-blue-600 transition">
                 Submit Legal Questions
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

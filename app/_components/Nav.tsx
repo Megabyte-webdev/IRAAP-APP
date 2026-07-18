@@ -2,11 +2,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Archive, Info, Mail, Menu, X, LogIn, ArrowRight } from "lucide-react";
+import { Menu, X, LogIn, ArrowRight } from "lucide-react";
 const navItems = [
-  { name: "Archive", href: "#", icon: Archive },
-  { name: "About", href: "#", icon: Info },
-  { name: "Contact", href: "#", icon: Mail },
+  { name: "Archive", href: "/archive" },
+  { name: "About", href: "#" },
+  { name: "Contact", href: "#" },
 ];
 const Nav = () => {
   const [open, setOpen] = useState(false);
@@ -26,14 +26,12 @@ const Nav = () => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-2 mr-auto ml-10">
           {navItems.map((item) => {
-            const Icon = item.icon;
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className="group relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-blue-50 hover:text-primary"
               >
-                <Icon className="h-4 w-4 transition group-hover:scale-110" />
                 {item.name}
                 <span className="absolute bottom-1 left-4 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-[calc(100%-2rem)]" />
               </Link>
@@ -69,7 +67,6 @@ const Nav = () => {
       >
         <div className="space-y-2 px-5 py-5">
           {navItems.map((item) => {
-            const Icon = item.icon;
             return (
               <Link
                 key={item.name}
@@ -77,7 +74,7 @@ const Nav = () => {
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 transition hover:bg-blue-50 hover:text-primary"
               >
-                <Icon className="h-5 w-5" /> {item.name}
+                {item.name}
               </Link>
             );
           })}

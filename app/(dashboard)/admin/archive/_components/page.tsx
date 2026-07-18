@@ -12,7 +12,7 @@ import {
 import ProjectCard from "./ProjectCard";
 import ProfileDropdown from "./ProfileDropdown";
 import Link from "next/link";
-import ProjectCardSkeleton from "./ProjectCardSkeleton";
+import ProjectCardSkeleton from "../../../../_components/ProjectCardSkeleton";
 import { useProject } from "@/app/_hooks/use-projects";
 import { useAuth } from "@/app/_context/AuthContext";
 import ThemeButton from "@/app/_components/ThemeButton";
