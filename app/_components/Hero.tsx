@@ -1,177 +1,62 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, ArrowRight, RotateCcw } from "lucide-react";
+import { GraduationCap, ArrowRight, Search } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
-  const router = useRouter();
-  const [showFilters, setShowFilters] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-
-  const [searchState, setSearchState] = useState({
-    title: "",
-    year: "",
-    researchArea: "",
-    methodology: "",
-  });
-
-  const activeFilterCount = useMemo(() => {
-    return Object.values(searchState).filter(Boolean).length;
-  }, [searchState]);
-
-  const buildQueryString = useCallback(() => {
-    const params = new URLSearchParams();
-
-    Object.entries(searchState).forEach(([key, value]) => {
-      if (value.trim()) {
-        params.set(key, value);
-      }
-    });
-
-    return params.toString();
-  }, [searchState]);
-
-  const handleSearch = useCallback(() => {
-    setIsSearching(true);
-
-    const query = buildQueryString();
-
-    setTimeout(() => {
-      router.push(`/repository?${query}`);
-      setIsSearching(false);
-    }, 400);
-  }, [router, buildQueryString]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  const resetFilters = () => {
-    setSearchState({
-      title: searchState.title, // keep main search
-      year: "",
-      researchArea: "",
-      methodology: "",
-    });
-  };
-
   return (
-    <section className="max-w-7xl mx-auto px-6 pt-28 pb-10">
-      {/* Header */}
-      <div className="max-w-3xl">
-        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight">
-          Discover Academic Research
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-          Search thousands of research papers, theses, dissertations and
-          scholarly publications.
-        </p>
-      </div>
-
-      {/* SEARCH CONTAINER */}
-      <div className="mt-12 rounded-2xl border bg-card p-6 space-y-6">
-        {/* MAIN SEARCH */}
-        <div className="flex items-center gap-3">
-          <Search className="text-muted-foreground" size={20} />
-
-          <input
-            value={searchState.title}
-            onChange={(e) =>
-              setSearchState((p) => ({ ...p, title: e.target.value }))
-            }
-            onKeyDown={handleKeyDown}
-            placeholder="Search by title, keyword, author..."
-            className="w-full bg-transparent outline-none text-lg"
+    <div
+      style={{
+        background:
+          "radial-gradient(105.7% 113.5% at 50% 0%, #EBF6FD 0%, #FFFFFF 70%)",
+      }}
+    >
+      <section className="relative max-w-5xl mx-auto px-6 pt-16 pb-10 text-center">
+        <div className="inline-flex items-center space-x-1.5 rounded-xl border border-[#C2E3FA] px-3.5 py-1 text-[10px] md:text-xs font-semibold text-[#FFC107] mb-2.5 bg-white/60 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:shadow-md hover:shadow-blue-100">
+          <GraduationCap
+            size={14}
+            className="transition-transform duration-300 group-hover:rotate-6"
           />
+          <span>Designed exclusively for OOU Computer Engineering</span>
+        </div>
 
-          <button
-            onClick={handleSearch}
-            disabled={isSearching}
-            className="px-5 py-2 rounded-lg bg-foreground text-background font-medium flex items-center gap-2"
-          >
-            {isSearching ? "Searching..." : "Search"}
-            <ArrowRight size={16} />
-          </button>
+        <h1 className="mx-auto text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-black">
+          The Central Hub for OOU Computer Engineering Research
+        </h1>
 
-          <button
-            onClick={() => setShowFilters((s) => !s)}
-            className="p-2 rounded-lg border"
+        <p className="mt-6 mx-auto max-w-150 text-base leading-relaxed text-gray-600">
+          Search thousands of past projects, manage your current milestones, and
+          collaborate seamlessly with your supervisor in one centralized, secure
+          archive system designed specifically for our department.
+        </p>
+
+        <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
+          <Link
+            href="/login"
+            className="group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2"
           >
-            <SlidersHorizontal size={18} />
+            Get Started
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+
+          <button className="group w-full md:w-auto border border-primary bg-transparent text-primary text-xs font-semibold px-7 py-4 rounded-lg transition-all duration-300 hover:bg-primary/5 hover:border-primary hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/20 flex items-center justify-center gap-2">
+            <Search className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+            <span>Explore Global Archives</span>
           </button>
         </div>
 
-        {/* FILTERS */}
-        {showFilters && (
-          <div className="grid md:grid-cols-3 gap-4 pt-4 border-t">
-            <input
-              placeholder="Year (e.g. 2025)"
-              value={searchState.year}
-              onChange={(e) =>
-                setSearchState((p) => ({ ...p, year: e.target.value }))
-              }
-              className="border rounded-lg px-3 py-2 bg-transparent"
-            />
-
-            <input
-              placeholder="Research Area"
-              value={searchState.researchArea}
-              onChange={(e) =>
-                setSearchState((p) => ({
-                  ...p,
-                  researchArea: e.target.value,
-                }))
-              }
-              className="border rounded-lg px-3 py-2 bg-transparent"
-            />
-
-            <input
-              placeholder="Methodology"
-              value={searchState.methodology}
-              onChange={(e) =>
-                setSearchState((p) => ({
-                  ...p,
-                  methodology: e.target.value,
-                }))
-              }
-              className="border rounded-lg px-3 py-2 bg-transparent"
-            />
-          </div>
-        )}
-
-        {/* SUGGESTIONS */}
-        {/* {!searchState.title && (
-          <div className="flex flex-wrap gap-2 pt-2">
-            {suggestedSearches.map((item) => (
-              <button
-                key={item}
-                onClick={() => setSearchState((p) => ({ ...p, title: item }))}
-                className="px-3 py-1 text-sm rounded-full border hover:bg-muted transition"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        )} */}
-
-        {/* FOOTER ACTIONS */}
-        <div className="flex items-center justify-between pt-4 border-t text-sm text-muted-foreground">
-          <div>Active filters: {activeFilterCount}</div>
-
-          {activeFilterCount > 0 && (
-            <button
-              onClick={resetFilters}
-              className="flex items-center gap-1 text-red-500"
-            >
-              <RotateCcw size={14} />
-              Reset filters
-            </button>
-          )}
+        {/* Dashboard Preview */}
+        <div className="mt-16 relative">
+          <Image
+            src="/dashboard_preview.png"
+            alt="preview"
+            width={1200}
+            height={700}
+            className="w-full transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:drop-shadow-2xl"
+          />
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

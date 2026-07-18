@@ -1,11 +1,8 @@
 "use client";
-
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { useAuth } from "@/app/_context/AuthContext";
 import { useSearchParams } from "next/navigation";
-import { Loader2, AlertCircle, Eye, EyeOff, Database } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function LoginForm() {
   const { login } = useAuth();
@@ -187,109 +184,4 @@ function LoginForm() {
     </form>
   );
 }
-
-export default function LoginPage() {
-  return (
-    <div className="min-h-screen w-full bg-muted dark:bg-[#0F172A] text-foreground flex items-center justify-center antialiased p-4 md:p-6 lg:p-8">
-      <div className="w-max lg:max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] rounded-4xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-        {/* LEFT SIDE: ILLUSTRATION CONTAINER */}
-        <div className="hidden lg:block p-4">
-          <div className="w-full h-full min-h-145 relative rounded-[1.75rem] bg-muted/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 flex flex-col justify-between p-10 overflow-hidden">
-            {/* Top Row Branding */}
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-800 bg-background dark:bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-muted-foreground dark:text-slate-300">
-                <Database className="w-3.5 h-3.5 text-primary/80 dark:text-slate-400" />
-                Academic Archive
-              </div>
-            </div>
-
-            {/* Center Graphic Artwork Mockup */}
-            <div className="my-auto flex flex-col items-center justify-center w-full">
-              <div className="w-64 aspect-square bg-linear-to-br from-slate-100 dark:from-slate-800/80 via-transparent to-transparent rounded-4xl border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                <Database className="w-16 h-16 text-slate-300 dark:text-slate-700 animate-pulse" />
-              </div>
-            </div>
-
-            {/* Bottom Content Metadata */}
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground dark:text-slate-100">
-                IRAAP Repository
-              </h1>
-              <p className="mt-2 text-muted-foreground text-sm max-w-sm leading-relaxed">
-                Access archived theses, dissertations, publications, and
-                scholarly research securely from across departments.
-              </p>
-
-              <div className="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
-                <div>
-                  <div className="text-xl font-bold text-foreground/90 dark:text-slate-200">
-                    4.8k+
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Records
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-foreground/90 dark:text-slate-200">
-                    120+
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Supervisors
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-foreground/90 dark:text-slate-200">
-                    15+
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Years
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT SIDE: AUTH FORM */}
-        <div className="flex items-center justify-center p-6 md:p-16">
-          <div className="w-full max-w-90 flex flex-col items-center">
-            {/* Logo Wrapper */}
-            <Link href="/" className="flex justify-center mb-6 outline-none">
-              <Image
-                src="/irap-logo.png"
-                alt="IRAP Logo"
-                width={100}
-                height={32}
-                className="object-contain h-15 w-auto transition-transform hover:scale-105  opacity-90"
-                priority
-              />
-            </Link>
-
-            {/* Header Content */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                Log in to your account
-              </h2>
-              <p className="mt-1.5 text-xs text-muted-foreground font-medium">
-                Welcome back! Please enter your details.
-              </p>
-            </div>
-
-            {/* Form Section */}
-            <div className="w-full">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-10">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  </div>
-                }
-              >
-                <LoginForm />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default LoginForm;

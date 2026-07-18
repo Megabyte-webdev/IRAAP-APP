@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import LoginPage from "./LoginClient";
+import LoginPage from "./LoginPage";
 import Loading from "@/app/(dashboard)/loading";
 
 const page = () => {

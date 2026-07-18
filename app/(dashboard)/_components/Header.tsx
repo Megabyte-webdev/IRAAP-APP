@@ -4,7 +4,7 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { Bell, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
-import ProfileDropdown from "@/app/_components/ProfileDropdown";
+import ProfileDropdown from "@/app/(dashboard)/admin/archive/_components/ProfileDropdown";
 import ThemeButton from "@/app/_components/ThemeButton";
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
