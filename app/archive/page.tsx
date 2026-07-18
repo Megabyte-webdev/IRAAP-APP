@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import Footer from "../_components/Footer";
 import { generatePageMetadata } from "../_lib/metadata";
+import Nav from "../_components/Nav";
+import ArchivePage from "./_components/ArchivePage";
 
 export const metadata = generatePageMetadata({
   title: "IRAP Repository",
@@ -19,6 +21,8 @@ export default function RepositoryPage({ searchParams }: any) {
         </div>
       }
     >
+      <Nav />
+      <ArchivePage />
       <Footer />
     </Suspense>
   );

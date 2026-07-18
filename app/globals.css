@@ -56,7 +56,7 @@
 
 /* Thumb hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #2040e3; /* Darker orange on hover */
+  background: var(--color-primary); /* Darker orange on hover */
 }
 
 /* Corner (where scrollbars meet) */
