@@ -211,6 +211,10 @@ export function updateMessageStatusBulk(
   };
 }
 
+/**
+ * Update conversation list with the latest message
+ * Handles both sent and received messages correctly
+ */
 export const updateConversationLastMessage = (
   qc: QueryClient,
   msg: any,
@@ -223,10 +227,18 @@ export const updateConversationLastMessage = (
     const firstPage = { ...pages[0] };
     const conversations = [...firstPage.data];
 
+    // CRITICAL FIX: Determine which user ID to match
+    // If WE sent the message → find conversation with receiverId (the other person)
+    // If WE received the message → find conversation with senderId (the other person)
+    const otherUserId =
+      String(msg.senderId) === String(authUserId)
+        ? msg.receiverId // We sent it → find by who we sent to
+        : msg.senderId; // We received it → find by who sent it
+
     const index = conversations.findIndex(
       (conversation: any) =>
         conversation.id === msg.conversationId ||
-        String(conversation.user?.id) === String(msg.senderId),
+        String(conversation.user?.id) === String(otherUserId),
     );
 
     const lastMessage = {
@@ -237,6 +249,7 @@ export const updateConversationLastMessage = (
     };
 
     if (index !== -1) {
+      // Update existing conversation
       const existing = conversations[index];
 
       conversations.splice(index, 1);
@@ -247,25 +260,32 @@ export const updateConversationLastMessage = (
         updatedAt: msg.createdAt,
         unreadCount:
           String(msg.senderId) === String(authUserId)
-            ? (existing.unreadCount ?? 0)
-            : (existing.unreadCount ?? 0) + 1,
+            ? (existing.unreadCount ?? 0) // Don't increment for our own messages
+            : (existing.unreadCount ?? 0) + 1, // Increment for received messages
       });
     } else {
-      // Only create if truly new
+      // Create new conversation - use the other person's data
+      const otherUserData =
+        String(msg.senderId) === String(authUserId)
+          ? {
+              // We sent it → other person is receiver
+              id: msg.receiverId,
+              fullName: msg.selectedChat?.fullName ?? "Unknown",
+              role: msg.selectedChat?.role ?? "STUDENT",
+            }
+          : {
+              // We received it → other person is sender
+              id: msg.sender?.id,
+              fullName: msg.sender?.fullName ?? "Unknown",
+              role: msg.sender?.role ?? "STUDENT",
+            };
+
       conversations.unshift({
         id: msg.conversationId,
-
-        user: {
-          id: msg.sender.id,
-          fullName: msg.sender.fullName,
-          role: msg.sender.role,
-        },
-
+        user: otherUserData,
         lastMessage,
-
         updatedAt: msg.createdAt,
-
-        unreadCount: msg.senderId === authUserId ? 0 : 1,
+        unreadCount: String(msg.senderId) === String(authUserId) ? 0 : 1,
       });
     }
 

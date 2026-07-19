@@ -1,13 +1,21 @@
+"use client";
 import { Database, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import LoginForm from "./_components/LoginForm";
+import useSearch from "@/app/_hooks/use-search";
+import StatItem from "./_components/StatItem";
 
 export default function LoginPage() {
+  const { useHome } = useSearch();
+  const { data, isLoading, isError } = useHome();
+
+  const stats = data?.stats;
+
   return (
     <div className="min-h-screen w-full bg-muted dark:bg-[#0F172A] text-foreground flex items-center justify-center antialiased p-4 md:p-6 lg:p-8">
-      <div className="w-full lg:max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] rounded-4xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div className=" lg:max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
         {/* LEFT SIDE: FULL-BLEED VISUAL LAYER */}
         <div className="hidden lg:block relative w-full h-full min-h-155 bg-white dark:bg-slate-900 overflow-hidden">
           {/* Edge-to-Edge Video Layout */}
@@ -24,7 +32,7 @@ export default function LoginPage() {
           </div>
 
           {/* Foreground UI Layer (Overlayed over the full-bleed video) */}
-          <div className="absolute inset-0 flex flex-col justify-between p-10 z-10 bg-gradient-to-b from-white/20 via-transparent to-white/40 dark:from-transparent dark:to-slate-900/60">
+          <div className="absolute inset-0 flex flex-col justify-between p-10 z-10 bg-linear-to-b from-white/20 via-transparent to-white/40 dark:from-transparent dark:to-slate-900/60">
             {/* Top Row Branding */}
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-xs">
@@ -44,30 +52,26 @@ export default function LoginPage() {
               </p>
 
               <div className="grid grid-cols-3 gap-4 pt-4 mt-4 border-t border-slate-200/60 dark:border-slate-800/60">
-                <div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-slate-200">
-                    4.8k+
-                  </div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-                    Records
-                  </div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-slate-200">
-                    120+
-                  </div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-                    Supervisors
-                  </div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-slate-200">
-                    15+
-                  </div>
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-                    Years
-                  </div>
-                </div>
+                <StatItem
+                  label="Projects"
+                  value={stats?.projects}
+                  loading={isLoading}
+                  error={isError}
+                />
+
+                <StatItem
+                  label="Researchers"
+                  value={stats?.researchers}
+                  loading={isLoading}
+                  error={isError}
+                />
+
+                <StatItem
+                  label="Supervisors"
+                  value={stats?.supervisors}
+                  loading={isLoading}
+                  error={isError}
+                />
               </div>
             </div>
           </div>

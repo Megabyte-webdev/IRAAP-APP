@@ -8,8 +8,8 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
   const CURRENT_USER = authDetails?.user;
   const isStudent = CURRENT_USER?.role === "STUDENT";
   const peer = isStudent
-    ? meeting.participants.supervisor
-    : meeting.participants.student;
+    ? meeting?.participants.supervisor
+    : meeting?.participants.student;
 
   // Track the current time live (updates every second)
   const [now, setNow] = useState(new Date());

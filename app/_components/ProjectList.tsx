@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AlertCircle, ArrowRight, RefreshCcw } from "lucide-react";
 import { useProject } from "../_hooks/use-projects";
 import ProjectCard from "./ProjectCard";
-import ProjectCardSkeleton from "./ProjectCardSkeleton";
+import ProjectCardSkeleton from "../(dashboard)/admin/archive/_components/ProjectCardSkeleton";
 
 const ProjectList = () => {
   const { getAllProjects } = useProject();

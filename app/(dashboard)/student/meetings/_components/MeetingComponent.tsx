@@ -8,18 +8,84 @@ import {
   LayoutGrid,
   CheckCircle2,
 } from "lucide-react";
-import { Meeting } from "@/app/_utils/types";
+import { Meeting, User } from "@/app/_utils/types";
 import useChat from "@/app/_hooks/use-chat";
 import MeetingCard from "./MeetingCard";
+import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import { useState } from "react";
+import { websocket } from "@/app/_services/websocket";
+import {
+  appendMessage,
+  createOptimisticMessage,
+  updateConversationLastMessage,
+} from "@/app/helpers/chat-cache";
+import { useAuth } from "@/app/_context/AuthContext";
+import { queryClient } from "@/app/_services/query-client";
 
 export default function MeetingComponent() {
-  const { getUserSchedules } = useChat();
+  const { authDetails } = useAuth();
+  const { getUserSchedules, getChatableUsers } = useChat();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     getUserSchedules();
 
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const { data: userList, isLoading: isLoadingUsers } = getChatableUsers();
+  const availableUsers: User[] =
+    userList?.pages.flatMap((page) => page.data) ?? [];
+
   const meetings = data?.pages.flatMap((page) => page.data) ?? [];
 
-  // 1. Premium Loading Skeletons matching IRAAP visual layout
+  const handleScheduleMeeting = ({
+    user,
+    title,
+    description,
+    scheduledAt,
+    duration,
+  }: {
+    user: User;
+    title: string;
+    description?: string;
+    scheduledAt: string;
+    duration: number;
+  }) => {
+    const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const meeting = {
+      title,
+      description,
+      scheduledAt,
+      duration,
+    };
+
+    const optimisticMsg = createOptimisticMessage({
+      clientId,
+      content: title,
+      msgType: "CALL_INVITE",
+      authDetails,
+      selectedChat: user,
+      meeting,
+    });
+
+    queryClient.setQueryData(["messages", Number(user.id)], (old: any) =>
+      appendMessage(old, optimisticMsg),
+    );
+
+    updateConversationLastMessage(
+      queryClient,
+      optimisticMsg,
+      Number(authDetails.user.id),
+    );
+
+    websocket.emit("chat:send", {
+      recipientId: Number(user.id),
+      content: title,
+      msgType: "CALL_INVITE",
+      meeting,
+    });
+
+    setShowScheduleModal(false);
+  };
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8 animate-pulse">
@@ -72,10 +138,15 @@ export default function MeetingComponent() {
             live project reviews.
           </p>
         </div>
-        <button className="w-max flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:bg-blue-800">
-          <Calendar className="mr-2 h-4.5 w-4.5" />
-          Schedule New Session
-        </button>
+        {authDetails?.user?.role === "SUPERVISOR" && (
+          <button
+            onClick={() => setShowScheduleModal(true)}
+            className="w-max flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:bg-blue-800"
+          >
+            <Calendar className="mr-2 h-4.5 w-4.5" />
+            Schedule New Session
+          </button>
+        )}
       </div>
 
       {meetings.length === 0 ? (
@@ -91,9 +162,14 @@ export default function MeetingComponent() {
             There are no research alignments or sync panels pending on your
             academic calendar.
           </p>
-          <button className="mt-5 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-            Schedule a Meeting
-          </button>
+          {authDetails?.user?.role === "SUPERVISOR" && (
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="mt-5 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            >
+              Schedule a Meeting
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-3 md:items-start ">
@@ -167,6 +243,15 @@ export default function MeetingComponent() {
           </div>
         </div>
       )}
+
+      {/* Schedule Meeting Modal */}
+      <ScheduleMeetingModal
+        open={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        onSchedule={handleScheduleMeeting}
+        users={availableUsers}
+        isLoadingUsers={isLoadingUsers}
+      />
     </div>
   );
 }

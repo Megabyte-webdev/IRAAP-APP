@@ -16,7 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useProject } from "@/app/_hooks/use-projects";
 import ProjectCard from "@/app/_components/ProjectCard";
-import ProjectCardSkeleton from "@/app/_components/ProjectCardSkeleton";
+import ProjectCardSkeleton from "@/app/(dashboard)/admin/archive/_components/ProjectCardSkeleton";
 import FilterCheckbox from "./FilterCheckbox";
 
 export default function ArchivePage() {
@@ -175,7 +175,7 @@ export default function ArchivePage() {
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
                 <span className="text-sm font-medium text-slate-400">
                   Showing{" "}
-                  <strong className="text-white font-semibold">42</strong>{" "}
+                  <strong className=" font-semibold">{projects?.length}</strong>{" "}
                   results
                 </span>
 

@@ -82,7 +82,7 @@ const navItems: NavItem[] = [
     roles: ["STUDENT", "ADMIN"],
     icon: BookOpen,
   },
-  { name: "Archive Search", href: "/repository", roles: "ALL", icon: Search },
+  { name: "Archive Search", href: "/archive", roles: "ALL", icon: Search },
 ];
 
 export function Sidebar({

@@ -5,8 +5,8 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { MdOutlineDashboard } from "react-icons/md";
 import Link from "next/link";
-import { useAuth } from "../../../../_context/AuthContext";
-import { getInitials } from "../../../../_utils/formatters";
+import { useAuth } from "../_context/AuthContext";
+import { getInitials } from "../_utils/formatters";
 
 interface UserProfile {
   profileImage?: string;

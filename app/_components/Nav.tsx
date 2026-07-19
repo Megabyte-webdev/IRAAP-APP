@@ -3,12 +3,15 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X, LogIn, ArrowRight } from "lucide-react";
+import { useAuth } from "../_context/AuthContext";
+import ProfileDropdown from "./ProfileDropdown";
 const navItems = [
   { name: "Archive", href: "/archive" },
   { name: "About", href: "#" },
   { name: "Contact", href: "#" },
 ];
 const Nav = () => {
+  const { authDetails } = useAuth();
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
@@ -39,20 +42,24 @@ const Nav = () => {
           })}
         </nav>
         {/* Desktop Buttons */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <LogIn className="h-4 w-4" /> Log In
-          </Link>
-          <Link
-            href="/login"
-            className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            Get Started <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        {authDetails?.user ? (
+          <ProfileDropdown />
+        ) : (
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/login"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <LogIn className="h-4 w-4" /> Log In
+            </Link>
+            <Link
+              href="/login"
+              className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              Get Started <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
         {/* Mobile Toggle */}
         <button
           onClick={() => setOpen(!open)}
