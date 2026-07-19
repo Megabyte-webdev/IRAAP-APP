@@ -4,27 +4,29 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="border-t border-gray-100 bg-white text-xs text-gray-500 py-16 px-6 md:px-16">
-      <div className="max-w-7xl mx-auto flex flex-wrap gap-8 mb-12">
-        <div className="flex-1 space-y-3">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:flex-wrap gap-8 mb-12">
+        <div className="w-full sm:flex-1 space-y-3">
           <Link href="/" className="flex items-center w-max">
-            {" "}
             <Image
               src="/irap-logo.png"
               alt="IRAAP"
               width={42}
               height={42}
               className="h-10 w-auto transition-transform duration-300 hover:scale-105"
-            />{" "}
+            />
           </Link>
+
           <p className="max-w-xs text-gray-600 leading-relaxed">
             The Hub for your external archiving files. OOU Computer Engineering
             automated project submission and tracking tool.
           </p>
         </div>
-        <div>
+
+        <div className="w-full sm:w-auto">
           <h5 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider mb-3">
             Platform
           </h5>
+
           <ul className="space-y-2">
             <li>
               <Link href="/archive" className="hover:text-blue-600 transition">
@@ -43,10 +45,12 @@ export default function Footer() {
             </li>
           </ul>
         </div>
-        <div>
+
+        <div className="w-full sm:w-auto">
           <h5 className="font-bold text-gray-800 uppercase text-[10px] tracking-wider mb-3">
             Support
           </h5>
+
           <ul className="space-y-2">
             <li>
               <Link href="#" className="hover:text-blue-600 transition">
