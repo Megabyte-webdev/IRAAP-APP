@@ -5,15 +5,22 @@ import { Bell, Menu } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import ProfileDropdown from "@/app/_components/ProfileDropdown";
-import ThemeButton from "@/app/_components/ThemeButton";
+import useChat from "@/app/_hooks/use-chat";
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { authDetails, isLoading: authLoading } = useAuth();
+  const { getConversations } = useChat();
+
+  const { data } = getConversations();
+
+  const conversations = data?.pages.flatMap((page) => page.data) ?? [];
+
+  const notificationCount = conversations.reduce(
+    (total, conversation) => total + (conversation.unreadCount ?? 0),
+    0,
+  );
   const [showNotifications, setShowNotifications] = useState(false);
   const user = authDetails?.user;
-
-  // Simulated notification count (replace with real data)
-  const notificationCount = 3;
 
   // Loading state – skeleton
   if (authLoading) {
@@ -68,7 +75,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
       {/* Right section */}
       <div className="flex items-center gap-2">
-        <ThemeButton />
+        {/* <ThemeButton /> */}
         {/* Notification bell */}
         <div className="relative">
           <button
@@ -77,9 +84,9 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             aria-label="Notifications"
             aria-expanded={showNotifications}
           >
-            <Bell size={24} />
+            <Bell size={20} />
             {notificationCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-[#1E293B]">
+              <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#1E293B]">
                 {notificationCount}
               </span>
             )}

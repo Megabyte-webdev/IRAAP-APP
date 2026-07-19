@@ -43,7 +43,9 @@ const Nav = () => {
         </nav>
         {/* Desktop Buttons */}
         {authDetails?.user ? (
-          <ProfileDropdown />
+          <div className="ml-auto mr-2">
+            <ProfileDropdown />
+          </div>
         ) : (
           <div className="hidden md:flex items-center gap-3">
             <Link
@@ -85,21 +87,23 @@ const Nav = () => {
               </Link>
             );
           })}
-          <div className="mt-5 space-y-3 border-t border-gray-300 pt-5">
-            <Link
-              href="/login"
-              className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 font-semibold transition hover:bg-gray-50"
-            >
-              <LogIn className="h-4 w-4" /> Log In
-            </Link>
-            <Link
-              href="/login"
-              className=" group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              Get Started
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </div>
+          {!authDetails?.user && (
+            <div className="mt-5 space-y-3 border-t border-gray-300 pt-5">
+              <Link
+                href="/login"
+                className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 font-semibold transition hover:bg-gray-50"
+              >
+                <LogIn className="h-4 w-4" /> Log In
+              </Link>
+              <Link
+                href="/login"
+                className=" group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Get Started
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

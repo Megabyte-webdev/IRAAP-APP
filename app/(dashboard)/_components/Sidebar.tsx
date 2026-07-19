@@ -41,12 +41,6 @@ const navItems: NavItem[] = [
     icon: MessageSquare,
   },
   {
-    name: "Submit Project",
-    href: "/upload",
-    roles: ["STUDENT"],
-    icon: FileUp,
-  },
-  {
     name: "My Project",
     href: "/projects",
     roles: ["STUDENT"],

@@ -1,26 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 export default function Loading() {
   return (
-    <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-md">
-      <div className="relative flex flex-col items-center">
-        {/* Outer Glow Effect */}
-        <div className="absolute h-16 w-16 animate-ping rounded-full bg-indigo-400/20 duration-2000" />
-
-        {/* Main Spinner */}
-        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-xl border border-slate-100">
-          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-sm transition-all duration-300">
+      <div className="w-full max-w-xs px-6 py-8 flex flex-col items-center bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-xl dark:shadow-2xl/40">
+        {/* Spinner Section */}
+        <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100/50 dark:border-indigo-900/30 mb-5">
+          <Loader2
+            className="h-6 w-6 animate-spin text-primary dark:text-primary/80"
+            strokeWidth={2.25}
+          />
         </div>
 
-        {/* Loading Text */}
-        <div className="mt-6 flex flex-col items-center gap-1">
-          <h2 className="text-sm font-bold tracking-widest text-slate-800 uppercase">
+        {/* Text Details */}
+        <div className="text-center w-full space-y-1 mb-4">
+          <h2 className="text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Syncing Workspace
           </h2>
-          <p className="text-[10px] font-medium text-slate-400 italic">
-            Preparing your dashboard...
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            Preparing your dashboard environment...
           </p>
         </div>
       </div>

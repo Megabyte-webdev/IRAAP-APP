@@ -47,7 +47,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
         )}
 
         <div className="flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/60 w-max p-1 transition-colors">
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden bg-slate-600 dark:bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200">
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600 dark:bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200">
             {user?.profile?.profileImage ? (
               <img
                 src={`${process.env.NEXT_PUBLIC_BASE_URL}${user.profile.profileImage}`}
