@@ -347,3 +347,89 @@ export function syncMessageWithCache(
     return appendMessage(old, payload);
   });
 }
+
+export function appendMeetingToCache(qc: QueryClient, message: any) {
+  if (message.msgType !== "CALL_INVITE" || !message.meeting) {
+    return;
+  }
+
+  qc.setQueryData(["meetings"], (old: any) => {
+    if (!old) {
+      return {
+        data: [buildMeeting(message)],
+        pagination: {
+          total: 1,
+          page: 1,
+          limit: 20,
+          totalPages: 1,
+          hasMore: false,
+        },
+      };
+    }
+
+    const exists = old.data?.some(
+      (meeting: any) =>
+        meeting.id === message.meeting.id ||
+        meeting.meetingId === message.meeting.meetingId,
+    );
+
+    if (exists) {
+      return old;
+    }
+
+    return {
+      ...old,
+      data: [buildMeeting(message), ...(old.data ?? [])],
+      pagination: {
+        ...old.pagination,
+        total: (old.pagination?.total ?? 0) + 1,
+      },
+    };
+  });
+}
+
+function buildMeeting(message: any) {
+  return {
+    id: message.meeting.id,
+
+    meetingId: message.meeting.meetingId,
+
+    title: message.meeting.title,
+
+    description: message.meeting.description,
+
+    meetingUrl: message.meeting.meetingUrl,
+
+    scheduledAt: message.meeting.scheduledAt,
+
+    duration: message.meeting.duration,
+
+    status: "SCHEDULED",
+
+    conversationId: message.conversationId,
+
+    creator: {
+      id: message.sender.id,
+      fullName: message.sender.fullName,
+      role: message.sender.role,
+    },
+
+    participants: {
+      supervisor:
+        message.sender.role === "SUPERVISOR"
+          ? {
+              id: message.sender.id,
+              fullName: message.sender.fullName,
+            }
+          : null,
+
+      student:
+        message.sender.role === "STUDENT"
+          ? {
+              id: message.sender.id,
+              fullName: message.sender.fullName,
+            }
+          : null,
+    },
+  };
+}

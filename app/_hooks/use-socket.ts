@@ -7,6 +7,7 @@ import { useChatUtils } from "../_context/ChatContext";
 import { websocket } from "../_services/websocket";
 import { showChatNotification } from "../_services/chatNotification";
 import {
+  appendMeetingToCache,
   appendToCache,
   clearUnreadInCache,
   updateConversationLastMessage,
@@ -63,6 +64,9 @@ export const useSocketConnection = ({
       appendToCache(qc, msg.senderId, msg);
 
       updateConversationLastMessage(qc, msg, authUserRef.current);
+      if (msg.msgType === "CALL_INVITE") {
+        appendMeetingToCache(qc, msg);
+      }
 
       const isOwnMessage = msg.senderId === authUserRef.current;
 
@@ -109,6 +113,9 @@ export const useSocketConnection = ({
         };
       });
       updateConversationLastMessage(qc, real, authUserRef.current);
+      if (real.msgType === "CALL_INVITE") {
+        appendMeetingToCache(qc, real);
+      }
     };
 
     const onMessagesBulk = (event: any) => {
