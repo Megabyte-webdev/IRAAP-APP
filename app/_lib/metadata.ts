@@ -133,4 +133,5 @@ applicationName: "IRAAP",
   images: [finalImage],
 },
     },
+    };
 }
