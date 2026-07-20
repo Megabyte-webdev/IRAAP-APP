@@ -82,7 +82,7 @@ applicationName: "IRAAP",
         { url: "/favicon.ico" },
         {
           url: "/favicon-16x16.png",
-          sizes:16x16",
+          sizes:"16x16",
           type: "image/png",
         },
         {
@@ -132,6 +132,5 @@ applicationName: "IRAAP",
   description: finalDescription,
   images: [finalImage],
 },
-    },
-    };
+    }
 }
