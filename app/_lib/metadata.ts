@@ -7,7 +7,7 @@ interface PageMetadataOptions {
   path?: string;
 }
 
-const BASE_URL = "http://iraap.com.ng";
+const BASE_URL = "https://iraap.com.ng";
 
 export function generatePageMetadata({
   title,
@@ -26,20 +26,63 @@ export function generatePageMetadata({
 
   return {
     metadataBase: new URL(BASE_URL),
-
+applicationName: "IRAAP",
     title: finalTitle,
     description: finalDescription,
+
+    keywords: [
+    "Institutional Repository",
+    "Computer Engineering",
+    "Olabisi Onabanjo University",
+    "Final Year Project",
+    "Research Repository",
+    "Academic Repository",
+    "Student Projects",
+    "IRAAP",
+    "OOU",
+  ],
+
+    robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
 
     alternates: {
       canonical: url,
     },
+    authors: [
+    {
+      name: "Department of Computer Engineering",
+    },
+      {
+        name:"Afolabi Mubarak"
+      },
+      {
+        name:"Abiola Olamilekan"
+      },
+      {
+        name:"Abdulwasiu Billal"
+      },
+  ],
+
+    creator: "Department of Computer Engineering",
+  publisher: "Department of Computer Engineering",
+    
 
     icons: {
       icon: [
         { url: "/favicon.ico" },
         {
           url: "/favicon-16x16.png",
-          sizes: "16x16",
+          sizes:16x16",
           type: "image/png",
         },
         {
@@ -84,10 +127,10 @@ export function generatePageMetadata({
     },
 
     twitter: {
-      card: "summary_large_image",
-      title: title,
-      description: description,
-      images: imageUrl ? [imageUrl] : undefined,
+  card: "summary_large_image",
+  title: finalTitle,
+  description: finalDescription,
+  images: [finalImage],
+},
     },
-  };
 }
