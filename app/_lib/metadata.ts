@@ -15,10 +15,10 @@ export function generatePageMetadata({
   imageUrl,
   path = "",
 }: PageMetadataOptions): Metadata {
-  const finalTitle = title || "IRAP · Institutional Repository";
+  const finalTitle = title || "IRAAP · Institutional Repository";
   const finalDescription =
     description ||
-    "IRAP is a digital institutional repository for accessing academic research, publications, and scholarly resources.";
+    "IRAAP is a digital institutional repository for accessing academic research, publications, and scholarly resources.";
 
   const finalImage = imageUrl ? imageUrl : `${BASE_URL}/irap-logo.png`;
 
@@ -114,14 +114,14 @@ applicationName: "IRAAP",
       title: finalTitle,
       description: finalDescription,
       url,
-      siteName: "IRAP",
+      siteName: "IRAAP",
       type: "website",
       images: [
         {
           url: finalImage,
           width: 1200,
           height: 630,
-          alt: "IRAP Repository",
+          alt: "IRAAP Repository",
         },
       ],
     },
