@@ -5,7 +5,7 @@ import Nav from "../_components/Nav";
 import ArchivePage from "./_components/ArchivePage";
 
 export const metadata = generatePageMetadata({
-  title: "IRAP Repository",
+  title: "IRAAP Repository",
   description:
     "Explore the IRAP institutional repository—access research papers, academic publications, and digital resources across multiple disciplines.",
   path: "/repository",
