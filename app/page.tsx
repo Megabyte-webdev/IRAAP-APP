@@ -5,7 +5,7 @@ import Nav from "./_components/Nav";
 import ProjectList from "./_components/ProjectList";
 import ExploreSection from "./_components/ExploreSection";
 import Footer from "./_components/Footer";
-import { generatePageMetadata } from "./_lib/metadata";
+import generatePageMetadata from "./_lib/metadata";
 export const metadata: Metadata = generatePageMetadata({
   title:
     "IRAAP | Institutional Repository for Academic Projects",
