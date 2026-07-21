@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Capabilities from "./_components/Capabilities";
 import Features from "./_components/Features";
 import Hero from "./_components/Hero";
