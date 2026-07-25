@@ -205,7 +205,7 @@ export default function MeetingRoomContent({ meetingId }: Props) {
 
   // 3. Active Call Layout
   return (
-    <div className="h-screen w-full flex flex-col bg-[#525252] text-white overflow-hidden relative">
+    <div className="h-screen w-full flex flex-col bg-[#575758] text-white overflow-hidden relative">
       {/* Floating Header Pill */}
       <div className="absolute top-6 left-6 z-30">
         <div className="bg-white/20 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full flex items-center gap-3 shadow-md">
