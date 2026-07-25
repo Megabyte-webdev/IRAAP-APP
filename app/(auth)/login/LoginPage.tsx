@@ -16,13 +16,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-full bg-muted dark:bg-[#0F172A] text-foreground flex items-center justify-center antialiased p-4 md:p-6 lg:p-8">
       <div className=" lg:max-w-6xl grid lg:grid-cols-2 bg-background dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-        {/* LEFT SIDE: FULL-BLEED VISUAL LAYER */}
         <div className="hidden lg:block relative w-full h-full min-h-155 bg-white dark:bg-slate-900 overflow-hidden">
-          {/* Edge-to-Edge Video Layout */}
           <div className="absolute inset-0 w-full h-full pointer-events-none select-none">
             <video
               src="/shapes-grid-flow.mp4"
-              poster="/Shapes_flowing_into_grid_2K_202607151236.jpeg"
+              poster="/shapes-grid-flow.jpeg"
               autoPlay
               loop
               muted
@@ -31,9 +29,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Foreground UI Layer (Overlayed over the full-bleed video) */}
           <div className="absolute inset-0 flex flex-col justify-between p-10 z-10 bg-linear-to-b from-white/20 via-transparent to-white/40 dark:from-transparent dark:to-slate-900/60">
-            {/* Top Row Branding */}
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-xs">
                 <Database className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -94,7 +90,7 @@ export default function LoginPage() {
 
             {/* Header Content */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-xl md:text-[22px] font-semibold tracking-tight text-foreground">
                 Log in to your account
               </h2>
               <p className="mt-1.5 text-xs text-muted-foreground font-medium">

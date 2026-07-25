@@ -194,7 +194,7 @@ export const useProject = () => {
 
   const releaseProject = useMutation({
     mutationFn: async (projectId: number) => {
-      const { data } = await api.get(`/projects/${projectId}/release`);
+      const { data } = await api.post(`/projects/${projectId}/release`);
       return data;
     },
     onSuccess: (_, projectId) => {

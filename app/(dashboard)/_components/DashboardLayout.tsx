@@ -3,11 +3,15 @@ import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import Portal from "@/app/_components/Portal";
+import { usePathname } from "next/navigation";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
-  const sidebar = (
+  const isMeeting = /room|waiting/i.test(pathname || "");
+
+  const sidebar = !isMeeting && (
     <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
   );
 
@@ -22,7 +26,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="hidden lg:block h-full">{sidebar}</div>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header onMenuClick={() => setIsSidebarOpen(true)} />
+        {!isMeeting && <Header onMenuClick={() => setIsSidebarOpen(true)} />}
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div className="mx-auto">{children}</div>
         </main>

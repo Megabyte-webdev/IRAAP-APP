@@ -348,45 +348,65 @@ export function syncMessageWithCache(
   });
 }
 
-export function appendMeetingToCache(qc: QueryClient, message: any) {
-  if (message.msgType !== "CALL_INVITE" || !message.meeting) {
-    return;
-  }
+export const appendMeetingToCache = (qc: any, real: any) => {
+  // Extract the actual meeting payload from the socket message
+  const meetingData = real.meeting ?? real;
 
-  qc.setQueryData(["meetings"], (old: any) => {
-    if (!old) {
+  if (!meetingData || !meetingData.id) return;
+
+  qc.setQueryData(["meetings"], (oldData: any) => {
+    // 1. Handle case where meetings haven't been fetched/cached yet
+    if (!oldData || !oldData.pages || oldData.pages.length === 0) {
       return {
-        data: [buildMeeting(message)],
-        pagination: {
-          total: 1,
-          page: 1,
-          limit: 20,
-          totalPages: 1,
-          hasMore: false,
-        },
+        pages: [
+          {
+            data: [meetingData],
+            pagination: { page: 1, hasMore: false },
+          },
+        ],
+        pageParams: [1],
       };
     }
 
-    const exists = old.data?.some(
-      (meeting: any) =>
-        meeting.id === message.meeting.id ||
-        meeting.meetingId === message.meeting.meetingId,
-    );
+    let alreadyExists = false;
 
-    if (exists) {
-      return old;
+    const updatedPages = oldData.pages.map((page: any) => {
+      const updatedData = page.data.map((m: any) => {
+        if (
+          m.id === meetingData.id ||
+          (real.clientId && m.id === real.clientId)
+        ) {
+          alreadyExists = true;
+          return { ...m, ...meetingData };
+        }
+        return m;
+      });
+
+      return {
+        ...page,
+        data: updatedData,
+      };
+    });
+
+    if (alreadyExists) {
+      return {
+        ...oldData,
+        pages: updatedPages,
+      };
     }
 
+    const firstPage = updatedPages[0];
+    updatedPages[0] = {
+      ...firstPage,
+      data: [meetingData, ...firstPage.data],
+    };
+
     return {
-      ...old,
-      data: [buildMeeting(message), ...(old.data ?? [])],
-      pagination: {
-        ...old.pagination,
-        total: (old.pagination?.total ?? 0) + 1,
-      },
+      ...oldData,
+      pages: updatedPages,
     };
   });
-}
+};
 
 function buildMeeting(message: any) {
   return {

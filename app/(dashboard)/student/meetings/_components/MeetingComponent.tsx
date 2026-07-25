@@ -33,7 +33,32 @@ export default function MeetingComponent() {
   const availableUsers: User[] =
     userList?.pages.flatMap((page) => page.data) ?? [];
 
-  const meetings = data?.pages.flatMap((page) => page.data) ?? [];
+  const meetings = (data?.pages.flatMap((page) => page.data) ?? []).sort(
+    (a, b) => {
+      const now = Date.now();
+      const TEN_MINUTES = 10 * 60 * 1000;
+
+      const aStart = new Date(a.scheduledAt).getTime();
+      const bStart = new Date(b.scheduledAt).getTime();
+
+      const aEnd = aStart + a.duration * 60 * 1000;
+      const bEnd = bStart + b.duration * 60 * 1000;
+
+      const aLive = now >= aStart - TEN_MINUTES && now <= aEnd;
+      const bLive = now >= bStart - TEN_MINUTES && now <= bEnd;
+
+      const aPast = now > aEnd;
+      const bPast = now > bEnd;
+
+      if (aLive !== bLive) return aLive ? -1 : 1;
+
+      if (!aPast && !bPast) return aStart - bStart;
+
+      if (aPast && bPast) return bStart - aStart;
+
+      return aPast ? 1 : -1;
+    },
+  );
 
   const handleScheduleMeeting = ({
     user,

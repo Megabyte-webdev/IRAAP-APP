@@ -20,16 +20,12 @@ export const extractErrorMessage = (
     | undefined,
 ) => {
   try {
-    // 1. Dig into the response data (where FastAPI's detail lives)
     const resData = error?.response?.data;
 
     if (resData) {
-      // Handle the specific structure: { detail: { message: "..." } }
       if (resData.detail?.message) {
         return resData.detail.message;
       }
-
-      // Handle FastAPI Validation Errors: { detail: [{ loc: [...], msg: "..." }] }
       if (Array.isArray(resData.detail)) {
         return resData.detail
           .map((d: { loc: string | any[]; msg: string }) => {
@@ -48,19 +44,16 @@ export const extractErrorMessage = (
           .join(" | ");
       }
 
-      // Handle simple string detail: { detail: "Error message" }
       if (typeof resData.detail === "string") {
         return resData.detail;
       }
 
-      // Handle direct message or error keys: { message: "..." }
       if (resData.message && typeof resData.message === "string")
         return resData.message;
       if (resData.error && typeof resData.error === "string")
         return resData.error;
     }
 
-    // 2. If no response data, check for standard Axios error messages
     if (error?.message) {
       if (error.message.includes("network error"))
         return "Network error. Please check your connection.";
@@ -242,18 +235,6 @@ export const STATUS_CONFIG = {
   },
 };
 
-export const getInitials = (name?: string) => {
-  if (!name) return "??";
-
-  return name
-    .trim()
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n) => n[0].toUpperCase())
-    .join("");
-};
-
 export const getTriggerMeta = (trigger: string, isCurrent: boolean) => {
   switch (trigger) {
     case "REVISION_SUBMISSION":
@@ -291,19 +272,67 @@ export const chatFeatures = [
     icon: <Image size={12} className="text-[#007BFC]" />,
     label: "Add Photos",
   },
-  // {
-  //   type: "video" as const,
-  //   icon: <Video size={12} className="text-[#FF2E74]" />,
-  //   label: "Add Videos",
-  // },
-  // {
-  //   type: "file" as const,
-  //   icon: <File size={12} className="text-[#333]" />,
-  //   label: "Files",
-  // },
-  // {
-  //   type: "camera" as const,
-  //   icon: <Camera size={12} className="text-[#FF2E74]" />,
-  //   label: "Camera",
-  // },
 ];
+
+// Function to get initials from name
+export const getInitials = (name: string): string => {
+  if (!name) return "?";
+
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase();
+  }
+
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+};
+export const getAvatarColor = (name: string): string => {
+  if (!name) return "hsl(210, 80%, 45%)"; // Safe default
+
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const hue = Math.abs(hash) % 360;
+
+  // Dynamic lightness map — keeps white text readable on ALL hues
+  const getReadableLightness = (h: number) => {
+    if (h >= 50 && h <= 80) return 35; // yellows & yellow-greens → must be dark
+    if (h >= 81 && h <= 160) return 40; // greens → slightly dark
+    if (h >= 161 && h <= 250) return 45; // cyans & blues
+    if (h >= 251 && h <= 320) return 50; // purples
+    return 42; // reds & oranges
+  };
+
+  const lightness = getReadableLightness(hue);
+  const saturation = 75;
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
+export const getOrCreateVsdkId = (daysUntilExpired = 30): string => {
+  const STORAGE_KEY = "vsdk_id";
+  const EXPIRY_KEY = "vsdk_id_expiry";
+
+  // Guard: check if window exists BEFORE accessing localStorage
+  if (typeof window === "undefined") {
+    // Return a temporary ID for SSR, it will be replaced on client
+    return `temp_${crypto.randomUUID()}`;
+  }
+
+  const now = Date.now();
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const expiry = localStorage.getItem(EXPIRY_KEY);
+
+  if (stored && expiry && now < Number(expiry)) {
+    return stored;
+  }
+
+  const id = crypto.randomUUID();
+  const newExpiry = now + daysUntilExpired * 24 * 60 * 60 * 1000;
+
+  localStorage.setItem(STORAGE_KEY, id);
+  localStorage.setItem(EXPIRY_KEY, String(newExpiry));
+
+  return id;
+};

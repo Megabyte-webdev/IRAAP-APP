@@ -10,3 +10,14 @@ export async function getProjectByIdServer(id: string) {
     return null;
   }
 }
+
+export async function getRoom(id: string) {
+  try {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_VIDEOSDK_URL}/rooms/${id}`,
+    );
+    return data?.data;
+  } catch (err) {
+    return null;
+  }
+}

@@ -2,9 +2,16 @@ import { api } from "../_lib/api-client";
 
 export const authService = {
   login: async (credentials: any) => {
-    const { data } = await api.post("/auth/login", credentials);
-    // data should contain { token, user: { role, name } }
+    const { data } = await api.post("/auth/login", credentials, {
+      withCredentials: true,
+    });
+
+    if (!data.success) {
+      throw new Error(data.message || "Login failed");
+    }
+
     localStorage.setItem("iraapUser", JSON.stringify(data));
+
     return data;
   },
   logout: () => {

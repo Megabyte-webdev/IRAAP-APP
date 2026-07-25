@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function LoginForm() {
-  const { login } = useAuth();
+  // Grab isLoading directly from context!
+  const { login, isLoading } = useAuth();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
 
@@ -13,7 +14,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const validateEmail = (emailStr: string) =>
@@ -34,16 +34,14 @@ function LoginForm() {
     }
 
     try {
-      setIsLoading(true);
       await login(email, password, callbackUrl);
     } catch (err) {
+      // AuthContext handles onFailure toast, but we capture error text for inline banner
       setError(
         err instanceof Error
           ? err.message
           : "Invalid credentials. Please try again.",
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -140,48 +138,8 @@ function LoginForm() {
       >
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
       </button>
-
-      {/* GOOGLE SIGN IN */}
-      {/* <button
-        type="button"
-        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-background text-sm font-medium transition hover:bg-muted dark:hover:bg-slate-800/50 focus-visible:outline-none"
-      >
-        <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
-          <path
-            fill="#EA4335"
-            d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582l3.51-3.51C17.642 1.072 14.96 0 12 0 7.354 0 3.307 2.655 1.298 6.515l3.968 3.25z"
-          />
-          <path
-            fill="#4285F4"
-            d="M23.49 12.275c0-.786-.07-1.541-.2-2.275H12v4.51h6.443a5.503 5.503 0 0 1-2.387 3.606l3.713 2.877c2.172-2.001 3.434-4.945 3.434-8.718z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.266 14.235L1.298 17.49A11.947 11.947 0 0 0 12 24c2.955 0 5.65-.982 7.77-2.664l-3.713-2.877A7.103 7.103 0 0 1 12 19.091a7.077 7.077 0 0 1-6.734-4.856z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 4.909c1.69 0 3.218.6 4.418 1.582l3.51-3.51C17.642 1.072 14.96 0 12 0 7.354 0 3.307 2.655 1.298 6.515l3.968 3.25A7.042 7.042 0 0 1 12 4.909z"
-          />
-        </svg>
-        <span className="text-xs font-semibold text-foreground/80 dark:text-slate-300">
-          Sign in with Google
-        </span>
-      </button> */}
-
-      {/* FOOTER LINK */}
-      {/* <div className="text-center pt-2">
-        <p className="text-xs text-muted-foreground">
-          Don't have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-primary font-semibold hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
-      </div> */}
     </form>
   );
 }
+
 export default LoginForm;

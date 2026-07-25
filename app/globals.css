@@ -27,7 +27,10 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-primary: #3aa6ee;
-  --color-tertiary: #dfe0e1;
+  --color-secondary: #2c2c2c;
+  --color-tertiary: #41473a;
+  --color-secondary-light: #414245;
+  --color-white-secondary: #a9abb0;
 
   --font-inter: "Inter";
 
@@ -49,14 +52,14 @@
 
 /* Thumb (draggable handle) */
 ::-webkit-scrollbar-thumb {
-  background: #355aff; /* Primary orange color */
+  background: var(--color-primary); /* Primary orange color */
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 /* Thumb hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary); /* Darker orange on hover */
+  background: #355aff; /* Darker orange on hover */
 }
 
 /* Corner (where scrollbars meet) */

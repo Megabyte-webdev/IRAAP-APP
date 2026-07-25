@@ -226,45 +226,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     callbackUrl?: string,
   ) => {
-    if (!email || !password) {
-      onPrompt({
-        title: "Missing Credentials",
-        message: "Please enter both your email and password to continue.",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
+    let destination = "";
+
     try {
-      const data = await authService.login({ email, password });
+      const data = await authService.login({
+        email,
+        password,
+      });
+
       setAuthDetails(data);
 
       const userRole = data.user.role.toLowerCase();
+
+      destination =
+        callbackUrl && callbackUrl.startsWith(`/${userRole}`)
+          ? callbackUrl
+          : `/${userRole}`;
 
       onSuccess({
         title: "Welcome Back!",
         message: `Successfully signed in as ${data.user.firstname || "User"}.`,
       });
-
-      // Decide destination
-      const destination =
-        callbackUrl && callbackUrl.startsWith(`/${userRole}`)
-          ? callbackUrl
-          : `/${userRole}`;
-
-      router.push(destination);
     } catch (err) {
+      const errorMessage =
+        extractErrorMessage(err) ||
+        "Please check your credentials and try again.";
+
       onFailure({
         title: "Login Failed",
-        message:
-          extractErrorMessage(err) ||
-          "Please check your credentials and try again.",
+        message: errorMessage,
       });
+
       setAuthDetails(null);
+
+      throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
+
+    router.push(destination);
   };
   const logout = () => {
     try {
@@ -278,8 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       router.replace("/login");
 
-      // Force a refresh to clear any sensitive data in the React state/memory
-      //window.location.href = "/login";
+      window.location.href = "/login";
     } catch (err) {
       onFailure({
         title: "Logout Error",

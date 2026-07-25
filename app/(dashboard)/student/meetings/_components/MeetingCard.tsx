@@ -7,9 +7,11 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
   const { authDetails } = useAuth();
   const CURRENT_USER = authDetails?.user;
   const isStudent = CURRENT_USER?.role === "STUDENT";
+
+  // Safe peer fallback depending on backend response shape
   const peer = isStudent
-    ? meeting?.participants.supervisor
-    : meeting?.participants.student;
+    ? meeting?.participants?.supervisor
+    : meeting?.participants?.student;
 
   // Track the current time live (updates every second)
   const [now, setNow] = useState(new Date());
@@ -64,6 +66,15 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
 
     const pad = (num: number) => String(num).padStart(2, "0");
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+
+  // Helper to construct or retrieve the meeting URL dynamically
+  const getMeetingUrl = () => {
+    const rolePath = isStudent ? "student" : "supervisor";
+    const meetingId = meeting.meetingId || meeting.id;
+    const userName = encodeURIComponent(CURRENT_USER?.fullName || "User");
+
+    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName}`;
   };
 
   // Determine the display status and color badges
@@ -139,10 +150,10 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
         {/* Join CTA Handler */}
         {isJoinable ? (
           <a
-            href={meeting.meetingUrl}
+            href={getMeetingUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all border border-transparent"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all border border-transparent"
           >
             <span>Join Meeting</span>
             <Video className="ml-1.5 h-4 w-4" />
@@ -180,7 +191,9 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
           <span>
             {isStudent ? "Supervisor: " : "Student: "}
             <strong
-              className={`font-medium ${isExpired ? "text-slate-500" : "text-slate-700"}`}
+              className={`font-medium ${
+                isExpired ? "text-slate-500" : "text-slate-700"
+              }`}
             >
               {peer?.fullName || "Unassigned"}
             </strong>
