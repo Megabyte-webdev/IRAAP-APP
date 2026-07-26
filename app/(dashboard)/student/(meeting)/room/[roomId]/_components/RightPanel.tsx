@@ -139,7 +139,7 @@ const RightPanel = ({
       exit={{ x: 300, opacity: 0 }}
       transition={{ duration: 0.3 }}
       className={`fixed inset-0 z-50 bg-secondary flex flex-col lg:relative w-full  lg:w-[320px] border-l border-[#2D2F33] shrink-0 ${
-        showSidebar ? "block" : "hidden lg:block"
+        showSidebar ? "block" : "hidden lg:flex"
       }`}
     >
       {/* Header & Tab Navigation Bar */}
@@ -242,7 +242,7 @@ const RightPanel = ({
                         <motion.p
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
-                          className={`text-white-secondary text-xs sm:text-[13px] wrap-break-word p-2 rounded-lg bg-[#2D2F33]/60 ${
+                          className={`text-white-secondary text-xs sm:text-[13px] wrap-break-word p-2 rounded-lg ${
                             msg.sender_id === localParticipant?.id
                               ? "ml-4"
                               : "mr-4"

@@ -16,6 +16,8 @@ import { useMeetingContext } from "@/app/_context/MeetingProvider";
 import { useMeeting, useMeetingPreview } from "@afosecure/meetingsdk";
 import WaitingStatus from "./WaitingStatus";
 import { useAuth } from "@/app/_context/AuthContext";
+import MediaPreview from "./MediaPreview";
+import MeetingDetails from "./MeetingDetails";
 
 export default function WaitingRoomContent() {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -305,84 +307,17 @@ export default function WaitingRoomContent() {
   return (
     <div className="w-full max-w-155 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
       {/* Header Details */}
-      <div className="mb-6 text-left">
-        <span className="text-[#3DA9EC] text-xs font-semibold uppercase tracking-wider">
-          UPCOMING CONSULTATION
-        </span>
-        <h1 className="text-2xl font-bold text-gray-900 mt-1">
-          {meetingName || "Chapter 3 Architecture Review"}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Supervisor:{" "}
-          <span className="font-medium text-gray-700">{hostName || ""}</span> •
-          Duration: 30 mins
-        </p>
-      </div>
+      <MeetingDetails hostName={hostName} meetingName={meetingName} />
 
       {/* Video Preview Container */}
-      <div className="relative w-full aspect-video bg-[#4A4D4E] rounded-xl overflow-hidden flex items-center justify-center">
-        {isVideoOn && stream ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover -scale-x-100"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-gray-300 gap-2">
-            <VideoOff className="w-10 h-10 stroke-[1.5]" />
-            <span className="text-sm font-medium text-gray-300">
-              Camera is off
-            </span>
-          </div>
-        )}
-
-        {/* Video Overlay Controls */}
-        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-          {/* Audio Status Pill */}
-          <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2">
-            <span className="flex items-end gap-0.5 h-3">
-              <span className="w-0.5 h-full bg-[#22C55E] rounded-full animate-pulse"></span>
-              <span className="w-0.5 h-2/3 bg-[#22C55E] rounded-full"></span>
-              <span className="w-0.5 h-4/5 bg-[#22C55E] rounded-full"></span>
-            </span>
-            <span className="text-xs text-white font-medium">Mic working</span>
-          </div>
-          {/* Toggle Buttons */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleMic}
-              className={`p-3 rounded-full transition-colors ${
-                isMicOn
-                  ? "bg-black/60 hover:bg-black/80 text-white"
-                  : "bg-[#EF4444] text-white hover:bg-red-600"
-              }`}
-            >
-              {isMicOn ? (
-                <Mic className="w-5 h-5" />
-              ) : (
-                <MicOff className="w-5 h-5" />
-              )}
-            </button>
-            <button
-              onClick={toggleVideo}
-              className={`p-3 rounded-full transition-colors ${
-                isVideoOn
-                  ? "bg-black/60 hover:bg-black/80 text-white"
-                  : "bg-[#EF4444] text-white hover:bg-red-600"
-              }`}
-            >
-              {isVideoOn ? (
-                <Video className="w-5 h-5" />
-              ) : (
-                <VideoOff className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-          <div className="w-22.5"></div> {/* Spacer balance */}
-        </div>
-      </div>
+      <MediaPreview
+        toggleMic={toggleMic}
+        toggleVideo={toggleVideo}
+        stream={stream}
+        isVideoOn={isVideoOn}
+        isMicOn={isMicOn}
+        videoRef={videoRef}
+      />
 
       {/* Media Device Selectors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">

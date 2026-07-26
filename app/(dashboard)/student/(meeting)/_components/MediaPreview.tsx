@@ -1,72 +1,91 @@
 import { RefObject } from "react";
-import { VideoOff, MicOff, Mic, Video } from "lucide-react";
+import { VideoOff, MicOff, Mic, Video, AudioLines } from "lucide-react";
 
 interface MediaPreviewProps {
   stream: MediaStream | null;
   isVideoOn: boolean;
   isMicOn: boolean;
-  isWaitingForHost: boolean;
   videoRef: RefObject<HTMLVideoElement | null>;
-  onToggleMic: () => void;
-  onToggleVideo: () => void;
+  toggleMic: () => void;
+  toggleVideo: () => void;
 }
 
 export default function MediaPreview({
   stream,
   isVideoOn,
   isMicOn,
-  isWaitingForHost,
   videoRef,
-  onToggleMic,
-  onToggleVideo,
+  toggleMic,
+  toggleVideo,
 }: MediaPreviewProps) {
   return (
-    <div className="bg-[#36460A] rounded-2xl flex flex-col items-center justify-center">
+    <div className="relative w-full aspect-video min-h-55 sm:min-h-0 bg-[#4A4D4E] rounded-xl sm:rounded-2xl overflow-hidden flex items-center justify-center shadow-md">
       {isVideoOn && stream ? (
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="w-full max-w-md h-48 sm:h-56 rounded-t-xl object-cover"
+          className="w-full h-full object-cover -scale-x-100"
         />
       ) : (
-        <div className="w-full max-w-md h-48 sm:h-56 rounded-xl flex items-center justify-center">
-          <VideoOff className="w-16 h-16 text-[#E5F5CC]" />
+        <div className="flex flex-col items-center justify-center text-gray-300 gap-2 p-4">
+          <VideoOff className="w-8 h-8 sm:w-10 sm:h-10 stroke-[1.5]" />
+          <span className="text-xs sm:text-sm font-medium text-gray-300">
+            Camera is off
+          </span>
         </div>
       )}
 
-      {/* Controls (mic + camera) */}
-      <div className="flex gap-4 my-3">
-        <button
-          onClick={onToggleMic}
-          disabled={!stream || isWaitingForHost}
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-            isMicOn ? "opacity-100" : "opacity-70"
-          } ${isWaitingForHost ? "opacity-50 cursor-not-allowed" : ""}`}
-          style={{ backgroundColor: "#1C1A1A" }}
-        >
-          {isMicOn ? (
-            <Mic className="w-5 h-5 text-white" />
-          ) : (
-            <MicOff className="w-5 h-5 text-white" />
-          )}
-        </button>
+      {/* Video Overlay Controls */}
+      <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between gap-2 z-10">
+        {/* Audio Status Pill */}
+        <div className="bg-black/60 backdrop-blur-md px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full flex items-center gap-1.5 border border-white/10 shrink-0">
+          <AudioLines
+            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+              isMicOn ? "text-emerald-400 animate-pulse" : "text-zinc-400"
+            }`}
+          />
+          <span className="text-[10px] sm:text-xs text-white font-medium whitespace-nowrap">
+            {isMicOn ? "Mic active" : "Mic muted"}
+          </span>
+        </div>
 
-        <button
-          onClick={onToggleVideo}
-          disabled={!stream || isWaitingForHost}
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-            isVideoOn ? "opacity-100" : "opacity-70"
-          } ${isWaitingForHost ? "opacity-50 cursor-not-allowed" : ""}`}
-          style={{ backgroundColor: "#FF0404" }}
-        >
-          {isVideoOn ? (
-            <Video className="w-5 h-5 text-white" />
-          ) : (
-            <VideoOff className="w-5 h-5 text-white" />
-          )}
-        </button>
+        {/* Action Toggle Buttons */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={toggleMic}
+            aria-label={isMicOn ? "Mute microphone" : "Unmute microphone"}
+            className={`p-2.5 sm:p-3 rounded-full transition-colors backdrop-blur-md border border-white/10 ${
+              isMicOn
+                ? "bg-black/60 hover:bg-black/80 text-white"
+                : "bg-red-500 text-white hover:bg-red-600"
+            }`}
+          >
+            {isMicOn ? (
+              <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+            ) : (
+              <MicOff className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={toggleVideo}
+            aria-label={isVideoOn ? "Turn off camera" : "Turn on camera"}
+            className={`p-2.5 sm:p-3 rounded-full transition-colors backdrop-blur-md border border-white/10 ${
+              isVideoOn
+                ? "bg-black/60 hover:bg-black/80 text-white"
+                : "bg-red-500 text-white hover:bg-red-600"
+            }`}
+          >
+            {isVideoOn ? (
+              <Video className="w-4 h-4 sm:w-5 sm:h-5" />
+            ) : (
+              <VideoOff className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

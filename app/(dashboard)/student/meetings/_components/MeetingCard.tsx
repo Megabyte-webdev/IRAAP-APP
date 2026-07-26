@@ -74,7 +74,7 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
     const meetingId = meeting.meetingId || meeting.id;
     const userName = encodeURIComponent(CURRENT_USER?.fullName || "User");
 
-    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName}`;
+    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName} meetingName=${meeting?.title}`;
   };
 
   // Determine the display status and color badges

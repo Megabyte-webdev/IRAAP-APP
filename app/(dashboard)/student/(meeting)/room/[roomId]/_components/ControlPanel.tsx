@@ -184,7 +184,7 @@ const ControlPanel = ({ toggleSidebar, setActiveTab, unreadCount }: any) => {
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-1.5 bg-primary/95 backdrop-blur-md border border-white/10 rounded-full px-3 py-2 shadow-2xl z-50"
+                className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-1.5 bg-primary/30 backdrop-blur-md border border-white/10 rounded-full px-3 py-2 shadow-2xl z-50"
               >
                 {EMOJIS.map((emoji) => (
                   <button

@@ -111,7 +111,7 @@ export const MeetingProvider = ({
   useEffect(() => {
     const meetingIdFromUrl = searchParams.get("meetingId") ?? "";
     const meetingNameFromUrl =
-      searchParams.get("meetingName") ?? "Meeting on Defcomm Meet";
+      searchParams.get("meetingName") ?? "Meeting on IRAAP";
     const hostNameFromUrl = searchParams.get("hostName") ?? "IRAAP";
     const userNameFromUrl = searchParams.get("userName") ?? "Guest";
 
