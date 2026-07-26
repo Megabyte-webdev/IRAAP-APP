@@ -244,6 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         callbackUrl && callbackUrl.startsWith(`/${userRole}`)
           ? callbackUrl
           : `/${userRole}`;
+      router.push(destination);
 
       onSuccess({
         title: "Welcome Back!",
@@ -265,8 +266,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-
-    router.push(destination);
   };
   const logout = () => {
     try {
