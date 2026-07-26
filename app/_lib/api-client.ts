@@ -92,7 +92,7 @@ api.interceptors.response.use(
 
 export const refreshTokenCall = async (): Promise<string> => {
   const res = await api.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+    `/auth/refresh-token`,
     {},
     { withCredentials: true },
   );
