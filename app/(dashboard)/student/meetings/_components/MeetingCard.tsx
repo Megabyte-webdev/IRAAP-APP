@@ -155,7 +155,7 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
             rel="noopener noreferrer"
             className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all border border-transparent"
           >
-            <span>Join Meeting</span>
+            <span>Join</span>
             <Video className="ml-1.5 h-4 w-4" />
           </a>
         ) : (
