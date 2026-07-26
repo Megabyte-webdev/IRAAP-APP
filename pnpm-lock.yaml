@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@afosecure/meetingsdk':
-        specifier: 1.4.4
-        version: 1.4.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 1.4.3
+        version: 1.4.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-query':
         specifier: ^5.90.21
         version: 5.90.21(react@19.2.3)
@@ -111,8 +111,8 @@ importers:
 
 packages:
 
-  '@afosecure/meetingsdk@1.4.4':
-    resolution: {integrity: sha512-Wg7a29KOnQjGu96q+Cud8Ku3PGsgr8QXtBvwppO0vSAs9LeVnPHWJ3PW7UiO+uPyOuygwnSEjVAb0BTHR3OGbg==}
+  '@afosecure/meetingsdk@1.4.3':
+    resolution: {integrity: sha512-flsKHJXP5CVmCx0xmcytIYCE9QgZ8DgLFMUxCapZ0lhJMDVd/EcS8Bvunof3+RS7/3VwF+jWbkQfdZr0TjFDbg==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -2483,7 +2483,7 @@ packages:
 
 snapshots:
 
-  '@afosecure/meetingsdk@1.4.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@afosecure/meetingsdk@1.4.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
