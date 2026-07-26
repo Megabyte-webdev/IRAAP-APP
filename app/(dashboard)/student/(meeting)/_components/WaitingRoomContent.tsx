@@ -391,7 +391,7 @@ export default function WaitingRoomContent() {
           className={`cursor-pointer px-6 py-3 rounded-full text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm ${
             joinDisabled
               ? "bg-[#3DA9EC]/50 cursor-not-allowed"
-              : "bg-[#3DA9EC] hover:bg-[#3298d6]"
+              : "bg-[#3DA9EC] hover:bg-[#3298d6] hover:shadow-md hover:-translate-y-0.5 hover:scale-[1.02]"
           }`}
         >
           <span>
@@ -407,7 +407,7 @@ export default function WaitingRoomContent() {
                       ? "Join Meeting"
                       : "Join Waiting Room"}
           </span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
         </button>
 
         {/* Cancel Request Button */}

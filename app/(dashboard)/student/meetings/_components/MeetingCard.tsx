@@ -74,7 +74,7 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
     const meetingId = meeting.meetingId || meeting.id;
     const userName = encodeURIComponent(CURRENT_USER?.fullName || "User");
 
-    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName} meetingName=${meeting?.title}`;
+    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName}&meetingName=${meeting?.title}`;
   };
 
   // Determine the display status and color badges
@@ -151,8 +151,6 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
         {isJoinable ? (
           <a
             href={getMeetingUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all border border-transparent"
           >
             <span>Join</span>

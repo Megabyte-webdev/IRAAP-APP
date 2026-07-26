@@ -3,12 +3,13 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMeeting } from "@afosecure/meetingsdk";
-import { extractErrorMessage } from "@/app/_utils/formatters";
+import { extractErrorMessage, getInitials } from "@/app/_utils/formatters";
 import { onFailure } from "@/app/_utils/Notification";
 import ControlPanel from "./ControlPanel";
 import RightPanel from "./RightPanel";
 import ScreenShare from "./ScreenShare";
 import ParticipantTile from "./PartcipantTile";
+import { useAuth } from "@/app/_context/AuthContext";
 
 interface Props {
   meetingId: string;
@@ -22,6 +23,7 @@ interface JoinRequest {
 }
 
 export default function MeetingRoomContent({ meetingId }: Props) {
+  const { authDetails } = useAuth();
   const [activeTab, setActiveTab] = useState<"chat" | "participants">("chat");
   const [showSidebar, setShowSidebar] = useState(false);
   const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
@@ -157,7 +159,9 @@ export default function MeetingRoomContent({ meetingId }: Props) {
       <div className="h-screen w-full flex flex-col items-center justify-center bg-[#EBF5FB] text-gray-800 p-4">
         <div className="relative mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl flex items-center justify-center bg-gray-200">
-            <span className="text-2xl font-bold text-gray-600">DO</span>
+            <span className="text-2xl font-bold text-gray-600">
+              {getInitials(authDetails?.user?.fullName)}
+            </span>
           </div>
           <div className="absolute inset-0 rounded-full border-2 border-[#3DA9EC] animate-ping opacity-25"></div>
         </div>

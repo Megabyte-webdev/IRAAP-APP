@@ -227,13 +227,10 @@ export const updateConversationLastMessage = (
     const firstPage = { ...pages[0] };
     const conversations = [...firstPage.data];
 
-    // CRITICAL FIX: Determine which user ID to match
-    // If WE sent the message → find conversation with receiverId (the other person)
-    // If WE received the message → find conversation with senderId (the other person)
     const otherUserId =
       String(msg.senderId) === String(authUserId)
-        ? msg.receiverId // We sent it → find by who we sent to
-        : msg.senderId; // We received it → find by who sent it
+        ? msg.receiverId
+        : msg.senderId;
 
     const index = conversations.findIndex(
       (conversation: any) =>
@@ -260,21 +257,18 @@ export const updateConversationLastMessage = (
         updatedAt: msg.createdAt,
         unreadCount:
           String(msg.senderId) === String(authUserId)
-            ? (existing.unreadCount ?? 0) // Don't increment for our own messages
-            : (existing.unreadCount ?? 0) + 1, // Increment for received messages
+            ? (existing.unreadCount ?? 0)
+            : (existing.unreadCount ?? 0) + 1,
       });
     } else {
-      // Create new conversation - use the other person's data
       const otherUserData =
         String(msg.senderId) === String(authUserId)
           ? {
-              // We sent it → other person is receiver
               id: msg.receiverId,
               fullName: msg.selectedChat?.fullName ?? "Unknown",
               role: msg.selectedChat?.role ?? "STUDENT",
             }
           : {
-              // We received it → other person is sender
               id: msg.sender?.id,
               fullName: msg.sender?.fullName ?? "Unknown",
               role: msg.sender?.role ?? "STUDENT",
@@ -350,7 +344,8 @@ export function syncMessageWithCache(
 
 export const appendMeetingToCache = (qc: any, real: any) => {
   // Extract the actual meeting payload from the socket message
-  const meetingData = real.meeting ?? real;
+  const info = real.meeting ?? real;
+  const meetingData = { ...info, creator: info?.sender };
 
   if (!meetingData || !meetingData.id) return;
 
