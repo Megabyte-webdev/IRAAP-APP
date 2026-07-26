@@ -52,7 +52,6 @@ export default function WaitingRoomContent() {
     isVideoOn,
     setIsVideoOn,
     participantId,
-    token,
     setMeetingInfo,
   } = useMeetingContext();
 
@@ -246,7 +245,7 @@ export default function WaitingRoomContent() {
   };
 
   const requestToJoin = async () => {
-    if (!meetingId || !token) {
+    if (!meetingId) {
       setError("Meeting information is missing or incomplete.");
       return;
     }
