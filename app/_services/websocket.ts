@@ -33,6 +33,10 @@ class WebSocketService {
       this.registerNetworkEvents();
     }
   }
+  private refreshHandler: (() => Promise<string | null>) | null = null;
+  setRefreshHandler(handler: () => Promise<string | null>) {
+    this.refreshHandler = handler;
+  }
 
   //  NETWORK
 
@@ -169,6 +173,13 @@ class WebSocketService {
         reason: event.reason,
       });
 
+      if (event.code === 4401) {
+        console.log("[WS] token expired");
+
+        this.handleTokenExpired();
+        return;
+      }
+
       if (this.manualDisconnect) {
         this.manualDisconnect = false;
 
@@ -183,9 +194,6 @@ class WebSocketService {
         return;
       }
 
-      /*
-          ReconnectingWebSocket handles retry.
-        */
       this.setState("reconnecting");
     });
 
@@ -197,6 +205,14 @@ class WebSocketService {
       try {
         const parsed = JSON.parse(event.data);
 
+        if (parsed.type === "auth:error") {
+          if (parsed.code === "TOKEN_EXPIRED") {
+            this.handleTokenExpired();
+          }
+
+          return;
+        }
+
         if (parsed.type === "pong") return;
 
         const handlers = this.listeners[parsed.type] || [];
@@ -204,11 +220,8 @@ class WebSocketService {
         handlers.forEach((cb) =>
           cb({
             type: parsed.type,
-
             client_id: parsed.client_id,
-
             data: parsed.data,
-
             payload: parsed.payload,
           }),
         );
@@ -297,6 +310,32 @@ class WebSocketService {
 
   get connected() {
     return this.socket?.readyState === WebSocket.OPEN;
+  }
+
+  private async handleTokenExpired() {
+    if (!this.refreshHandler) {
+      console.error("[WS] no refresh handler registered");
+      return;
+    }
+
+    try {
+      console.log("[WS] token expired, refreshing...");
+
+      const newToken = await this.refreshHandler();
+
+      if (!newToken) {
+        console.warn("[WS] refresh failed");
+        this.disconnect();
+        return;
+      }
+
+      this.updateToken(newToken);
+
+      this.connect(newToken, true);
+    } catch (err) {
+      console.error("[WS] refresh error", err);
+      this.disconnect();
+    }
   }
 }
 

@@ -137,6 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [updateAccessToken]);
 
+  useEffect(() => {
+    websocket.setRefreshHandler(handleRefresh);
+  }, [handleRefresh]);
+
   // ---------------- PROACTIVE REFRESH SCHEDULER ----------------
   const scheduleRefresh = useCallback(
     (token: string) => {
