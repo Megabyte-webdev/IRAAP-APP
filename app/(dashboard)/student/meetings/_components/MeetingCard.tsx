@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/_context/AuthContext";
 import { Meeting } from "@/app/_utils/types";
 import { Calendar, Clock, User, Video, Timer } from "lucide-react";
+import { getMeetingUrl } from "@/app/_utils/utility";
 
 const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
   const { authDetails } = useAuth();
   const CURRENT_USER = authDetails?.user;
   const isStudent = CURRENT_USER?.role === "STUDENT";
 
-  // Safe peer fallback depending on backend response shape
   const peer = isStudent
     ? meeting?.participants?.supervisor
     : meeting?.participants?.student;
 
-  // Track the current time live (updates every second)
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -66,15 +65,6 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
 
     const pad = (num: number) => String(num).padStart(2, "0");
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  };
-
-  // Helper to construct or retrieve the meeting URL dynamically
-  const getMeetingUrl = () => {
-    const rolePath = isStudent ? "student" : "supervisor";
-    const meetingId = meeting.meetingId || meeting.id;
-    const userName = encodeURIComponent(CURRENT_USER?.fullName || "User");
-
-    return `/${rolePath}/waiting?meetingId=${meetingId}&userName=${userName}&hostName=${meeting.creator.fullName}&meetingName=${meeting?.title}`;
   };
 
   // Determine the display status and color badges
@@ -150,7 +140,11 @@ const MeetingCard = ({ meeting }: { meeting: Meeting }) => {
         {/* Join CTA Handler */}
         {isJoinable ? (
           <a
-            href={getMeetingUrl()}
+            href={getMeetingUrl({
+              role: CURRENT_USER?.role,
+              meeting,
+              userName: CURRENT_USER?.name,
+            })}
             className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all border border-transparent"
           >
             <span>Join</span>

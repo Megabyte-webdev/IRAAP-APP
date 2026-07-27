@@ -149,16 +149,7 @@ export interface Message {
   senderId: number;
   content: string;
   msgType: "TEXT" | "CALL_INVITE" | "FILE" | "IMAGE";
-  meeting?: {
-    id?: number;
-    msgType: "CALL_INVITE";
-    title?: string;
-    description?: string | null;
-    scheduledAt?: string;
-    duration?: number;
-    meetingId?: string;
-    meetingUrl?: string;
-  } | null;
+  meeting?: Meeting;
   status: "SENT" | "DELIVERED" | "READ";
   readAt: string | null;
   createdAt: string;
@@ -193,10 +184,11 @@ export interface Meeting {
   title: string;
   description: string | null;
   meetingUrl: string;
-  scheduledAt: string; // ISO String from backend
-  duration: number; // in minutes
+  scheduledAt: string;
+  duration: number;
   status: "scheduled" | "completed" | "cancelled";
   conversationId: number;
+  msgType?: "CALL_INVITE";
   creator: {
     id: number;
     fullName: string;

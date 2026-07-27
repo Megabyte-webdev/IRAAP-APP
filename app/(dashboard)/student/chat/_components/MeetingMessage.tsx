@@ -8,6 +8,8 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { Message, User } from "@/app/_utils/types";
 import { LuClock } from "react-icons/lu";
 import ReplyPreview from "./ReplyPreview";
+import { getMeetingUrl } from "@/app/_utils/utility";
+import { useRouter } from "next/navigation";
 
 interface MeetingMessageProps {
   msg: Message;
@@ -20,7 +22,9 @@ const MeetingMessage = ({
   onReply,
   selectedUser,
 }: MeetingMessageProps) => {
+  const router = useRouter();
   const { authDetails } = useAuth();
+  const CURRENT_USER = authDetails?.user;
   const isSender = Number(msg.senderId) === Number(authDetails?.user?.id);
   const styles = getMessageLayout(isSender);
   const [isHighlighted, setIsHighlighted] = useState(false);
@@ -218,16 +222,23 @@ const MeetingMessage = ({
           {/* Join Button */}
           {canJoin ? (
             <button
-              onClick={() => window.open(meetingUrl, "_blank")}
+              onClick={() => {
+                let url = getMeetingUrl({
+                  role: CURRENT_USER?.role,
+                  meeting: { ...meetingData, creator: msg?.sender },
+                  userName: CURRENT_USER?.fullName,
+                });
+                router.push(url);
+              }}
               className={`
-      w-full mt-3 px-3 py-2 rounded-lg text-xs font-semibold
-      transition-all active:scale-95 cursor-pointer
-      ${
-        isSender
-          ? "bg-white/20 hover:bg-white/30 text-white"
-          : "bg-primary hover:bg-[#07b2e6] text-white shadow-sm"
-      }
-    `}
+                        w-full mt-3 px-3 py-2 rounded-lg text-xs font-semibold
+                        transition-all active:scale-95 cursor-pointer
+                        ${
+                          isSender
+                            ? "bg-white/20 hover:bg-white/30 text-white"
+                            : "bg-primary hover:bg-[#07b2e6] text-white shadow-sm"
+                        }
+                    `}
             >
               Join Meeting
             </button>

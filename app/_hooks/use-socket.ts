@@ -41,7 +41,6 @@ export const useSocketConnection = ({
   useEffect(() => {
     const token = authDetails?.token;
     if (!token) {
-      websocket.disconnect();
       return;
     }
     if (websocket.connected) return;
@@ -59,18 +58,39 @@ export const useSocketConnection = ({
   useEffect(() => {
     const onMessage = (event: any) => {
       const msg = event.payload;
+
+      if (!msg?.id) return;
+      websocket.emit("chat:received", {
+        messageId: msg.id,
+      });
+
       const qc = queryClientRef.current;
 
       appendToCache(qc, msg.senderId, msg);
+      const isOwnMessage = msg.senderId === authUserRef.current;
+      const otherUserId =
+        String(msg.senderId) === String(authUserRef.current)
+          ? String(msg.receiverId)
+          : String(msg.senderId);
 
-      updateConversationLastMessage(qc, msg, authUserRef.current);
+      const isCurrentConversation =
+        String(activeUserRef.current) === otherUserId;
+      console.log(
+        isCurrentConversation,
+        activeUserRef.current,
+        otherUserId,
+        msg,
+      );
+
+      updateConversationLastMessage(
+        qc,
+        msg,
+        authUserRef.current,
+        isCurrentConversation,
+      );
       if (msg.msgType === "CALL_INVITE") {
         appendMeetingToCache(qc, msg);
       }
-
-      const isOwnMessage = msg.senderId === authUserRef.current;
-
-      const isCurrentConversation = activeUserRef.current === msg.senderId;
 
       if (!isOwnMessage && !isCurrentConversation) {
         showChatNotification({
@@ -86,6 +106,27 @@ export const useSocketConnection = ({
       // Auto-read if currently viewing chat
       if (isCurrentConversation) {
         clearUnreadInCache(qc, msg.senderId);
+
+        qc.setQueryData(["messages", msg.senderId], (old: any) => {
+          if (!old?.pages) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((m: any) =>
+                m.id === msg.id
+                  ? {
+                      ...m,
+                      status: "READ",
+                      readAt: new Date().toISOString(),
+                    }
+                  : m,
+              ),
+            })),
+          };
+        });
+
         websocket.emit("chat:read:bulk", {
           conversationId: msg.conversationId,
           senderId: msg.senderId,
@@ -120,27 +161,54 @@ export const useSocketConnection = ({
 
     const onMessagesBulk = (event: any) => {
       const msgs: any[] = event.payload ?? [];
-      const qc = queryClientRef.current;
 
-      const bySender = msgs.reduce<Record<number, any[]>>((acc, m) => {
-        (acc[m.senderId] ??= []).push(m);
-        return acc;
-      }, {});
+      const ids = msgs.map((m) => m.id).filter(Boolean);
 
-      for (const [senderId, senderMsgs] of Object.entries(bySender)) {
-        qc.setQueryData(["messages", Number(senderId)], (old: any) => {
-          if (!old) return old;
-          const pages = [...old.pages];
-          const last = { ...pages[pages.length - 1] };
-          // Deduplicate against existing ids
-          const existingIds = new Set((last.data ?? []).map((m: any) => m.id));
-          const newMsgs = senderMsgs.filter((m) => !existingIds.has(m.id));
-          last.data = [...(last.data ?? []), ...newMsgs];
-          pages[pages.length - 1] = last;
-          return { ...old, pages };
+      if (ids.length) {
+        websocket.emit("chat:received:bulk", {
+          messageIds: ids,
         });
-        clearUnreadInCache(qc, Number(senderId));
       }
+
+      msgs.forEach((msg) => {
+        const otherUserId =
+          String(msg.senderId) === String(authUserRef.current)
+            ? String(msg.receiverId)
+            : String(msg.senderId);
+
+        updateConversationLastMessage(
+          queryClientRef.current,
+          msg,
+          authUserRef.current,
+          String(activeUserRef.current) === otherUserId,
+        );
+      });
+
+      queryClientRef.current.setQueryData(
+        ["messages", activeUserRef.current],
+        (old: any) => {
+          if (!old?.pages?.length) return old;
+
+          const existing = new Set(
+            old.pages.flatMap((p: any) => p.data).map((m: any) => m.id),
+          );
+
+          const incoming = msgs.filter((m: any) => !existing.has(m.id));
+
+          if (!incoming.length) return old;
+
+          return {
+            ...old,
+            pages: [
+              {
+                ...old.pages[0],
+                data: [...old.pages[0].data, ...incoming],
+              },
+              ...old.pages.slice(1),
+            ],
+          };
+        },
+      );
     };
 
     const onDelivered = (event: any) => {
@@ -191,7 +259,7 @@ export const useSocketConnection = ({
       const qc = queryClientRef.current;
 
       const messageIds: number[] = event.payload?.messageIds ?? [];
-      const senderId: number = event.payload?.senderId;
+      const senderId = event.payload?.readerId;
 
       // Update message statuses
       qc.setQueriesData({ queryKey: ["messages"] }, (old: any) =>
@@ -209,15 +277,12 @@ export const useSocketConnection = ({
             ...page,
 
             data: page.data.map((conversation: any) => {
-              if (conversation.user?.id !== senderId) {
+              if (String(conversation.user?.id) !== String(senderId)) {
                 return conversation;
               }
-
               return {
                 ...conversation,
-
                 unreadCount: 0,
-
                 lastMessage: conversation.lastMessage
                   ? {
                       ...conversation.lastMessage,

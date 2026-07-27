@@ -11,7 +11,7 @@ import {
 import { authService, setupInterceptors } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
-import { onFailure, onPrompt, onSuccess } from "../_utils/Notification";
+import { onFailure, onSuccess } from "../_utils/Notification";
 import { refreshTokenCall } from "../_lib/api-client";
 import { websocket } from "../_services/websocket";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       const updated = { ...prev, token: token };
       localStorage.setItem("iraapUser", JSON.stringify(updated));
-      websocket.reconnectWithToken(token);
+      websocket.updateToken(token);
       return updated;
     });
   }, []);
@@ -135,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return null;
     }
-  }, [updateAccessToken, safeLogout]);
+  }, [updateAccessToken]);
 
   // ---------------- PROACTIVE REFRESH SCHEDULER ----------------
   const scheduleRefresh = useCallback(
@@ -193,9 +193,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const parsed = JSON.parse(stored);
         setAuthDetails(parsed);
-        if (parsed?.token) {
-          websocket.connect(parsed.token);
-        }
       } catch {
         localStorage.removeItem("iraapUser");
       }
@@ -203,21 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setupInterceptors(() => authDetailsRef.current, handleRefresh);
 
-    websocket.onAuthFailure = async () => {
-      console.warn("[WS] auth failure → attempting silent refresh");
-
-      const token = await handleRefresh();
-
-      if (!token) {
-        console.warn("[WS] refresh failed (NOT logging out)");
-      }
-    };
-
     setTimeout(() => setIsLoading(false), 50);
-
-    return () => {
-      websocket.onAuthFailure = null;
-    };
   }, []);
 
   // Login function now accepts optional callbackUrl

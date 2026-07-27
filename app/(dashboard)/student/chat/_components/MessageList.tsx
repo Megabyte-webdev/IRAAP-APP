@@ -24,6 +24,7 @@ import { Message, User } from "@/app/_utils/types";
 import { clearUnreadInCache } from "@/app/helpers/chat-cache";
 import { queryClient } from "@/app/_services/query-client";
 import MeetingMessage from "./MeetingMessage";
+import { websocket } from "@/app/_services/websocket";
 
 interface Props {
   selectedUser?: User;
@@ -190,8 +191,34 @@ const MessageList = forwardRef<MessageListRef, Props>(
       markedReadRef.current = new Set();
       lastMessageIdRef.current = null;
       loadingOlderRef.current = false;
-      clearUnreadInCache(queryClient, Number(userId));
     }, [userId]);
+    useEffect(() => {
+      if (!conversationId || !userId) return;
+      clearUnreadInCache(queryClient, Number(userId));
+      websocket.emit("chat:read:bulk", {
+        conversationId,
+        senderId: Number(userId),
+      });
+    }, [conversationId, userId]);
+
+    useEffect(() => {
+      const handleVisibility = () => {
+        if (document.visibilityState === "visible") {
+          clearUnreadInCache(queryClient, Number(userId));
+
+          websocket.emit("chat:read:bulk", {
+            conversationId,
+            senderId: Number(userId),
+          });
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibility);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      };
+    }, [userId, conversationId]);
 
     // Initial scroll to bottom
     useLayoutEffect(() => {
@@ -255,19 +282,6 @@ const MessageList = forwardRef<MessageListRef, Props>(
       if (isMine || isNearBottom())
         requestAnimationFrame(() => scrollToBottom("smooth"));
     }, [sortedMessages]);
-
-    // Unread count
-    const unreadCount = useMemo(() => {
-      const myId = Number(authDetails.user.id);
-
-      return sortedMessages.filter(
-        (m) => m.senderId !== myId && m.status !== "READ",
-      ).length;
-    }, [sortedMessages]);
-
-    useEffect(() => {
-      onUnreadChange?.(unreadCount);
-    }, [unreadCount]);
 
     // Scroll handler
     const handleScroll = async () => {
@@ -348,9 +362,11 @@ const MessageList = forwardRef<MessageListRef, Props>(
                         onReply={() =>
                           setReplyTo({
                             id: String(msg.id),
+                            msgType: msg.msgType,
                             content: msg.content,
                             senderId: msg.senderId,
                             sender: msg.sender,
+                            meeting: msg?.meeting,
                           })
                         }
                       />
@@ -365,9 +381,11 @@ const MessageList = forwardRef<MessageListRef, Props>(
                         onReply={() =>
                           setReplyTo({
                             id: String(msg.id),
+                            msgType: msg.msgType,
                             content: msg.content,
                             senderId: msg.senderId,
                             sender: msg.sender,
+                            meeting: msg?.meeting,
                           })
                         }
                         onOpen={handleOpenImage}
@@ -385,9 +403,11 @@ const MessageList = forwardRef<MessageListRef, Props>(
                       onReply={() =>
                         setReplyTo({
                           id: String(msg.id),
+                          msgType: msg.msgType,
                           content: msg.content,
                           senderId: msg.senderId,
                           sender: msg.sender,
+                          meeting: msg?.meeting,
                         })
                       }
                       onScrollToMessage={scrollToMessage}

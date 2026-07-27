@@ -3,7 +3,7 @@
 import SafeImage from "@/app/_components/SafeImage";
 import { useAuth } from "@/app/_context/AuthContext";
 import { User } from "@/app/_utils/types";
-import { Video, Image as ImageIcon, File } from "lucide-react";
+import { Video, Image as ImageIcon, File, Calendar } from "lucide-react";
 
 // TYPES
 
@@ -16,18 +16,30 @@ interface ReplyPreviewProps {
 
 // HELPERS
 
-const getMediaIcon = (mediaType?: string) => {
-  if (mediaType === "image") return ImageIcon;
-  if (mediaType === "video") return Video;
-  if (mediaType === "file") return File;
+const isMeeting = (reply: any) =>
+  reply?.msgType === "CALL_INVITE" || reply?.meeting?.msgType === "CALL_INVITE";
+
+const getMediaIcon = (reply: any) => {
+  if (isMeeting(reply)) return Calendar;
+  if (reply?.media_type === "image") return ImageIcon;
+  if (reply?.media_type === "video") return Video;
+  if (reply?.media_type === "file") return File;
   return null;
 };
 
 const getPreviewText = (reply: any) => {
-  if (reply.content) return reply.content;
-  if (reply.media_type === "image") return "Photo";
-  if (reply.media_type === "video") return "Video";
-  if (reply.media_type === "file") return reply.file_name || "File";
+  if (isMeeting(reply)) {
+    return (
+      reply?.meeting?.title ||
+      reply?.meeting_title ||
+      reply?.content ||
+      "Meeting Invitation"
+    );
+  }
+  if (reply?.content) return reply.content;
+  if (reply?.media_type === "image") return "Photo";
+  if (reply?.media_type === "video") return "Video";
+  if (reply?.media_type === "file") return reply.file_name || "File";
   return "Message";
 };
 
@@ -45,8 +57,9 @@ export default function ReplyPreview({
 
   const isReplySender =
     Number(reply.senderId) === Number(authDetails?.user?.id);
-  const Icon = getMediaIcon(reply.media_type);
+  const Icon = getMediaIcon(reply);
   const previewText = getPreviewText(reply);
+  const isMeetingReply = isMeeting(reply);
   const isClickable = !!onScrollToMessage;
 
   const handleClick = () => {
@@ -75,10 +88,17 @@ export default function ReplyPreview({
       return (
         <div
           className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${
-            isSender ? "bg-black/10" : "bg-gray-300/50"
+            isMeetingReply
+              ? "bg-[#3DA9EC]/20 text-[#3DA9EC]"
+              : isSender
+                ? "bg-black/10"
+                : "bg-gray-300/50"
           }`}
         >
-          <Icon size={16} className="text-black/40" />
+          <Icon
+            size={16}
+            className={isMeetingReply ? "text-[#3DA9EC]" : "text-black/40"}
+          />
         </div>
       );
     }
@@ -103,7 +123,9 @@ export default function ReplyPreview({
         ${isSender ? "bg-white/80" : "bg-black/80"}
         ${isClickable ? "cursor-pointer hover:opacity-80 active:opacity-60" : ""}
       `}
-      style={{ borderLeft: "4px solid #bbb" }}
+      style={{
+        borderLeft: isMeetingReply ? "4px solid #3DA9EC" : "4px solid #bbb",
+      }}
     >
       {/* Thumbnail */}
       {renderThumbnail()}
@@ -113,28 +135,36 @@ export default function ReplyPreview({
         {/* Sender name */}
         <div
           className={`text-[10px] font-medium truncate ${
-            isSender ? "text-green-700/80" : "text-orange"
+            isSender ? "text-green-700/80" : "text-white"
           }`}
         >
           {isReplySender ? "You" : selectedUser?.fullName || "User"}
         </div>
 
         {/* Message preview */}
-        <div className="flex items-center gap-1 text-[12px] text-black/55 min-w-0">
-          {Icon && (
+        <div className="flex items-center gap-1 text-[12px] min-w-0 mt-0.5">
+          {Icon && !reply.media_urls?.[0] && (
             <Icon
-              size={14}
+              size={13}
               className={`shrink-0 ${
-                isSender ? "text-black/80" : "text-gray-300"
+                isMeetingReply
+                  ? "text-[#3DA9EC]"
+                  : isSender
+                    ? "text-black/80"
+                    : "text-gray-300"
               }`}
             />
           )}
           <span
             className={`min-w-0 flex-1 line-clamp-2 wrap-break-word leading-tight ${
-              isSender ? "text-black/80" : "text-gray-300"
+              isMeetingReply
+                ? "font-medium text-[#3DA9EC]"
+                : isSender
+                  ? "text-black/80"
+                  : "text-gray-300"
             }`}
           >
-            {previewText}
+            {isMeetingReply ? `${previewText}` : previewText}
           </span>
         </div>
       </div>

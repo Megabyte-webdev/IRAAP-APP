@@ -17,6 +17,7 @@ import {
 import { FILE_ACCEPT_MAP, FileAcceptType } from "@/app/_utils/markup";
 import { chatFeatures } from "@/app/_utils/formatters";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import SmartReplyPreview from "./SmartReplyPreview";
 
 interface SendMessageProps {
   selectedChat?: User;
@@ -137,8 +138,6 @@ const SendMessage = ({
       replyTo,
       meeting,
     });
-    console.log(optimisticMsg);
-
     queryClient.setQueryData(
       ["messages", Number(selectedChat.id)],
       (old: any) => appendMessage(old, optimisticMsg),
@@ -237,29 +236,12 @@ const SendMessage = ({
 
       {/* Reply bar */}
       {replyTo && (
-        <div className="relative px-3 pb-1 pt-1 mb-1 w-full">
-          <div
-            className="flex items-center gap-3 px-3 py-2 bg-[#F4F4F4] rounded-[10px]"
-            style={{ borderLeft: "4px solid #b07b1b" }}
-          >
-            <div className="flex-1">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide line-clamp-1">
-                {Number(replyTo.senderId) === Number(authDetails?.user?.id)
-                  ? "Replying to yourself"
-                  : `Replying to ${selectedChat?.fullName ?? "them"}`}
-              </p>
-              <p className="text-xs text-gray-600 line-clamp-1">
-                {replyTo.content}
-              </p>
-            </div>
-            <button
-              onClick={() => setReplyTo(null)}
-              className="cursor-pointer p-2 hover:bg-black/10 rounded-full text-gray-500"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
+        <SmartReplyPreview
+          replyTo={replyTo}
+          currentUserId={authDetails?.user?.id}
+          recipientName={selectedChat?.fullName}
+          onClose={() => setReplyTo(null)}
+        />
       )}
 
       {/* Attachment menu */}

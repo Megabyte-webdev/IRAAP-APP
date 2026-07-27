@@ -11,60 +11,11 @@ import {
   FileUp,
   Tag,
 } from "lucide-react";
+import { Meeting } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
-
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-export function formatNumber(n: number): string {
-  return new Intl.NumberFormat("en-NG").format(n);
-}
-
-export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-export const avatarBg = (initials: string) => {
-  const map: Record<string, string> = {
-    A: "bg-violet-100 text-violet-700",
-    B: "bg-sky-100 text-sky-700",
-    C: "bg-emerald-100 text-emerald-700",
-    D: "bg-rose-100 text-rose-700",
-    E: "bg-amber-100 text-amber-700",
-    F: "bg-fuchsia-100 text-fuchsia-700",
-    G: "bg-teal-100 text-teal-700",
-    H: "bg-orange-100 text-orange-700",
-    I: "bg-indigo-100 text-indigo-700",
-    J: "bg-red-100 text-red-700",
-    K: "bg-cyan-100 text-cyan-700",
-    S: "bg-yellow-100 text-yellow-700",
-    T: "bg-lime-100 text-lime-700",
-  };
-  return map[initials[0]] ?? "bg-slate-100 text-slate-700";
-};
-
 export const statusConfig = {
   active: {
     label: "Active",
@@ -177,15 +128,6 @@ export const getFileIcon = (fileName: string) => {
   }
 };
 
-export const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
 export const getRadius = (i: number, total: number) => {
   if (total === 1) return "rounded-[10px]";
 
@@ -199,7 +141,6 @@ export const getRadius = (i: number, total: number) => {
     return "rounded-b-[10px] col-span-2";
   }
 
-  // 4 or more
   if (i === 0) return "rounded-tl-[10px]";
   if (i === 1) return "rounded-tr-[10px]";
   if (i === 2) return "rounded-bl-[10px]";
@@ -213,26 +154,6 @@ export const projectSubmissionSteps = [
   { icon: FileUp, label: "Document upload", key: "upload" },
   { icon: Tag, label: "Keywords & research area", key: "keywords" },
 ];
-
-export const getStatus = (chapterTasks: any[]) => {
-  const allVerified = chapterTasks.every((t) => t.status === "VERIFIED");
-  if (allVerified) return "Completed";
-
-  const anyInProgress = chapterTasks.some(
-    (t) => t.status === "PENDING" || t.status === "IN_PROGRESS",
-  );
-
-  const allSubmittedOrDone = chapterTasks.every(
-    (t) => t.status === "COMPLETED" || t.status === "VERIFIED",
-  );
-
-  // 🔥 KEY STATE YOU WERE MISSING
-  if (allSubmittedOrDone) return "Awaiting Review";
-
-  if (anyInProgress) return "In Progress";
-
-  return "Needs Attention";
-};
 
 export const getChapterState = (chapterTasks: any[], review: any) => {
   if (chapterTasks.every((t: any) => t.status === "VERIFIED")) {
@@ -278,3 +199,26 @@ export const getChapterState = (chapterTasks: any[], review: any) => {
     urgent: true,
   };
 };
+
+interface MeetingUrlParams {
+  role: "STUDENT" | "SUPERVISOR";
+  meeting: Partial<Meeting>;
+  userName?: string;
+}
+
+export function getMeetingUrl({
+  role,
+  meeting,
+  userName = "User",
+}: MeetingUrlParams) {
+  const rolePath = role.toLowerCase();
+  const meetingId = meeting.meetingId;
+  const params = new URLSearchParams({
+    meetingId: meetingId ?? "",
+    userName,
+    hostName: meeting.creator?.fullName || "",
+    meetingName: meeting.title ?? "",
+  });
+
+  return `/${rolePath}/waiting?${params.toString()}`;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Mic, MicOff, MoreVertical } from "lucide-react";
 import { useRemoteMedia, useLocalParticipant } from "@afosecure/meetingsdk";
 import ReactPlayer from "react-player";

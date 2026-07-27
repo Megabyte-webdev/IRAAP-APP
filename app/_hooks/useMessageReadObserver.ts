@@ -3,18 +3,6 @@
 import { useEffect, useRef } from "react";
 import { websocket } from "../_services/websocket";
 
-/**
- * Observes message elements in the scroll container and emits chat:read:bulk
- * only when:
- *   1. The message bubble is ≥50% visible in the viewport
- *   2. The browser tab is focused (document.visibilityState === "visible")
- *   3. The message was sent by someone else (not us)
- *   4. The message is not already READ
- *
- * Uses a 600ms debounce to batch multiple visible messages into one WS emit,
- * exactly like WhatsApp — one bulk read per "reading session" rather than
- * one emit per message.
- */
 export function useMessageReadObserver({
   containerRef,
   messages,
@@ -28,7 +16,7 @@ export function useMessageReadObserver({
   authUserId: number | undefined;
   conversationId: number | undefined;
   recipientId: number | undefined;
-  enabled: boolean; // false when tab is hidden or chat is not mounted
+  enabled: boolean;
 }) {
   const pendingRef = useRef<Set<number>>(new Set()); // ids visible but not yet emitted
   const emittedRef = useRef<Set<number>>(new Set()); // ids already sent to server

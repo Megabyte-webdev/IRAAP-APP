@@ -17,6 +17,7 @@ import { useLocalParticipant, useMeeting } from "@afosecure/meetingsdk";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import RoundControlButton from "./RoundControlButton";
+import { useAuth } from "@/app/_context/AuthContext";
 
 const ControlPanel = ({ toggleSidebar, setActiveTab, unreadCount }: any) => {
   const {
@@ -28,6 +29,8 @@ const ControlPanel = ({ toggleSidebar, setActiveTab, unreadCount }: any) => {
     startScreenShare,
     presenterId,
   } = useMeeting();
+  const { authDetails } = useAuth();
+  const USER_ROLE = authDetails?.user?.role?.toLowerCase();
 
   const router = useRouter();
   const { participant } = useLocalParticipant();
@@ -68,7 +71,7 @@ const ControlPanel = ({ toggleSidebar, setActiveTab, unreadCount }: any) => {
     } catch (e) {
       console.error("Error leaving meeting:", e);
     } finally {
-      router.push("/");
+      router.replace(`/${USER_ROLE}`);
     }
   };
 
@@ -204,7 +207,7 @@ const ControlPanel = ({ toggleSidebar, setActiveTab, unreadCount }: any) => {
             whileTap={{ scale: 0.9 }}
             onClick={handleLeave}
             disabled={isLeaving}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition shrink-0 ml-auto md:ml-2 ${
+            className={`cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition shrink-0 ml-auto md:ml-2 ${
               isLeaving
                 ? "bg-red-500/60 cursor-not-allowed"
                 : "bg-red-600 active:bg-red-700"

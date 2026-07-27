@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { Meeting } from "../_utils/types";
 
 interface CreateOptimisticMessageArgs {
   clientId: string | number;
@@ -12,8 +13,10 @@ interface CreateOptimisticMessageArgs {
   replyTo?: {
     id: number;
     content: string;
+    msgType: string;
     senderId: number;
     createdAt: string | Date;
+    meeting?: Meeting;
   } | null;
 }
 
@@ -60,6 +63,8 @@ export function createOptimisticMessage({
           content: replyTo.content,
           senderId: replyTo.senderId,
           createdAt: replyTo.createdAt,
+          msgType,
+          meeting: replyTo?.meeting,
         }
       : null,
   };
@@ -117,28 +122,26 @@ export function initializeCacheIfNeeded(old: any) {
 }
 
 export const appendMessage = (old: any, message: any) => {
-  // Initialize if cache doesn't exist
+  const normalized = normalizeMessage(message);
+
   if (!old) {
     return {
-      pages: [{ data: [normalizeMessage(message)] }],
+      pages: [{ data: [normalized] }],
       pageParams: [undefined],
     };
   }
 
-  if (!old.pages?.length) {
-    return {
-      ...old,
-      pages: [{ data: [normalizeMessage(message)] }],
-    };
-  }
-
-  const normalized = normalizeMessage(message);
   const pages = [...old.pages];
-  const lastPage = pages[pages.length - 1];
 
-  pages[pages.length - 1] = {
-    ...lastPage,
-    data: [...(lastPage.data ?? []), normalized],
+  const exists = pages.some((page) =>
+    page.data?.some((m: any) => m.id === normalized.id),
+  );
+
+  if (exists) return old;
+
+  pages[0] = {
+    ...pages[0],
+    data: [...(pages[0]?.data ?? []), normalized],
   };
 
   return {
@@ -211,14 +214,11 @@ export function updateMessageStatusBulk(
   };
 }
 
-/**
- * Update conversation list with the latest message
- * Handles both sent and received messages correctly
- */
 export const updateConversationLastMessage = (
   qc: QueryClient,
   msg: any,
   authUserId?: number,
+  isActiveConversation = false,
 ) => {
   qc.setQueryData(["conversations"], (old: any) => {
     if (!old?.pages?.length) return old;
@@ -246,7 +246,6 @@ export const updateConversationLastMessage = (
     };
 
     if (index !== -1) {
-      // Update existing conversation
       const existing = conversations[index];
 
       conversations.splice(index, 1);
@@ -256,8 +255,8 @@ export const updateConversationLastMessage = (
         lastMessage,
         updatedAt: msg.createdAt,
         unreadCount:
-          String(msg.senderId) === String(authUserId)
-            ? (existing.unreadCount ?? 0)
+          String(msg.senderId) === String(authUserId) || isActiveConversation
+            ? 0
             : (existing.unreadCount ?? 0) + 1,
       });
     } else {
@@ -279,7 +278,10 @@ export const updateConversationLastMessage = (
         user: otherUserData,
         lastMessage,
         updatedAt: msg.createdAt,
-        unreadCount: String(msg.senderId) === String(authUserId) ? 0 : 1,
+        unreadCount:
+          String(msg.senderId) === String(authUserId) || isActiveConversation
+            ? 0
+            : 1,
       });
     }
 
@@ -302,7 +304,7 @@ export function clearUnreadInCache(qc: QueryClient, participantId: number) {
       pages: old.pages.map((page: any) => ({
         ...page,
         data: page.data.map((conversation: any) =>
-          conversation.user?.id === participantId
+          String(conversation.user?.id) === String(participantId)
             ? {
                 ...conversation,
                 unreadCount: 0,
@@ -311,34 +313,6 @@ export function clearUnreadInCache(qc: QueryClient, participantId: number) {
         ),
       })),
     };
-  });
-}
-
-/**
- * Synchronize incoming WebSocket message with cache
- * Handles replacement of pending optimistic messages
- * and bulk read receipt updates
- */
-export function syncMessageWithCache(
-  qc: QueryClient,
-  userId: number,
-  payload: any,
-) {
-  qc.setQueryData(["messages", userId], (old: any) => {
-    if (!old?.pages) return old;
-
-    // If payload contains messageIds (bulk operation), update status
-    if (Array.isArray(payload.messageIds)) {
-      return updateMessageStatusBulk(old, payload.messageIds, payload.status);
-    }
-
-    // If it's a single message with clientId, replace pending
-    if (payload.clientId) {
-      return replacePendingMessage(old, payload);
-    }
-
-    // Otherwise, treat as new message
-    return appendMessage(old, payload);
   });
 }
 

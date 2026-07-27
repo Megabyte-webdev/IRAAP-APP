@@ -19,7 +19,6 @@ const ChatWindow = ({
   isConversationLoading,
   role = "buyer",
 }: ChatWindowProps) => {
-  const { authDetails } = useAuth();
   const { userId } = useParams<{ userId: string }>();
   const scrollListRef = useRef<{
     scrollToBottom: () => void;
