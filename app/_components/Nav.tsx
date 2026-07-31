@@ -1,18 +1,24 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, LogIn, ArrowRight } from "lucide-react";
 import { useAuth } from "../_context/AuthContext";
 import ProfileDropdown from "./ProfileDropdown";
+
 const navItems = [
   { name: "Archive", href: "/archive" },
-  { name: "About", href: "#" },
-  { name: "Contact", href: "#" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
 ];
+
 const Nav = () => {
   const { authDetails } = useAuth();
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-18 max-w-5xl items-center justify-between px-5 lg:px-6">
@@ -26,21 +32,27 @@ const Nav = () => {
             className="h-10 w-auto transition-transform duration-300 hover:scale-105"
           />
         </Link>
+
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-2 mr-auto ml-10">
           {navItems.map((item) => {
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className="group relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-blue-50 hover:text-primary"
+                aria-current={isActive ? "page" : undefined}
+                className="group relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-blue-50 hover:text-primary aria-[current=page]:bg-blue-50 aria-[current=page]:text-primary aria-[current=page]:font-semibold"
               >
                 {item.name}
-                <span className="absolute bottom-1 left-4 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-[calc(100%-2rem)]" />
+                <span className="absolute bottom-1 left-4 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-[calc(100%-2rem)] group-aria-[current=page]:w-[calc(100%-2rem)]" />
               </Link>
             );
           })}
         </nav>
+
         {/* Desktop Buttons */}
         {authDetails?.user ? (
           <div className="ml-auto mr-2">
@@ -62,6 +74,7 @@ const Nav = () => {
             </Link>
           </div>
         )}
+
         {/* Mobile Toggle */}
         <button
           onClick={() => setOpen(!open)}
@@ -70,23 +83,31 @@ const Nav = () => {
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
+
       {/* Mobile Menu */}
       <div
-        className={`overflow-hidden border-t border-gray-100 bg-white transition-all duration-300 md:hidden ${open ? "max-h-96" : "max-h-0"}`}
+        className={`overflow-hidden border-t border-gray-100 bg-white transition-all duration-300 md:hidden ${
+          open ? "max-h-96" : "max-h-0"
+        }`}
       >
         <div className="space-y-2 px-5 py-5">
           {navItems.map((item) => {
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-4 py-3 text-gray-700 transition hover:bg-blue-50 hover:text-primary"
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-blue-50 hover:text-primary aria-[current=page]:bg-blue-50 aria-[current=page]:text-primary aria-[current=page]:font-semibold"
               >
                 {item.name}
               </Link>
             );
           })}
+
           {!authDetails?.user && (
             <div className="mt-5 space-y-3 border-t border-gray-300 pt-5">
               <Link
@@ -97,7 +118,7 @@ const Nav = () => {
               </Link>
               <Link
                 href="/login"
-                className=" group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2 cursor-pointer"
+                className="group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 Get Started
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -109,4 +130,5 @@ const Nav = () => {
     </header>
   );
 };
+
 export default Nav;

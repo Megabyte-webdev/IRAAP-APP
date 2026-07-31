@@ -156,15 +156,13 @@ export const useProject = () => {
 
   const getAllProjects = (
     filters: {
-      status?: string;
-      categoryId?: number;
-      limit?: number;
       title?: string;
-      year?: number;
-      researchArea?: string;
-      methodology?: string;
-      researchType?: string;
-      keyword?: string | string[];
+      keyword?: string[];
+      supervisor?: string[];
+      year?: number[];
+      status?: string;
+      limit?: number;
+      sortBy?: "Most Recent" | "Oldest First" | "Alphabetical";
     } = {},
   ) => {
     const { limit = 20, status = "APPROVED", ...restFilters } = filters;
@@ -218,6 +216,15 @@ export const useProject = () => {
     },
 
     onSuccess: (_, projectId) => {
+      queryClient.setQueryData(["project", projectId], (oldProject: any) => {
+        if (!oldProject) return oldProject;
+
+        return {
+          ...oldProject,
+          status: "APPROVED",
+        };
+      });
+
       queryClient.invalidateQueries({
         queryKey: ["project", projectId],
       });

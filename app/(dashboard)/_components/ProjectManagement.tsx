@@ -120,7 +120,7 @@ const ProjectManagement = () => {
             </div>
 
             {/* Dynamic Status Badges for Release State */}
-            {project.isSignaledForPublication && (
+            {role === "SUPERVISOR" && project.isSignaledForPublication && (
               <div className="hidden md:flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter shrink-0">
                 <Globe size={12} /> Released for Publication
               </div>
@@ -139,12 +139,14 @@ const ProjectManagement = () => {
               )}
 
             {/* ACTION TRIGGER: STUDENT PORTAL FINAL ARCHIVAL SUBMISSION SUBMIT BUTTON */}
-            {role === "STUDENT" && project.isSignaledForPublication && (
-              <PublicationButton
-                projectId={Number(projectId)}
-                action="PUBLISH"
-              />
-            )}
+            {role === "STUDENT" &&
+              project.isSignaledForPublication &&
+              project.status === "VERIFIED" && (
+                <PublicationButton
+                  projectId={Number(projectId)}
+                  action="PUBLISH"
+                />
+              )}
 
             <button
               className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"

@@ -10,7 +10,7 @@ interface HeroProps {
   badgeText: string;
   title: string;
   description: string;
-  variant?: "home" | "archive";
+  variant?: "home" | "archive" | "about";
   // Search specific props
   onSearchSubmit?: (query: string) => void;
   searchPlaceholder?: string;
@@ -50,7 +50,11 @@ environment designed specifically for engineering scholars.`,
           "radial-gradient(105.7% 113.5% at 50% 0%, #EBF6FD 0%, #FFFFFF 70%)",
       }}
     >
-      <section className="relative max-w-5xl mx-auto px-6 pt-16 pb-10 text-center">
+      <section
+        className={`relative max-w-5xl mx-auto px-6 text-center ${
+          variant === "about" ? "pt-16 pb-16" : "pt-16 pb-10"
+        }`}
+      >
         {/* Universal Dynamic Badge */}
         <div className="inline-flex items-center space-x-1.5 rounded-xl border border-[#C2E3FA] px-3.5 py-1 text-[10px] md:text-xs font-semibold text-[#FFC107] mb-2.5 bg-white/60 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:shadow-md hover:shadow-blue-100">
           {badgeIcon}
@@ -145,6 +149,9 @@ environment designed specifically for engineering scholars.`,
             )}
           </div>
         )}
+
+        {/* --- VARIANT C: ABOUT PAGE (Minimal Title & Text Only) --- */}
+        {/* No buttons or search form required */}
       </section>
     </div>
   );

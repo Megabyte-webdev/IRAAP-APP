@@ -264,9 +264,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         message: "You have been logged out successfully. See you soon!",
       });
 
-      router.replace("/login");
+      router.replace("/");
 
-      window.location.href = "/login";
+      window.location.href = "/";
     } catch (err) {
       onFailure({
         title: "Logout Error",

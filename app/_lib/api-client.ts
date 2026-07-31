@@ -3,6 +3,9 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
+  paramsSerializer: {
+    indexes: null, // Renders arrays as ?keyword=IoT&keyword=AI instead of keyword[]=...
+  },
 });
 
 api.interceptors.request.use((config) => {

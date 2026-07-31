@@ -1,7 +1,7 @@
 "use client";
 
 interface FilterCheckboxProps {
-  label: string | number;
+  label: string;
   checked: boolean;
   onChange: () => void;
 }
@@ -9,18 +9,25 @@ interface FilterCheckboxProps {
 const FilterCheckbox = ({ label, checked, onChange }: FilterCheckboxProps) => {
   return (
     <label
-      className={`flex items-center gap-3 cursor-pointer select-none text-sm transition-colors ${
-        checked ? "font-medium text-black" : "font-normal text-slate-500"
+      className={`group flex w-full items-start gap-2 cursor-pointer select-none transition-colors ${
+        checked
+          ? "font-medium text-slate-900"
+          : "font-normal text-slate-600 hover:text-slate-900"
       }`}
     >
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="w-4 h-4 rounded-sm border-slate-300 text-blue-500 focus:ring-blue-500/20 cursor-pointer"
+        className="mt-0.5 h-4 w-4 shrink-0 appearance-none rounded border border-slate-300 bg-white checked:border-primary checked:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
       />
 
-      {label}
+      <span
+        title={label}
+        className="min-w-0 flex-1 text-[14px] leading-5 tracking-normal line-clamp-2"
+      >
+        {label}
+      </span>
     </label>
   );
 };
