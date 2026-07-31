@@ -184,6 +184,7 @@ export default function ProjectForm({
             setCurrentKeyword("");
             setResearchArea("");
             if (fileInputRef.current) fileInputRef.current.value = "";
+            router.push("/student");
           } else {
             router.push("/student");
           }
