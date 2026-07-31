@@ -55,7 +55,7 @@ export default function ProjectForm({
     const state = {
       details: !!(title && abstract && methodology && category && researchType),
       upload: !!(file || isEditing),
-      keywords: !!(keywords.length > 0 || researchArea),
+      keywords: !!(keywords.length > 0 && researchArea),
     };
 
     onCompletionChangeRef.current?.(state);
