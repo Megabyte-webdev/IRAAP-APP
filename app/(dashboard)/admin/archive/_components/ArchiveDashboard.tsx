@@ -46,7 +46,7 @@ export default function ArchiveDashboard() {
   const projects = data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
-    <main className="min-h-screen overflow-y-auto bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased selection:bg-blue-500/30">
+    <main className="min-h-screen overflow-y-auto bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased selection:bg-blue-500/30 px-4">
       {/* TRANSFORMING HERO & SEARCH BAR LAYER */}
       <ArchiveHeader
         searchQuery={searchQuery}

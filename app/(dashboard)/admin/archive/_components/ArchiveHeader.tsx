@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTheme } from "next-themes";
 interface ArchiveHeaderProps {
   searchQuery: string;

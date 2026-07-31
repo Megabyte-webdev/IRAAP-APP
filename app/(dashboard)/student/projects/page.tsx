@@ -5,6 +5,7 @@ import { useProject } from "@/app/_hooks/use-projects";
 import ProjectList from "./_components/ProjectList";
 import { FolderOpen } from "lucide-react";
 import ProjectDetailView from "./_components/ProjectDetailView";
+import ProjectHeader from "./_components/ProjectHeader";
 
 type Project = any;
 
@@ -69,16 +70,19 @@ export default function Projects() {
   // EMPTY STATE
   if (!projects || projects.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-16 text-center bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
-        <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center">
-          <FolderOpen size={24} className="text-slate-400" />
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-6 text-slate-800 dark:text-slate-200">
+        <ProjectHeader projectCount={projects.length} />
+        <div className="flex flex-col items-center justify-center gap-3 p-16 text-center bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center">
+            <FolderOpen size={24} className="text-slate-400" />
+          </div>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            No projects available
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            You haven't been assigned to any projects yet.
+          </p>
         </div>
-        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          No projects available
-        </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          You haven't been assigned to any projects yet.
-        </p>
       </div>
     );
   }

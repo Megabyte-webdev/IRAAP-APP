@@ -413,7 +413,7 @@ export default function ProjectForm({
         <button
           type="submit"
           disabled={submitProject.isPending || updateProject?.isPending}
-          className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:shadow-lg disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98] cursor-pointer"
         >
           <FileUp size={15} />
           {isEditing
