@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Hero from "@/app/_components/Hero";
 import {
   Archive,
@@ -17,6 +17,12 @@ import ArchiveFilters from "./ArchiveFilters";
 
 export default function ArchivePage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchQuery.trim()), 350);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
   const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
   const [selectedSupervisors, setSelectedSupervisors] = useState<string[]>([]);
@@ -27,8 +33,11 @@ export default function ArchivePage() {
   const { getFilterOptions } = useSearch();
   const { getAllProjects } = useProject();
 
-  const { data: filterOptions = {}, isLoading: filterOptionsLoading } =
-    getFilterOptions();
+  const {
+    data: filterOptions = {},
+    isLoading: filterOptionsLoading,
+    isError: filterOptionsError,
+  } = getFilterOptions();
 
   const {
     data,
@@ -38,8 +47,9 @@ export default function ArchivePage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    isFetching,
   } = getAllProjects({
-    title: searchQuery || undefined,
+    title: debouncedSearch || undefined,
     keyword: selectedFocus.length > 0 ? selectedFocus : undefined,
     supervisor:
       selectedSupervisors.length > 0 ? selectedSupervisors : undefined,
@@ -50,7 +60,7 @@ export default function ArchivePage() {
   });
 
   const projects = data?.pages.flatMap((page) => page.data) ?? [];
-  const metadata = data?.pages[data.pages.length - 1]?.metadata;
+  const metadata = data?.pages[data.pages.length - 1]?.metadata ?? data?.pages[data.pages.length - 1]?.pagination;
 
   const handleSearch = (query: string) => setSearchQuery(query);
 
@@ -116,6 +126,7 @@ export default function ArchivePage() {
             <ArchiveFilters
               filterOptions={filterOptions}
               filterOptionsLoading={filterOptionsLoading}
+              filterOptionsError={filterOptionsError}
               selectedFocus={selectedFocus}
               selectedYears={selectedYears}
               selectedSupervisors={selectedSupervisors}
@@ -146,6 +157,9 @@ export default function ArchivePage() {
                   )}{" "}
                   results
                 </span>
+                {isFetching && !isFetchingNextPage && (
+                  <span className="text-[11px] text-slate-400 animate-pulse">Updating results…</span>
+                )}
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-400 font-medium">

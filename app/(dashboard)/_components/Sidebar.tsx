@@ -53,12 +53,6 @@ const navItems: NavItem[] = [
     icon: CalendarDays,
   },
   {
-    name: "Review Queue",
-    href: "/review",
-    roles: ["SUPERVISOR"],
-    icon: ClipboardCheck,
-  },
-  {
     name: "Students",
     href: "/students",
     roles: ["ADMIN", "SUPERVISOR"],

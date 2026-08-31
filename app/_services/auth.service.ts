@@ -1,64 +1,47 @@
 import { api } from "../_lib/api-client";
 
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: any;
+  requiresOtp?: boolean;
+  challengeId?: string;
+  email?: string;
+  purpose?: "SIGNUP" | "LOGIN" | "PASSWORD_RESET";
+  message?: string;
+}
+
 export const authService = {
-  login: async (credentials: any) => {
-    const { data } = await api.post("/auth/login", credentials, {
-      withCredentials: true,
-    });
-
-    if (!data.success) {
-      throw new Error(data.message || "Login failed");
-    }
-
-    localStorage.setItem("iraapUser", JSON.stringify(data));
-
+  register: async (payload: { fullName: string; email: string; password: string }) => {
+    const { data } = await api.post<AuthResponse>("/auth/register", payload, { withCredentials: true });
+    if (!data.success) throw new Error(data.message || "Registration failed");
     return data;
   },
-  logout: () => {
-    localStorage.removeItem("iraapUser");
+  login: async (credentials: { email: string; password: string }) => {
+    const { data } = await api.post<AuthResponse>("/auth/login", credentials, { withCredentials: true });
+    if (!data.success) throw new Error(data.message || "Login failed");
+    return data;
+  },
+  verifyOtp: async (payload: { challengeId: string; code: string }) => {
+    const { data } = await api.post<AuthResponse>("/auth/verify-otp", payload, { withCredentials: true });
+    if (!data.success || !data.token || !data.user) throw new Error(data.message || "Verification failed");
+    return data;
+  },
+  resendOtp: async (challengeId: string) => {
+    const { data } = await api.post<AuthResponse>("/auth/resend-otp", { challengeId }, { withCredentials: true });
+    if (!data.success || !data.challengeId) throw new Error(data.message || "Unable to resend code");
+    return data;
+  },
+  logout: async () => {
+    try {
+      await api.post("/auth/logout", {}, { withCredentials: true });
+    } finally {
+      localStorage.removeItem("iraapUser");
+      localStorage.removeItem("iraapOtpChallenge");
+    }
   },
   getCurrentUser: () => {
-    // In a real app, decode the JWT here
     const user = localStorage.getItem("iraapUser");
     return user ? JSON.parse(user) : null;
   },
-};
-
-export const setupInterceptors = (getAuth: any, refreshFn: any) => {
-  api.interceptors.request.use((config) => {
-    const auth = getAuth();
-    if (auth?.access_token) {
-      config.headers.Authorization = `Bearer ${auth.access_token}`;
-    }
-    return config;
-  });
-
-  api.interceptors.response.use(
-    (res) => res,
-    async (error) => {
-      const original = error.config;
-
-      // Don't retry on network errors — no point, request won't reach server
-      if (!error.response) {
-        return Promise.reject(error);
-      }
-
-      if (error.response?.status === 401 && !original._retry) {
-        original._retry = true;
-
-        const newToken = await refreshFn();
-
-        if (newToken) {
-          original.headers.Authorization = `Bearer ${newToken}`;
-          return api(original);
-        }
-
-        // refreshFn returned null — either network issue or logged out
-        // Just reject, don't retry again
-        return Promise.reject(error);
-      }
-
-      return Promise.reject(error);
-    },
-  );
 };

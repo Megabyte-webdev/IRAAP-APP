@@ -72,6 +72,10 @@ export default function ProjectDetailPage() {
     .filter(Boolean)
     .join(" / ");
 
+  const pdfUrl = typeof project.fileUrl === "string" && project.fileUrl.trim()
+    ? project.fileUrl.trim().replace(/\.pdf\.pdf$/i, ".pdf")
+    : null;
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 pb-24 font-sans">
       <main className="max-w-6xl mx-auto px-6 pt-8 space-y-8">
@@ -175,7 +179,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Document Preview Placeholder */}
-            {project.fileUrl && (
+            {pdfUrl && (
               <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
                 <h2 className="flex items-center gap-2.5 text-base font-bold text-slate-900">
                   <FileText size={18} className="text-slate-700" />
@@ -184,7 +188,7 @@ export default function ProjectDetailPage() {
 
                 <div className="w-full h-125 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
                   <iframe
-                    src={`${project.fileUrl}#toolbar=0`}
+                    src={`${pdfUrl}#toolbar=0`}
                     className="w-full h-full border-none"
                     title="Document Preview"
                   />
@@ -197,9 +201,9 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-8 self-start">
             {/* Download & Actions Card */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3">
-              {project.fileUrl ? (
+              {pdfUrl ? (
                 <a
-                  href={project.fileUrl}
+                  href={pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-xl font-semibold text-sm transition-colors shadow-sm"
@@ -301,7 +305,7 @@ export default function ProjectDetailPage() {
                     {project.relatedProjects.map((item: any) => (
                       <div
                         key={item.id}
-                        onClick={() => router.push(`/repository/${item.id}`)}
+                        onClick={() => router.push(`/archive/${item.id}`)}
                         className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 space-y-2 hover:border-slate-300 transition-colors cursor-pointer"
                       >
                         {item.researchType && (

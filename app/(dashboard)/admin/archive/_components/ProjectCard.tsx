@@ -1,4 +1,5 @@
 import { Bookmark } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Update the interface to match your exact backend response schema
 interface ProjectCardProps {
@@ -23,8 +24,12 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project }: ProjectCardProps) {
+  const router = useRouter();
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 flex flex-col justify-between hover:shadow-md dark:hover:shadow-sky-950/20 transition-shadow duration-200 relative group">
+    <div
+      onClick={() => router.push(`archive/${project.id}`)}
+      className="cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 flex flex-col justify-between hover:shadow-md dark:hover:shadow-sky-950/20 transition-shadow duration-200 relative group"
+    >
       <div>
         {/* Top Meta row */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">

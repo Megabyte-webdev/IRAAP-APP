@@ -2,8 +2,8 @@
 
 import { useAuth } from "@/app/_context/AuthContext";
 import { useProject } from "@/app/_hooks/use-projects";
+import { AlertCircle, RefreshCcw, Loader2 } from "lucide-react";
 import {
-  Upload,
   User,
   MessageSquare,
   Video,
@@ -21,16 +21,57 @@ export default function StudentDashboard() {
   const { authDetails } = useAuth();
   const user = authDetails?.user;
 
-  const { data: projects, isLoading: isProjectsLoading } = getProjects();
+  const { data: projects, isLoading: isProjectsLoading, isError: isProjectsError, refetch: refetchProjects } = getProjects();
 
   const projectId = projects?.[0]?.id;
 
-  const { data: reviews = [], isLoading: isReviewLoading } = getProjectReviews(
-    Number(projectId),
-  );
+  const { data: reviews = [], isLoading: isReviewLoading, isError: isReviewError, refetch: refetchReviews } = getProjectReviews(Number(projectId));
 
   if (isProjectsLoading) {
-    return <div className="p-8">Loading dashboard...</div>;
+    return (
+      <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="h-24 rounded-2xl bg-white border border-slate-200 animate-pulse" />
+        <div className="grid lg:grid-cols-2 gap-6"><div className="h-72 rounded-2xl bg-white border border-slate-200 animate-pulse" /><div className="h-72 rounded-2xl bg-white border border-slate-200 animate-pulse" /></div>
+      </div>
+    );
+  }
+
+  if (isProjectsError) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <AlertCircle className="mx-auto h-8 w-8 text-red-500" />
+          <h2 className="mt-3 font-semibold text-slate-900">We could not load your dashboard</h2>
+          <p className="mt-1 text-sm text-slate-600">Check your connection and try again.</p>
+          <button onClick={() => refetchProjects()} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"><RefreshCcw size={15} /> Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!projectId) {
+    return (
+      <div className="p-8 max-w-3xl mx-auto">
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center">
+          <h2 className="text-lg font-semibold text-slate-900">Your workspace is ready</h2>
+          <p className="mt-2 text-sm text-slate-500">Submit your first project to start tracking reviews, tasks, and revisions.</p>
+          <Link href="/student/upload" className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white">Submit a project</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (isReviewError) {
+    return (
+      <div className="p-8 max-w-3xl mx-auto">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <AlertCircle className="mx-auto h-8 w-8 text-red-500" />
+          <h2 className="mt-3 font-semibold text-slate-900">Project data needs a refresh</h2>
+          <p className="mt-1 text-sm text-slate-600">Your projects loaded, but the review activity did not.</p>
+          <button onClick={() => refetchReviews()} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"><RefreshCcw size={15} /> Retry</button>
+        </div>
+      </div>
+    );
   }
 
   const allReviews = reviews || [];
@@ -178,18 +219,16 @@ export default function StudentDashboard() {
 
             {/* JOIN MEETING — separated clearly as a communication tool */}
             <Link
-              href="/student/meet"
+              href="/student/meetings"
               className="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
                 <Video size={16} className="text-slate-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-700">
-                  Join Meet Room
-                </p>
+                <p className="text-sm font-semibold text-slate-700">Meetings</p>
                 <p className="text-[11px] text-slate-400">
-                  Connect with your supervisor via video
+                  Join and manage your video meetings
                 </p>
               </div>
               <ArrowRight

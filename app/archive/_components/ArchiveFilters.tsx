@@ -18,6 +18,7 @@ interface FilterOptions {
 interface ArchiveFiltersProps {
   filterOptions: FilterOptions;
   filterOptionsLoading: boolean;
+  filterOptionsError?: boolean;
   selectedFocus: string[];
   selectedYears: number[];
   selectedSupervisors: string[];
@@ -36,6 +37,7 @@ interface ArchiveFiltersProps {
 export default function ArchiveFilters({
   filterOptions,
   filterOptionsLoading,
+  filterOptionsError,
   selectedFocus,
   selectedYears,
   selectedSupervisors,
@@ -124,6 +126,8 @@ export default function ArchiveFilters({
                 />
               ))}
             </div>
+          ) : filterOptionsError ? (
+            <p className="text-xs text-red-500">Filter options could not be loaded.</p>
           ) : (
             <div className="space-y-2.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
               {filterOptions?.keywords?.map((focus: string) => (
@@ -277,7 +281,7 @@ export default function ArchiveFilters({
       </div>
 
       {/* FACETS */}
-      {metadata?.facets && (
+      {metadata?.total !== undefined && (
         <div className="mt-6 pt-4 border-t border-slate-100">
           <p className="text-xs text-slate-500">
             Showing{" "}

@@ -5,6 +5,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
 import { extractErrorMessage } from "../_lib/utils";
@@ -172,20 +173,17 @@ export const useProject = () => {
       initialPageParam: 1,
       queryFn: async ({ pageParam }) => {
         const { data } = await api.get("/projects", {
-          params: {
-            page: pageParam,
-            limit,
-            status,
-            ...restFilters,
-          },
+          params: { page: pageParam, limit, status, ...restFilters },
         });
         return data;
       },
       getNextPageParam: (lastPage) => {
-        const { page, totalPages } = lastPage.pagination;
-        return page < totalPages ? page + 1 : undefined;
+        const pagination = lastPage?.pagination || lastPage?.metadata;
+        if (!pagination?.hasNextPage) return undefined;
+        return Number(pagination.page) + 1;
       },
-      staleTime: 1000 * 60 * 5,
+      placeholderData: keepPreviousData,
+      staleTime: 1000 * 60 * 2,
       refetchOnWindowFocus: false,
     });
   };

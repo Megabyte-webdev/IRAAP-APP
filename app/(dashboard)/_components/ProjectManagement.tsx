@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   ClipboardList,
   Globe,
-  ArrowUpRight,
 } from "lucide-react";
 import { useProject } from "@/app/_hooks/use-projects";
 import ProjectInfo from "@/app/(dashboard)/_components/ProjectInfo";

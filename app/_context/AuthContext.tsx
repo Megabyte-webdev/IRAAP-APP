@@ -8,11 +8,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { authService, setupInterceptors } from "../_services/auth.service";
+import { authService } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onSuccess } from "../_utils/Notification";
-import { refreshTokenCall } from "../_lib/api-client";
+import { clearApiAccessToken, refreshTokenCall, setApiAccessToken } from "../_lib/api-client";
 import { websocket } from "../_services/websocket";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -28,9 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const refreshInFlight = {
-    current: null as Promise<string | null> | null,
-  };
+  const refreshInFlight = useRef<Promise<string | null> | null>(null);
   const logoutLockRef = useRef(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const authDetailsRef = useRef<any>(null);
@@ -59,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
 
     setAuthDetails(null);
+    clearApiAccessToken();
     localStorage.removeItem("iraapUser");
     localStorage.removeItem("ws_token");
     websocket.disconnect();
@@ -71,22 +70,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ---------------- SINGLE REFRESH PIPELINE ----------------
 
   const updateAccessToken = useCallback((token: string) => {
+    setApiAccessToken(token);
     setAuthDetails((prev: any) => {
       if (!prev) return prev;
-      const updated = { ...prev, token: token };
-      localStorage.setItem("iraapUser", JSON.stringify(updated));
+      const updated = { ...prev, token };
+      localStorage.setItem("iraapUser", JSON.stringify({ user: updated.user }));
       websocket.updateToken(token);
       return updated;
     });
   }, []);
 
-  const refreshTokenSafe = async (): Promise<string | null> => {
-    if (refreshInFlight.current) return refreshInFlight.current;
+  const refreshTokenSafe = useCallback(async (): Promise<string | null> => {
+    if (refreshInFlight.current) {
+      return refreshInFlight.current;
+    }
 
     refreshInFlight.current = (async () => {
       try {
-        const token = await refreshTokenCall();
-        return token;
+        return await refreshTokenCall();
       } catch (err: any) {
         const isNetworkError =
           !err.response ||
@@ -114,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return refreshInFlight.current;
-  };
+  }, []);
 
   const handleRefresh = useCallback(async (): Promise<string | null> => {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
@@ -192,71 +193,94 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [authDetails?.token, handleRefresh, scheduleRefresh]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("iraapUser");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setAuthDetails(parsed);
-      } catch {
-        localStorage.removeItem("iraapUser");
+    let cancelled = false;
+
+    const restoreSession = async () => {
+      const stored = localStorage.getItem("iraapUser");
+      let persistedUser: any = null;
+
+      if (stored) {
+        try {
+          persistedUser = JSON.parse(stored);
+          if (!cancelled && persistedUser?.user) setAuthDetails(persistedUser);
+        } catch {
+          localStorage.removeItem("iraapUser");
+        }
       }
-    }
 
-    setupInterceptors(() => authDetailsRef.current, handleRefresh);
+      try {
+        const token = await refreshTokenSafe();
+        if (token && !cancelled) {
+          setApiAccessToken(token);
+          setAuthDetails((prev: any) => prev ? { ...prev, token } : (persistedUser ? { ...persistedUser, token } : null));
+        }
+      } catch {
+        if (!cancelled) {
+          clearApiAccessToken();
+          setAuthDetails(null);
+          localStorage.removeItem("iraapUser");
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
 
-    setTimeout(() => setIsLoading(false), 50);
-  }, []);
+    restoreSession();
+    return () => { cancelled = true; };
+  }, [refreshTokenSafe]);
 
-  // Login function now accepts optional callbackUrl
-  const login = async (
-    email: string,
-    password: string,
-    callbackUrl?: string,
-  ) => {
+  const login = async (email: string, password: string, callbackUrl?: string) => {
     setIsLoading(true);
-
-    let destination = "";
-
     try {
-      const data = await authService.login({
-        email,
-        password,
-      });
-
-      setAuthDetails(data);
-
-      const userRole = data.user.role.toLowerCase();
-
-      destination =
-        callbackUrl && callbackUrl.startsWith(`/${userRole}`)
+      const data = await authService.login({ email, password });
+      if (!data.requiresOtp || !data.challengeId) {
+        throw new Error("A verification step is required to continue.");
+      }
+      const role = (data.user?.role || "").toLowerCase();
+      const safeCallbackUrl =
+        callbackUrl && role && callbackUrl.startsWith(`/${role}`) && !callbackUrl.startsWith("//")
           ? callbackUrl
-          : `/${userRole}`;
-      router.push(destination);
+          : null;
 
-      onSuccess({
-        title: "Welcome Back!",
-        message: `Successfully signed in as ${data.user.firstname || "User"}.`,
-      });
+      localStorage.setItem(
+        "iraapOtpChallenge",
+        JSON.stringify({
+          challengeId: data.challengeId,
+          email: data.email || email,
+          purpose: data.purpose || "LOGIN",
+          callbackUrl: safeCallbackUrl,
+        }),
+      );
+      router.push("/verify-otp");
+      return data;
     } catch (err) {
-      const errorMessage =
-        extractErrorMessage(err) ||
-        "Please check your credentials and try again.";
-
-      onFailure({
-        title: "Login Failed",
-        message: errorMessage,
-      });
-
-      setAuthDetails(null);
-
+      const errorMessage = extractErrorMessage(err) || "Please check your credentials and try again.";
+      onFailure({ title: "Login Failed", message: errorMessage });
       throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-  const logout = () => {
+
+  const verifyOtp = async (challengeId: string, code: string, callbackUrl?: string) => {
+    const data = await authService.verifyOtp({ challengeId, code });
+    const destination =
+      callbackUrl && callbackUrl.startsWith(`/${data.user.role.toLowerCase()}`)
+        ? callbackUrl
+        : `/${data.user.role.toLowerCase()}`;
+    setApiAccessToken(data.token!);
+    setAuthDetails(data);
+    localStorage.setItem("iraapUser", JSON.stringify({ user: data.user }));
+    localStorage.removeItem("iraapOtpChallenge");
+    websocket.updateToken(data.token!);
+    onSuccess({ title: "Verified", message: `Welcome back, ${data.user.fullName || "User"}.` });
+    router.replace(destination);
+    return data;
+  };
+
+  const logout = async () => {
     try {
-      authService.logout(); // Clears tokens/localStorage
+      await authService.logout();
       setAuthDetails(null);
 
       onSuccess({
@@ -265,8 +289,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       router.replace("/");
-
-      window.location.href = "/";
     } catch (err) {
       onFailure({
         title: "Logout Error",
@@ -277,7 +299,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ authDetails, login, isLoading, setAuthDetails, logout }}
+      value={{ authDetails, login, verifyOtp, isLoading, setAuthDetails, logout }}
     >
       {children}
     </AuthContext.Provider>

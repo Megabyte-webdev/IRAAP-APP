@@ -1,8 +1,6 @@
 import { generatePageMetadata } from "@/app/_lib/metadata";
-import ProjectDetailPage from "../_components/ProjectDetailPage";
 import { getProjectByIdServer } from "@/app/_lib/meta-function";
-
-//import { notFound } from "next/navigation";
+import ProjectDetailPage from "@/app/archive/_components/ProjectDetailPage";
 
 export async function generateMetadata({ params }: any) {
   const { pageId } = await params;
@@ -10,13 +8,11 @@ export async function generateMetadata({ params }: any) {
 
   if (project) {
     return generatePageMetadata({
-      title: `${project.title || "Report"} · IRAAP Repository`,
-      description: `${project.category || "Academic research"} by ${project.author || "the researcher"}. Explore the abstract, methodology, metadata, and document.`,
-      path: `/archive/${pageId}`,
+      title: `${project.title} · IRAAP Repository`,
+      description: `${project.category} (Author: ${project.author})`,
     });
   }
 
-  // Explicit fallback so it doesn't use the root layout's metadata
   return generatePageMetadata({
     title: "Project Not Found · IRAAP Repository",
     description: "The requested project could not be located in our records.",

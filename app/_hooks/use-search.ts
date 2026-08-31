@@ -1,11 +1,9 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../_lib/api-client";
+import { keepPreviousData } from "@tanstack/react-query";
 
-interface FilterOptions {
-  keywords: string[];
-  years: number[];
-  supervisors: Array<{ id: number; name: string }>;
-}
 const useSearch = () => {
   const getCategories = () =>
     useQuery({
@@ -14,41 +12,42 @@ const useSearch = () => {
         const { data } = await api.get("/search/categories");
         return data?.categories || [];
       },
+      staleTime: 1000 * 60 * 30,
+      placeholderData: keepPreviousData,
     });
 
   const getSearchResults = (query: any) =>
     useQuery({
       queryKey: ["searchResults", query],
       queryFn: async () => {
-        const { data } = await api.get(
-          `/search/projects?title=${query.title || ""}&year=${query.year || ""}&researchArea=${query.researchArea || ""}&methodology=${query.methodology || ""}`,
-        );
-        console.log(data);
-
-        return data?.projects || [];
+        const { data } = await api.get("/projects", {
+          params: { ...query, status: query?.status || "APPROVED" },
+        });
+        return data;
       },
       enabled: !!query,
+      placeholderData: keepPreviousData,
     });
 
-  const useHome = () => {
-    return useQuery({
+  const useHome = () =>
+    useQuery({
       queryKey: ["home"],
       queryFn: async () => {
         const { data } = await api.get("/search/homepage-data");
         return data;
       },
+      staleTime: 1000 * 60 * 5,
     });
-  };
 
-  const getFilterOptions = () => {
-    return useQuery({
+  const getFilterOptions = () =>
+    useQuery({
       queryKey: ["filterOptions"],
       queryFn: async () => {
         const { data } = await api.get("/search/filter-options");
         return data;
       },
+      staleTime: 1000 * 60 * 15,
     });
-  };
 
   return { getCategories, getSearchResults, useHome, getFilterOptions };
 };

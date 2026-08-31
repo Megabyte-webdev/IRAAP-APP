@@ -22,7 +22,7 @@ const ProjectReviewModal: FC<ProjectReviewModalProps> = ({
 }) => {
   const [showPdf, setShowPdf] = useState(true);
 
-  const pdfUrl = useMemo(() => `${project?.fileUrl}.pdf`, [project?.fileUrl]);
+  const pdfUrl = useMemo(() => (typeof project?.fileUrl === "string" && project.fileUrl.trim() ? project.fileUrl.trim().replace(/\.pdf\.pdf$/i, ".pdf") : null), [project?.fileUrl]);
 
   if (!isOpen) return null;
 
@@ -94,7 +94,7 @@ const ProjectReviewModal: FC<ProjectReviewModalProps> = ({
                   </a>
                 </div>
               </div>
-              {showPdf && (
+              {showPdf && pdfUrl && (
                 <iframe
                   src={pdfUrl}
                   className="w-full flex-1"

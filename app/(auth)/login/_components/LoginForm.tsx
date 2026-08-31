@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useAuth } from "@/app/_context/AuthContext";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function LoginForm() {
@@ -138,6 +139,10 @@ function LoginForm() {
       >
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
       </button>
+
+      <p className="text-center text-xs text-muted-foreground">
+        New to IRAAP? <Link href="/signup" className="font-semibold text-primary hover:underline">Create a student account</Link>
+      </p>
     </form>
   );
 }
