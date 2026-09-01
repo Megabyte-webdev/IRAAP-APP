@@ -10,8 +10,8 @@ export async function generateMetadata({ params }: any) {
 
   if (project) {
     return generatePageMetadata({
-      title: `${project.title || "Report"} · IRAAP Repository`,
-      description: `${project.category || "Academic research"} by ${project.author || "the researcher"}. Explore the abstract, methodology, metadata, and document.`,
+      title: `${project.title ?? "Report"} · IRAAP Repository`,
+      description: `${project.category ?? "Academic research"} by ${project.author ?? "the researcher"}. Explore the abstract, methodology, metadata, and document.`,
       path: `/archive/${pageId}`,
     });
   }
