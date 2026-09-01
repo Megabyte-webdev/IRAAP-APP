@@ -75,7 +75,7 @@ environment designed specifically for engineering scholars.`,
           <>
             <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
               <Link
-                href="/login"
+                href="/signup"
                 className="group w-full md:w-auto bg-primary text-white text-xs font-semibold px-7 py-4 rounded-md shadow-md shadow-blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-300 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30 flex items-center justify-center gap-2"
               >
                 Get Started
