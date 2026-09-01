@@ -22,7 +22,7 @@ const ProjectReviewModal: FC<ProjectReviewModalProps> = ({
 }) => {
   const [showPdf, setShowPdf] = useState(true);
 
-  const pdfUrl = useMemo(() => (typeof project?.fileUrl === "string" && project.fileUrl.trim() ? project.fileUrl.trim().replace(/\.pdf\.pdf$/i, ".pdf") : null), [project?.fileUrl]);
+  const pdfUrl = project?.fileUrl
 
   if (!isOpen) return null;
 
