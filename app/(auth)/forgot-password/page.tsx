@@ -30,6 +30,7 @@ export default function ForgotPasswordPage() {
           challengeId: data.challengeId,
           email: data.email || email.trim(),
           purpose: "PASSWORD_RESET",
+          expiresAt: Date.now() + 10 * 60 * 1000,
         }),
       );
       router.push("/verify-otp");

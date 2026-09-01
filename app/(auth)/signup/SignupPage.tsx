@@ -69,6 +69,7 @@ export default function SignupPage() {
           email: authData.email || cleanEmail,
           purpose: "SIGNUP",
           callbackUrl: "/student",
+          expiresAt: Date.now() + 10 * 60 * 1000,
         }),
       );
 

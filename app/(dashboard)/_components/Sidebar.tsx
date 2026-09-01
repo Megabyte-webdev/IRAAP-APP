@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -19,32 +20,49 @@ import {
   BookOpen,
   CalendarDays,
 } from "lucide-react";
+
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
-import Image from "next/image";
 
-type UserRole = "STUDENT" | "SUPERVISOR" | "ADMIN";
+type UserRole = "ADMIN" | "SUPERVISOR" | "STUDENT";
 
-interface NavItem {
+type NavItem = {
   name: string;
   href: string;
   roles: UserRole[] | "ALL";
-  icon: React.ElementType;
-}
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+};
 
 const navItems: NavItem[] = [
-  { name: "Dashboard", href: "", roles: "ALL", icon: LayoutDashboard },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    roles: "ALL",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Research",
+    href: "/research",
+    roles: ["STUDENT", "SUPERVISOR"],
+    icon: FileUp,
+  },
+  {
+    name: "Projects",
+    href: "/projects",
+    roles: ["STUDENT", "SUPERVISOR"],
+    icon: FolderOpen,
+  },
+  {
+    name: "Approvals",
+    href: "/approvals",
+    roles: ["ADMIN", "SUPERVISOR"],
+    icon: ClipboardCheck,
+  },
   {
     name: "Chat",
     href: "/chat",
-    roles: ["STUDENT", "SUPERVISOR"],
+    roles: ["STUDENT", "SUPERVISOR", "ADMIN"],
     icon: MessageSquare,
-  },
-  {
-    name: "My Project",
-    href: "/projects",
-    roles: ["STUDENT"],
-    icon: FolderOpen,
   },
   {
     name: "Meetings",
@@ -70,7 +88,12 @@ const navItems: NavItem[] = [
     roles: ["STUDENT", "ADMIN"],
     icon: BookOpen,
   },
-  { name: "Archive Search", href: "/archive", roles: "ALL", icon: Search },
+  {
+    name: "Archive Search",
+    href: "/archive",
+    roles: "ALL",
+    icon: Search,
+  },
 ];
 
 export function Sidebar({
@@ -82,16 +105,37 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { authDetails, logout } = useAuth();
+
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = authDetails?.user;
   const userRole = user?.role as UserRole | undefined;
-  const rolePrefix = `/${userRole?.toLowerCase()}`;
+
+  const rolePrefix = userRole ? `/${userRole.toLowerCase()}` : "";
 
   const filteredNavItems = navItems.filter((item) => {
-    if (item.roles === "ALL") return true;
-    return userRole && item.roles.includes(userRole);
+    if (item.roles === "ALL") {
+      return true;
+    }
+
+    return !!userRole && item.roles.includes(userRole);
   });
+
+  const getTourTarget = (name: string) => {
+    switch (name) {
+      case "Archive Search":
+        return "archive";
+
+      case "Chat":
+        return "chat";
+
+      case "Meetings":
+        return "meetings";
+
+      default:
+        return undefined;
+    }
+  };
 
   return (
     <>
@@ -100,75 +144,126 @@ export function Sidebar({
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       <aside
         data-tour="sidebar"
+        aria-label="Main navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 h-full flex flex-col bg-white dark:bg-[#1E293B] text-slate-900 dark:text-slate-100 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-slate-200 dark:border-slate-800",
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col",
+          "bg-white text-slate-900 dark:bg-[#1E293B] dark:text-slate-100",
+          "border-r border-slate-200 dark:border-slate-800",
+          "transition-all duration-300 ease-in-out",
+          "lg:static lg:translate-x-0",
           isOpen
-            ? "translate-x-0 max-w-64 w-full shadow-lg"
+            ? "w-full max-w-64 translate-x-0 shadow-lg"
             : "-translate-x-full",
           isCollapsed ? "lg:w-18" : "lg:w-64",
         )}
       >
-        {/* --- THE EDGE TOGGLE BUTTON --- */}
+        {/* Edge Toggle */}
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          type="button"
+          onClick={() => setIsCollapsed((value) => !value)}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className={cn(
-            "absolute -right-4 top-20 z-50 hidden h-8 w-8 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all lg:flex",
-            "hover:scale-110 active:scale-95 shadow-sm cursor-pointer",
+            "absolute -right-4 top-20 z-50 hidden",
+            "h-8 w-8 items-center justify-center",
+            "rounded-full",
+            "border border-slate-200 dark:border-slate-700",
+            "bg-white dark:bg-slate-800",
+            "text-slate-700 dark:text-slate-300",
+            "shadow-sm transition-all",
+            "hover:scale-110 active:scale-95",
+            "lg:flex",
           )}
         >
           {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
 
-        {/* Header Branding */}
-        <div className="flex h-18 items-center border-b border-slate-200 dark:border-slate-800 overflow-hidden">
+        {/* Header */}
+        <div
+          className={cn(
+            "flex h-18 shrink-0 items-center",
+            "border-b border-slate-200 dark:border-slate-800",
+            "overflow-hidden",
+          )}
+        >
           <div
             className={cn(
-              "w-full transition-opacity duration-300 flex justify-center items-center px-6",
+              "flex w-full items-center justify-center px-6",
+              "transition-opacity duration-300",
               isCollapsed && "lg:opacity-0",
             )}
           >
             <Image
-              alt="IRAP Logo"
               src="/irap-logo.png"
+              alt="IRAAP Logo"
               width={150}
               height={150}
-              className="h-10 w-auto opacity-90 transition-all"
+              priority
+              className="h-10 w-auto opacity-90"
             />
           </div>
+
           <button
+            type="button"
             onClick={onClose}
-            className="ml-auto mr-4 lg:hidden text-red-500 hover:text-red-600 cursor-pointer p-1"
+            aria-label="Close navigation"
+            className="ml-auto mr-4 p-1 text-red-500 hover:text-red-600 lg:hidden"
           >
             <X size={24} />
           </button>
         </div>
 
-        {/* Navigation Items Container */}
-        <nav className="flex-1 space-y-1 p-3 pt-6 overflow-y-auto overflow-x-hidden">
-          {filteredNavItems.map((item) => {
+        {/* Navigation */}
+        <nav
+          className={cn(
+            "flex-1 space-y-1 overflow-x-hidden overflow-y-auto",
+            "p-3 pt-6",
+          )}
+          aria-label="Workspace navigation"
+        >
+          {filteredNavItems.map((item, index) => {
             const Icon = item.icon;
+
             const fullHref = `${rolePrefix}${item.href}`;
-            const isActive = pathname === fullHref;
+
+            const isActive =
+              pathname === fullHref || pathname?.startsWith(`${fullHref}/`);
+
+            const tourTarget = getTourTarget(item.name);
 
             return (
               <Link
                 key={item.href}
-                data-tour={item.name === "Archive Search" ? "archive" : item.name === "Meetings" ? "meetings" : item.name === "Chat" ? "chat" : undefined}
                 href={fullHref}
+                data-tour={tourTarget}
+                data-tour-nav={item.name}
+                data-tour-nav-index={index}
                 onClick={() => {
-                  const tourActive = document.body.classList.contains("driver-active");
-                  if (window.innerWidth < 1024 && !tourActive) onClose();
+                  const tourActive =
+                    document.body.classList.contains("driver-active");
+
+                  if (window.innerWidth < BREAKPOINT && !tourActive) {
+                    onClose();
+                  }
                 }}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
+                  "group relative flex items-center gap-3",
+                  "rounded-lg px-3 py-2.5",
+                  "text-sm font-medium",
+                  "transition-all",
                   isActive
                     ? "bg-primary text-white"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60",
+                    : [
+                        "text-slate-700",
+                        "hover:bg-slate-100",
+                        "dark:text-slate-300",
+                        "dark:hover:bg-slate-800/60",
+                      ],
                 )}
               >
                 <Icon
@@ -177,14 +272,20 @@ export function Sidebar({
                     "shrink-0 transition-colors",
                     isActive
                       ? "text-white"
-                      : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200",
+                      : [
+                          "text-slate-500",
+                          "dark:text-slate-400",
+                          "group-hover:text-slate-900",
+                          "dark:group-hover:text-slate-200",
+                        ],
                   )}
                 />
+
                 <span
                   className={cn(
-                    "transition-all duration-300 whitespace-nowrap",
+                    "whitespace-nowrap transition-all duration-300",
                     isCollapsed
-                      ? "lg:opacity-0 lg:pointer-events-none"
+                      ? ["lg:pointer-events-none", "lg:opacity-0"]
                       : "opacity-100",
                   )}
                 >
@@ -195,30 +296,45 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Bottom Profile Information & Footer Controls */}
-        <div className="mt-auto border-t border-slate-200 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/20">
+        {/* Footer */}
+        <div
+          className={cn(
+            "mt-auto shrink-0",
+            "border-t border-slate-200 dark:border-slate-800",
+            "bg-slate-50/50 dark:bg-slate-900/20",
+            "p-4",
+          )}
+        >
           {!isCollapsed && (
-            <div className="mb-4 px-2 overflow-hidden transition-all duration-300">
+            <div className="mb-4 overflow-hidden px-2">
               <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
-                {user?.fullName}
+                {user?.fullName ?? "User"}
               </p>
-              <p className="text-[10px] text-primary uppercase font-bold tracking-wider mt-0.5">
-                {user?.role}
+
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                {user?.role ?? ""}
               </p>
             </div>
           )}
 
           <button
+            type="button"
             onClick={logout}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/20 group cursor-pointer",
+              "group flex w-full items-center gap-3",
+              "rounded-lg px-3 py-2.5",
+              "text-sm font-medium",
+              "text-red-500 dark:text-red-400",
+              "transition-colors",
+              "hover:bg-red-50 dark:hover:bg-red-950/20",
               isCollapsed && "lg:justify-center lg:px-0",
             )}
           >
             <LogOut
               size={20}
-              className="shrink-0 group-hover:-translate-x-0.5 transition-transform"
+              className="shrink-0 transition-transform group-hover:-translate-x-0.5"
             />
+
             {!isCollapsed && <span>Sign Out</span>}
           </button>
         </div>
@@ -226,3 +342,5 @@ export function Sidebar({
     </>
   );
 }
+
+const BREAKPOINT = 1024;

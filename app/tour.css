@@ -1,63 +1,84 @@
 .driver-popover.iraap-driver-popover {
-  width: min(380px, calc(100vw - 32px));
-  max-width: 380px;
-  padding: 18px;
-  border: 1px solid rgba(23, 20, 19, 0.08);
-  border-radius: 20px;
+  width: fit-content;
+  max-width: min(340px, calc(100vw - 32px));
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 15px 16px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+
   background: var(--card, #ffffff);
   color: var(--foreground, #171413);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.06);
+
   font-family:
     Inter,
     system-ui,
     -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
-  box-sizing: border-box;
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-title {
-  margin: 0 32px 6px 0;
-  font-size: 17px;
-  line-height: 1.2;
+  margin: 0 26px 6px 0;
+  max-width: 100%;
+  font-size: 15px;
+  line-height: 1.3;
   font-weight: 750;
-  letter-spacing: -0.02em;
-  color: var(--foreground, #171413);
+  letter-spacing: -0.01em;
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-description {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--muted-foreground, #6f6864);
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-progress-text {
-  color: var(--muted-foreground, #a09792);
-  font-size: 10px;
-  font-weight: 800;
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted-foreground, #9a918c);
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-footer {
-  margin-top: 16px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: nowrap;
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-btn {
-  min-height: 38px;
-  border-radius: 10px;
-  padding: 0 14px;
+  min-height: 34px;
+  padding: 0 11px;
   border: 0;
+  border-radius: 9px;
   box-shadow: none;
   text-shadow: none;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
+  flex-shrink: 0;
   transition:
-    background-color 150ms ease,
-    opacity 150ms ease;
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-btn:hover {
+  opacity: 0.9;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-btn:active {
+  transform: scale(0.98);
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-next-btn,
@@ -67,33 +88,31 @@
 }
 
 .driver-popover.iraap-driver-popover .driver-popover-prev-btn {
-  background: var(--background, #f4efea);
+  background: #f4efea;
   color: var(--foreground, #554e4a);
-}
-
-.driver-popover.iraap-driver-popover .driver-popover-arrow {
-  border-color: var(--card, #ffffff);
 }
 
 .iraap-tour-skip {
   appearance: none;
+  min-height: 34px;
+  margin-right: auto;
+  padding: 0 5px;
   border: 0;
+  border-radius: 7px;
   background: transparent;
   color: var(--muted-foreground, #918983);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 8px 6px;
-  margin-right: auto;
   cursor: pointer;
-  border-radius: 6px;
+  white-space: nowrap;
 }
 
 .iraap-tour-skip:hover {
+  background: rgba(15, 23, 42, 0.04);
   color: var(--foreground, #171413);
 }
 
 .driver-overlay {
-  transition: opacity 180ms ease;
   z-index: 99990 !important;
 }
 
@@ -103,49 +122,71 @@
 
 .driver-active-element {
   border-radius: 8px !important;
-  outline: 2px solid var(--color-primary, #0f172a) !important;
-  outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
-  /* Prevent driver popover from overflowing side edges */
+@media (max-width: 1023px) {
   .driver-popover.iraap-driver-popover {
-    width: calc(100vw - 24px) !important;
-    max-width: calc(100vw - 24px) !important;
-    left: 12px !important; /* Force margin consistency on small screens */
-    padding: 14px 14px 12px 14px;
-    border-radius: 16px;
+    width: fit-content !important;
+    max-width: min(320px, calc(100vw - 24px)) !important;
+    padding: 13px 14px 12px;
+    border-radius: 13px;
   }
 
   .driver-popover.iraap-driver-popover .driver-popover-title {
-    font-size: 15px;
-    margin-right: 24px;
+    font-size: 14px;
+    line-height: 1.3;
+    margin-right: 20px;
   }
 
   .driver-popover.iraap-driver-popover .driver-popover-description {
-    font-size: 12px;
-    line-height: 1.45;
-  }
-
-  /* Improve button layout on narrow screens */
-  .driver-popover.iraap-driver-popover .driver-popover-footer {
-    margin-top: 12px;
-    gap: 6px;
-  }
-
-  .driver-popover.iraap-driver-popover .driver-popover-btn {
-    min-height: 38px; /* Larger tap targets for touch */
-    padding: 0 12px;
     font-size: 11.5px;
+    line-height: 1.48;
   }
 
+  .driver-popover.iraap-driver-popover .driver-popover-footer {
+    margin-top: 10px;
+    gap: 5px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-btn,
   .iraap-tour-skip {
-    min-height: 38px;
-    padding: 0 4px;
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 380px) {
+  .driver-popover.iraap-driver-popover {
+    max-width: calc(100vw - 16px) !important;
+    padding: 12px;
   }
 
-  /* Hide popover arrows on small screens to avoid misaligned pointers */
-  .driver-popover.iraap-driver-popover .driver-popover-arrow {
-    display: none !important;
+  .driver-popover.iraap-driver-popover .driver-popover-title {
+    font-size: 13.5px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-description {
+    font-size: 11px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-btn,
+  .iraap-tour-skip {
+    min-height: 32px;
+    padding-left: 9px;
+    padding-right: 9px;
+    font-size: 10px;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 1023px) {
+  .driver-popover.iraap-driver-popover {
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .driver-popover.iraap-driver-popover,
+  .driver-popover.iraap-driver-popover .driver-popover-btn {
+    transition: none;
   }
 }
