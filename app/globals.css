@@ -39,6 +39,15 @@
   --grid-template-columns-card: repeat(auto-fill, minmax(250px, 1fr));
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: var(--font-inter);
+}
+
 ::-webkit-scrollbar {
   width: 5px; /* Slim but visible scrollbar */
   height: 5px; /* Horizontal scrollbar height */
@@ -46,20 +55,20 @@
 
 /* Track (background) */
 ::-webkit-scrollbar-track {
-  background: #d5d8ff; /* Soft orange tint background */
+  background: #d5d8ff;
   border-radius: 10px;
 }
 
 /* Thumb (draggable handle) */
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary); /* Primary orange color */
+  background: var(--color-primary);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 /* Thumb hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #355aff; /* Darker orange on hover */
+  background: #355aff;
 }
 
 /* Corner (where scrollbars meet) */
