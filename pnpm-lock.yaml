@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@afosecure/meetingsdk':
+        specifier: 1.4.4
+        version: 1.4.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-query':
         specifier: ^5.90.21
         version: 5.90.21(react@19.2.3)
@@ -107,6 +110,12 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@afosecure/meetingsdk@1.4.4':
+    resolution: {integrity: sha512-Wg7a29KOnQjGu96q+Cud8Ku3PGsgr8QXtBvwppO0vSAs9LeVnPHWJ3PW7UiO+uPyOuygwnSEjVAb0BTHR3OGbg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -2225,6 +2234,10 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
+  uuid@14.0.2:
+    resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
+    hasBin: true
+
   warning@4.0.3:
     resolution: {integrity: sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==}
 
@@ -2275,6 +2288,12 @@ packages:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
+
+  '@afosecure/meetingsdk@1.4.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      uuid: 14.0.2
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -4571,6 +4590,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  uuid@14.0.2: {}
 
   warning@4.0.3:
     dependencies:
