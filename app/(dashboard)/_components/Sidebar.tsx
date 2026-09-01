@@ -104,6 +104,7 @@ export function Sidebar({
       )}
 
       <aside
+        data-tour="sidebar"
         className={cn(
           "fixed inset-y-0 left-0 z-50 h-full flex flex-col bg-white dark:bg-[#1E293B] text-slate-900 dark:text-slate-100 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-slate-200 dark:border-slate-800",
           isOpen
@@ -157,6 +158,7 @@ export function Sidebar({
             return (
               <Link
                 key={item.href}
+                data-tour={item.name === "Archive Search" ? "archive" : item.name === "Meetings" ? "meetings" : item.name === "Chat" ? "chat" : undefined}
                 href={fullHref}
                 onClick={() => {
                   if (window.innerWidth < 1024) onClose();

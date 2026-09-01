@@ -7,6 +7,8 @@ import SocketConnect from "./SocketConnect";
 import { queryClient } from "../_services/query-client";
 import { ToastContainer } from "react-toastify";
 import { NotificationProvider } from "./NotificationContext";
+import PwaRuntime from "../_components/pwa/PwaRuntime";
+import InstallPrompt from "../_components/pwa/InstallPrompt";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -22,6 +24,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <ChatProvider>
             <NotificationProvider>
               <SocketConnect>{children}</SocketConnect>
+              <PwaRuntime />
+              <InstallPrompt />
               <ToastContainer
                 position="top-right"
                 autoClose={5000}

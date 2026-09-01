@@ -176,7 +176,7 @@ class WebSocketService {
       if (event.code === 4401) {
         console.log("[WS] token expired");
 
-        this.handleTokenExpired();
+        this.handleHandshakeTokenExpired();
         return;
       }
 
@@ -207,7 +207,7 @@ class WebSocketService {
 
         if (parsed.type === "auth:error") {
           if (parsed.code === "TOKEN_EXPIRED") {
-            this.handleTokenExpired();
+            this.handleHandshakeTokenExpired();
           }
 
           return;
@@ -312,28 +312,26 @@ class WebSocketService {
     return this.socket?.readyState === WebSocket.OPEN;
   }
 
-  private async handleTokenExpired() {
+  private async handleHandshakeTokenExpired() {
     if (!this.refreshHandler) {
       console.error("[WS] no refresh handler registered");
       return;
     }
 
     try {
-      console.log("[WS] token expired, refreshing...");
-
+      console.log("[WS] handshake token expired; refreshing before reconnect...");
       const newToken = await this.refreshHandler();
-
       if (!newToken) {
-        console.warn("[WS] refresh failed");
         this.disconnect();
         return;
       }
 
-      this.updateToken(newToken);
-
+      // This path is reached only when the server rejected a connection attempt.
+      // A healthy, already-authenticated websocket is never replaced just because
+      // its HTTP access token was refreshed.
       this.connect(newToken, true);
     } catch (err) {
-      console.error("[WS] refresh error", err);
+      console.error("[WS] handshake refresh error", err);
       this.disconnect();
     }
   }

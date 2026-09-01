@@ -14,12 +14,12 @@ export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
 
     const userRole = authDetails?.user?.role?.toLowerCase();
 
-    const isPublicPath = ["/", "/login", "/signup", "/verify-otp"].includes(pathname);
+    const isPublicPath = ["/", "/login", "/signup", "/forgot-password", "/verify-otp"].includes(pathname);
 
     if (!authDetails && !isPublicPath) {
       const loginUrl = `/login?callbackUrl=${encodeURIComponent(pathname)}`;
       router.replace(loginUrl);
-    } else if (authDetails && (pathname === "/login" || pathname === "/signup" || pathname === "/verify-otp")) {
+    } else if (authDetails && (pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password" || pathname === "/verify-otp")) {
       router.replace(`/${userRole || "dashboard"}`);
     }
   }, [authDetails, isLoading, router, pathname]);
@@ -28,7 +28,7 @@ export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
     return <Loading />;
   }
 
-  if (!authDetails && ["/", "/login", "/signup", "/verify-otp"].includes(pathname)) {
+  if (!authDetails && ["/", "/login", "/signup", "/forgot-password", "/verify-otp"].includes(pathname)) {
     return <>{children}</>;
   }
 

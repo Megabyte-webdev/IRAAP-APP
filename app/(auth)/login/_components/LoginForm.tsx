@@ -123,12 +123,12 @@ function LoginForm() {
           Remember for 30 days
         </label>
 
-        <button
-          type="button"
+        <Link
+          href="/forgot-password"
           className="text-xs text-muted-foreground font-medium hover:text-primary hover:underline focus:outline-none"
         >
-          Forgot password
-        </button>
+          Forgot password?
+        </Link>
       </div>
 
       {/* SIGN IN BUTTON */}

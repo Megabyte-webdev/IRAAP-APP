@@ -461,17 +461,17 @@ export default function PublicationSubmissionForm({
         </div>
 
         {formData.file ? (
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex items-start justify-between">
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-wrap items-start justify-between">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-primary rounded-lg mt-0.5">
                 <CheckCircle size={16} className="text-white" />
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">
+              <div className="min-w-0 w-full">
+                <p className="text-sm font-medium text-slate-900 line-clamp-1">
                   {formData.file.name}
                 </p>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                  {(formData.file.size / 1024 / 1024).toFixed(3)} MB
                 </p>
               </div>
             </div>

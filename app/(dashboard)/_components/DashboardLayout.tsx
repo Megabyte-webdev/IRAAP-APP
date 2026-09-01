@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import Portal from "@/app/_components/Portal";
 import { usePathname } from "next/navigation";
+import AppTour from "@/app/_components/AppTour";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,6 +18,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <AppTour />
       {/* Portal only on small screens */}
       <Portal>
         <div className="lg:hidden">{sidebar}</div>

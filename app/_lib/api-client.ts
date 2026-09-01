@@ -39,7 +39,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const requestUrl = String(originalRequest?.url || "");
     const isRefreshRequest = requestUrl.includes("/auth/refresh-token");
-    const isAuthRequest = /\/auth\/(login|register|verify-otp|resend-otp|logout)/.test(requestUrl);
+    const isAuthRequest = /\/auth\/(login|register|forgot-password|reset-password|verify-otp|resend-otp|logout)/.test(requestUrl);
 
     if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest && !isAuthRequest) {
       if (isRefreshing) {

@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { authService } from "../_services/auth.service";
-import { profileService } from "../_services/profile.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onSuccess } from "../_utils/Notification";
@@ -213,36 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = await refreshTokenSafe();
         if (token && !cancelled) {
           setApiAccessToken(token);
-
-          let nextAuthDetails: any = null;
-          if (persistedUser) {
-            nextAuthDetails = { ...persistedUser, token };
-          }
-
-          // Always rehydrate the authenticated user from the server after a
-          // successful refresh. This keeps profile changes (photo, department,
-          // programme, level, bio, etc.) durable across a full browser reload
-          // instead of relying on the cached localStorage copy.
-          try {
-            const profile = await profileService.getMe();
-            if (!cancelled) {
-              nextAuthDetails = nextAuthDetails
-                ? { ...nextAuthDetails, user: { ...nextAuthDetails.user, ...profile }, token }
-                : { user: profile, token };
-              localStorage.setItem(
-                "iraapUser",
-                JSON.stringify({ user: nextAuthDetails.user }),
-              );
-            }
-          } catch (profileError: any) {
-            // A profile request should not destroy an otherwise valid session.
-            // The authoritative session remains the HttpOnly refresh cookie.
-            console.warn("[AUTH] profile rehydration failed", profileError?.message);
-          }
-
-          if (!cancelled && nextAuthDetails) {
-            setAuthDetails(nextAuthDetails);
-          }
+          setAuthDetails((prev: any) => prev ? { ...prev, token } : (persistedUser ? { ...persistedUser, token } : null));
         }
       } catch {
         if (!cancelled) {

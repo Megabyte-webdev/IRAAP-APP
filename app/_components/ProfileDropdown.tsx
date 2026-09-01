@@ -10,6 +10,7 @@ import { getInitials } from "../_utils/formatters";
 
 interface UserProfile {
   profileImage?: string;
+  profileImageUrl?: string;
 }
 
 interface User {
@@ -17,6 +18,7 @@ interface User {
   name?: string;
   role?: string;
   profile?: UserProfile;
+  profileImageUrl?: string;
 }
 
 interface ProfileDropdownProps {
@@ -27,6 +29,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
   const { authDetails, logout } = useAuth();
   const user = authDetails?.user as User | undefined;
   const [isOpen, setIsOpen] = useState(false);
+  const profileImage = user?.profileImageUrl || user?.profile?.profileImageUrl || user?.profile?.profileImage;
 
   if (!user) return null;
 
@@ -34,6 +37,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
     <div className="relative text-slate-700 dark:text-slate-300">
       {/* Trigger Button */}
       <div
+        data-tour="profile"
         className="flex items-center gap-2 ml-2 font-medium cursor-pointer select-none"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -48,9 +52,9 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
 
         <div className="flex items-center rounded-full bg-slate-200/50 dark:bg-slate-800/60 w-max p-1 transition-colors">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600 dark:bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200">
-            {user?.profile?.profileImage ? (
+            {profileImage ? (
               <img
-                src={`${process.env.NEXT_PUBLIC_BASE_URL}${user.profile.profileImage}`}
+                src={profileImage}
                 alt="User Avatar"
                 className="w-full h-full object-cover"
               />
@@ -95,7 +99,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
 
               {/* Profile Link */}
               <Link
-                href="/app/profile"
+                href={`/${user?.role?.toLowerCase()}/profile`}
                 className="px-4 py-2.5 flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -105,6 +109,19 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
                 />
                 Profile
               </Link>
+
+              <button
+                type="button"
+                className="w-full px-4 py-2.5 flex items-center gap-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                onClick={() => {
+                  localStorage.removeItem("iraap_tour_completed");
+                  window.dispatchEvent(new Event("iraap:restart-tour"));
+                  setIsOpen(false);
+                }}
+              >
+                <span className="h-[18px] w-[18px] rounded-full border border-slate-300 dark:border-slate-600 text-[10px] flex items-center justify-center font-bold">?</span>
+                Take a tour
+              </button>
 
               <hr className="my-1 border-slate-100 dark:border-slate-800" />
 

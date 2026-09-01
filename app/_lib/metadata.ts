@@ -26,7 +26,8 @@ export function generatePageMetadata({
 
   return {
     metadataBase: new URL(BASE_URL),
-applicationName: "IRAAP",
+    applicationName: "IRAAP",
+    manifest: "/manifest.webmanifest",
     title: finalTitle,
     description: finalDescription,
 
