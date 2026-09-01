@@ -88,7 +88,7 @@ export default function AuthShell({
         </section>
 
         {/* SECOND SECTION */}
-        <section className="min-h-[calc(100vh-2rem)] lg:min-h-0 max-h-full overflow-y-auto">
+        <section className="min-h-[calc(100vh-2rem)] lg:min-h-0 max-h-full overflow-y-auto flex items-center justify-center">
           <div className="flex h-full items-center justify-center p-6 md:p-10 lg:p-12 xl:p-16">
             <div className="h-max w-full max-w-sm">
               <Link

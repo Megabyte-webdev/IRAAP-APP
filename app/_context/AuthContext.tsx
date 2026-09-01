@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { authService } from "../_services/auth.service";
-import { profileService } from "../_services/profile.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onSuccess } from "../_utils/Notification";
@@ -75,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthDetails((prev: any) => {
       if (!prev) return prev;
       const updated = { ...prev, token };
-      localStorage.setItem("iraapUser", JSON.stringify({ user: updated.user }));
+      localStorage.setItem("iraapUser", JSON.stringify(updated));
       websocket.updateToken(token);
       return updated;
     });
@@ -198,57 +197,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const restoreSession = async () => {
       const stored = localStorage.getItem("iraapUser");
-      let persistedUser: any = null;
+      let persistedAuth: any = null;
 
       if (stored) {
         try {
-          persistedUser = JSON.parse(stored);
-          if (!cancelled && persistedUser?.user) setAuthDetails(persistedUser);
+          persistedAuth = JSON.parse(stored);
+          if (!cancelled && persistedAuth?.user) {
+            setAuthDetails(persistedAuth);
+            if (persistedAuth.token) {
+              setApiAccessToken(persistedAuth.token);
+              websocket.updateToken(persistedAuth.token);
+            }
+          }
         } catch {
           localStorage.removeItem("iraapUser");
         }
       }
 
       try {
-        const token = await refreshTokenSafe();
-        if (token && !cancelled) {
-          setApiAccessToken(token);
-
-          let nextAuthDetails: any = null;
-          if (persistedUser) {
-            nextAuthDetails = { ...persistedUser, token };
-          }
-
-          // Always rehydrate the authenticated user from the server after a
-          // successful refresh. This keeps profile changes (photo, department,
-          // programme, level, bio, etc.) durable across a full browser reload
-          // instead of relying on the cached localStorage copy.
-          try {
-            const profile = await profileService.getMe();
-            if (!cancelled) {
-              nextAuthDetails = nextAuthDetails
-                ? { ...nextAuthDetails, user: { ...nextAuthDetails.user, ...profile }, token }
-                : { user: profile, token };
-              localStorage.setItem(
-                "iraapUser",
-                JSON.stringify({ user: nextAuthDetails.user }),
-              );
-            }
-          } catch (profileError: any) {
-            // A profile request should not destroy an otherwise valid session.
-            // The authoritative session remains the HttpOnly refresh cookie.
-            console.warn("[AUTH] profile rehydration failed", profileError?.message);
-          }
-
-          if (!cancelled && nextAuthDetails) {
-            setAuthDetails(nextAuthDetails);
+        // Use the persisted access token immediately. If it is already expired,
+        // refresh through the HttpOnly cookie. This preserves authentication
+        // across browser restarts while still rotating tokens when necessary.
+        if (persistedAuth?.token && !isExpired(persistedAuth.token)) {
+          setApiAccessToken(persistedAuth.token);
+        } else {
+          const token = await refreshTokenSafe();
+          if (token && !cancelled) {
+            updateAccessToken(token);
+          } else if (!persistedAuth?.token && !cancelled) {
+            clearApiAccessToken();
+            setAuthDetails(null);
           }
         }
-      } catch {
-        if (!cancelled) {
-          clearApiAccessToken();
-          setAuthDetails(null);
-          localStorage.removeItem("iraapUser");
+      } catch (err: any) {
+        if (!cancelled && err?.message === "AUTH_EXPIRED") {
+          await safeLogout();
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -300,13 +283,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         : `/${data.user.role.toLowerCase()}`;
     setApiAccessToken(data.token!);
     setAuthDetails(data);
-    localStorage.setItem("iraapUser", JSON.stringify({ user: data.user }));
+    localStorage.setItem("iraapUser", JSON.stringify(data));
     localStorage.removeItem("iraapOtpChallenge");
     websocket.updateToken(data.token!);
     onSuccess({ title: "Verified", message: `Welcome back, ${data.user.fullName || "User"}.` });
     router.replace(destination);
     return data;
   };
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      void safeLogout();
+    };
+
+    window.addEventListener("iraap:auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("iraap:auth-expired", handleAuthExpired);
+  }, [safeLogout]);
 
   const logout = async () => {
     try {

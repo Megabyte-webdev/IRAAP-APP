@@ -4,6 +4,28 @@ let accessToken: string | null = null;
 
 export const setApiAccessToken = (token: string | null) => {
   accessToken = token;
+
+  if (typeof window === "undefined") return;
+
+  const stored = localStorage.getItem("iraapUser");
+
+  if (!stored) return;
+
+  try {
+    const parsed = JSON.parse(stored);
+
+    if (token) {
+      localStorage.setItem(
+        "iraapUser",
+        JSON.stringify({ ...parsed, token }),
+      );
+    } else {
+      const { token: _token, ...withoutToken } = parsed || {};
+      localStorage.setItem("iraapUser", JSON.stringify(withoutToken));
+    }
+  } catch {
+    // Ignore malformed persisted auth state; AuthContext handles recovery.
+  }
 };
 
 export const getApiAccessToken = () => accessToken;
@@ -62,7 +84,9 @@ api.interceptors.response.use(
       } catch (refreshError) {
         setApiAccessToken(null);
         processQueue(refreshError, null);
-        if (typeof window !== "undefined") window.location.href = "/login";
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("iraap:auth-expired"));
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

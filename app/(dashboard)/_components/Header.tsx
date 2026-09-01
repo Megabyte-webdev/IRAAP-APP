@@ -63,7 +63,6 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
       {/* Left section */}
       <div className="flex items-center gap-4">
         <button
-          data-tour="menu"
           onClick={onMenuClick}
           className="p-2 -ml-2 text-slate-600 dark:text-slate-300 lg:hidden hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
         >

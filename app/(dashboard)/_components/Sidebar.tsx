@@ -161,7 +161,8 @@ export function Sidebar({
                 data-tour={item.name === "Archive Search" ? "archive" : item.name === "Meetings" ? "meetings" : item.name === "Chat" ? "chat" : undefined}
                 href={fullHref}
                 onClick={() => {
-                  if (window.innerWidth < 1024) onClose();
+                  const tourActive = document.body.classList.contains("driver-active");
+                  if (window.innerWidth < 1024 && !tourActive) onClose();
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group relative",
