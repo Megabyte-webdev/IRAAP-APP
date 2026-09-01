@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap");
-@import "driver.js/dist/driver.css";
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -73,91 +72,5 @@
   ::-webkit-scrollbar {
     width: 0px;
     height: 0px;
-  }
-}
-
-/* IRAAP Driver.js theme */
-.iraap-driver-popover {
-  width: min(360px, calc(100vw - 32px));
-  max-width: calc(100vw - 32px);
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--foreground);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
-  font-family: inherit;
-}
-
-.iraap-driver-popover .driver-popover-title {
-  font-size: 1rem;
-  line-height: 1.35;
-  font-weight: 700;
-  color: var(--foreground);
-}
-
-.iraap-driver-popover .driver-popover-description {
-  margin-top: 0.45rem;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--muted-foreground);
-}
-
-.iraap-driver-popover .driver-popover-progress-text {
-  color: var(--muted-foreground);
-  font-size: 0.6875rem;
-  font-weight: 600;
-}
-
-.iraap-driver-popover .driver-popover-footer-btn {
-  border-radius: 0.625rem;
-  min-height: 2.5rem;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.iraap-driver-popover .driver-popover-next-btn,
-.iraap-driver-popover .driver-popover-done-btn {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  text-shadow: none;
-}
-
-.iraap-driver-popover .driver-popover-prev-btn {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--background);
-  text-shadow: none;
-}
-
-.iraap-driver-popover .driver-popover-close-btn {
-  color: var(--muted-foreground);
-}
-
-.dark .iraap-driver-popover {
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-}
-
-@media (max-width: 1023px) {
-  .iraap-driver-popover {
-    width: min(340px, calc(100vw - 24px));
-    max-width: calc(100vw - 24px);
-  }
-
-  .iraap-driver-popover .driver-popover-footer {
-    gap: 0.5rem;
-  }
-
-  .iraap-driver-popover .driver-popover-footer-btn {
-    min-height: 2.75rem;
-    padding-inline: 0.9rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .iraap-driver-popover,
-  .driver-overlay {
-    transition: none !important;
   }
 }

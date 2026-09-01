@@ -1,0 +1,151 @@
+.driver-popover.iraap-driver-popover {
+  width: min(380px, calc(100vw - 32px));
+  max-width: 380px;
+  padding: 18px;
+  border: 1px solid rgba(23, 20, 19, 0.08);
+  border-radius: 20px;
+  background: var(--card, #ffffff);
+  color: var(--foreground, #171413);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  box-sizing: border-box;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-title {
+  margin: 0 32px 6px 0;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--foreground, #171413);
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted-foreground, #6f6864);
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-progress-text {
+  color: var(--muted-foreground, #a09792);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-footer {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-btn {
+  min-height: 38px;
+  border-radius: 10px;
+  padding: 0 14px;
+  border: 0;
+  box-shadow: none;
+  text-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-next-btn,
+.driver-popover.iraap-driver-popover .driver-popover-done-btn {
+  background: var(--color-primary, #0f172a);
+  color: #ffffff;
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-prev-btn {
+  background: var(--background, #f4efea);
+  color: var(--foreground, #554e4a);
+}
+
+.driver-popover.iraap-driver-popover .driver-popover-arrow {
+  border-color: var(--card, #ffffff);
+}
+
+.iraap-tour-skip {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground, #918983);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 6px;
+  margin-right: auto;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.iraap-tour-skip:hover {
+  color: var(--foreground, #171413);
+}
+
+.driver-overlay {
+  transition: opacity 180ms ease;
+  z-index: 99990 !important;
+}
+
+.driver-popover {
+  z-index: 100010 !important;
+}
+
+.driver-active-element {
+  border-radius: 8px !important;
+  outline: 2px solid var(--color-primary, #0f172a) !important;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  /* Prevent driver popover from overflowing side edges */
+  .driver-popover.iraap-driver-popover {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    left: 12px !important; /* Force margin consistency on small screens */
+    padding: 14px 14px 12px 14px;
+    border-radius: 16px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-title {
+    font-size: 15px;
+    margin-right: 24px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-description {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  /* Improve button layout on narrow screens */
+  .driver-popover.iraap-driver-popover .driver-popover-footer {
+    margin-top: 12px;
+    gap: 6px;
+  }
+
+  .driver-popover.iraap-driver-popover .driver-popover-btn {
+    min-height: 38px; /* Larger tap targets for touch */
+    padding: 0 12px;
+    font-size: 11.5px;
+  }
+
+  .iraap-tour-skip {
+    min-height: 38px;
+    padding: 0 4px;
+  }
+
+  /* Hide popover arrows on small screens to avoid misaligned pointers */
+  .driver-popover.iraap-driver-popover .driver-popover-arrow {
+    display: none !important;
+  }
+}

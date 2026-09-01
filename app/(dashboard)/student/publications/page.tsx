@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/app/_context/AuthContext";
-import NoSupervisor from "../../_components/NoSupervisor";
 import {
   BookOpen,
   Plus,
@@ -38,8 +37,6 @@ export default function PublicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const hasSupervisor = authDetails?.user?.supervisorId;
   const { data: publications = [], isLoading, error } = getMyPublications();
 
   // Close custom dropdown when clicking outside
@@ -93,8 +90,6 @@ export default function PublicationsPage() {
 
     return { filteredPublications: filtered, counts: stats };
   }, [publications, filterStatus, searchQuery]);
-
-  if (!hasSupervisor) return <NoSupervisor />;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 px-4 py-10 lg:px-12 transition-colors duration-200">

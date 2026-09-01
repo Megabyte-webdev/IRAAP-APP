@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { driver, type DriveStep, type Driver } from "driver.js";
+import "driver.js/dist/driver.css";
+import "../tour.css";
 
 interface AppTourProps {
   onOpenSidebar?: () => void;
@@ -10,95 +12,93 @@ interface AppTourProps {
 }
 
 const TOUR_KEY = "iraap_tour_completed";
-const MOBILE_QUERY = "(max-width: 1023px)";
+const BREAKPOINT = 1024;
+const WAIT_TIMEOUT = 2500;
 
-const isMobile = () =>
-  typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
-const findVisibleTourElement = (name: string): Element | undefined => {
-  if (typeof document === "undefined") return undefined;
+const isMobileViewport = () =>
+  typeof window !== "undefined" && window.innerWidth < BREAKPOINT;
 
-  const elements = Array.from(
-    document.querySelectorAll(`[data-tour="${name}"]`),
-  );
+const getSelectorForViewport = (desktop: string, mobile: string) =>
+  isMobileViewport() ? mobile : desktop;
 
-  return elements.find((element) => {
-    const node = element as HTMLElement;
-    const rect = node.getBoundingClientRect();
-    const style = window.getComputedStyle(node);
+const waitForVisible = async (selector: string, timeout = WAIT_TIMEOUT) => {
+  const started = Date.now();
 
-    return (
-      style.display !== "none" &&
-      style.visibility !== "hidden" &&
-      style.opacity !== "0" &&
-      rect.width > 0 &&
-      rect.height > 0
-    );
-  });
+  while (Date.now() - started < timeout) {
+    const matches = Array.from(document.querySelectorAll(selector));
+    const visible = matches.find((element) => {
+      const el = element as HTMLElement;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0" &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+    });
+
+    if (visible) return visible;
+    await sleep(80);
+  }
+
+  return null;
 };
 
-const waitForVisibleTourElement = (name: string, timeout = 2500) =>
-  new Promise<Element | undefined>((resolve) => {
-    const started = performance.now();
-
-    const check = () => {
-      const element = findVisibleTourElement(name);
-
-      if (element) {
-        resolve(element);
-        return;
-      }
-
-      if (performance.now() - started >= timeout) {
-        resolve(undefined);
-        return;
-      }
-
-      window.requestAnimationFrame(check);
-    };
-
-    check();
-  });
-
-const getStep = (name: string, title: string, description: string, mobileSidebar = true): DriveStep => ({
-  element: () => findVisibleTourElement(name) as Element,
+const stepWithResponsiveTarget = ({
+  desktop,
+  mobile,
+  title,
+  description,
+  side = "right",
+  align = "start",
+  onNextClick,
+  onPrevClick,
+}: {
+  desktop: string;
+  mobile: string;
+  title: string;
+  description: string;
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "start" | "center" | "end";
+  onNextClick?: (
+    element: Element | undefined,
+    step: DriveStep,
+    options: {
+      config: unknown;
+      state: unknown;
+      driver: Driver;
+      index: number | undefined;
+    },
+  ) => void | Promise<void>;
+  onPrevClick?: (
+    element: Element | undefined,
+    step: DriveStep,
+    options: {
+      config: unknown;
+      state: unknown;
+      driver: Driver;
+      index: number | undefined;
+    },
+  ) => void | Promise<void>;
+}): DriveStep => ({
+  element: getSelectorForViewport(desktop, mobile),
+  waitForElement: WAIT_TIMEOUT,
   popover: {
     title,
     description,
-    side: mobileSidebar ? "right" : "bottom",
-    align: mobileSidebar ? "start" : "end",
+    side,
+    align,
+    onNextClick:
+      onNextClick ?? ((_element, _step, { driver }) => driver.moveNext()),
+    onPrevClick:
+      onPrevClick ?? ((_element, _step, { driver }) => driver.movePrevious()),
   },
-  data: { mobileSidebar },
 });
-
-const baseSteps: DriveStep[] = [
-  getStep(
-    "sidebar",
-    "Your workspace",
-    "Use the main navigation to move between your dashboard, research work, conversations, meetings and the academic archive.",
-  ),
-  getStep(
-    "archive",
-    "Explore the archive",
-    "Search and browse approved academic projects across the repository using filters and keywords.",
-  ),
-  getStep(
-    "chat",
-    "Stay connected",
-    "Message supervisors and collaborators directly from your workspace.",
-  ),
-  getStep(
-    "meetings",
-    "Meet online",
-    "Start or join scheduled academic meetings without leaving IRAAP.",
-  ),
-  getStep(
-    "profile",
-    "Manage your profile",
-    "Keep your photo and academic information up to date from your profile menu.",
-    false,
-  ),
-];
 
 export default function AppTour({
   onOpenSidebar,
@@ -106,7 +106,13 @@ export default function AppTour({
 }: AppTourProps) {
   const pathname = usePathname();
   const driverRef = useRef<Driver | null>(null);
-  const shouldStartRef = useRef(false);
+  const completionHandledRef = useRef(false);
+
+  const [viewportMode, setViewportMode] = useState<"mobile" | "desktop">(
+    typeof window !== "undefined" && window.innerWidth < BREAKPOINT
+      ? "mobile"
+      : "desktop",
+  );
 
   const isDisabledRoute = useCallback(() => {
     const currentPath = pathname ?? "";
@@ -117,137 +123,245 @@ export default function AppTour({
     );
   }, [pathname]);
 
-  const closeSidebarIfMobile = useCallback(() => {
-    if (isMobile()) onCloseSidebar?.();
-  }, [onCloseSidebar]);
-
-  const finishTour = useCallback(
-    (markCompleted = true) => {
-      if (markCompleted) {
-        localStorage.setItem(TOUR_KEY, "1");
-      }
-
-      closeSidebarIfMobile();
-      driverRef.current?.destroy();
-      driverRef.current = null;
-    },
-    [closeSidebarIfMobile],
-  );
-
-  const createTour = useCallback(() => {
-    if (isDisabledRoute() || typeof window === "undefined") return null;
-
-    const tour = driver({
-      showProgress: true,
-      progressText: "{{current}} of {{total}}",
-      animate: true,
-      duration: 300,
-      smoothScroll: true,
-      allowClose: true,
-      overlayColor: "rgba(15, 23, 42, 0.56)",
-      popoverClass: "iraap-driver-popover",
-      stagePadding: 6,
-      stageRadius: 12,
-      popoverOffset: 12,
-      showButtons: ["previous", "next", "close"],
-      nextBtnText: "Next",
-      prevBtnText: "Back",
-      doneBtnText: "Finish",
-      steps: baseSteps,
-
-      onHighlightStarted: (_element, step) => {
-        const mobileSidebarStep = Boolean(step.data?.mobileSidebar);
-
-        if (!isMobile()) return;
-
-        if (mobileSidebarStep) {
-          onOpenSidebar?.();
-        } else {
-          onCloseSidebar?.();
-        }
-
-        window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            tour.refresh();
-          });
-        });
-      },
-
-      onDoneClick: () => {
-        localStorage.setItem(TOUR_KEY, "1");
-        closeSidebarIfMobile();
-        tour.destroy();
-      },
-
-      onCloseClick: () => {
-        // Dismissal should not trap the user in a permanently incomplete state.
-        localStorage.setItem(TOUR_KEY, "1");
-        closeSidebarIfMobile();
-        tour.destroy();
-      },
-
-      onDestroyed: () => {
-        closeSidebarIfMobile();
-        driverRef.current = null;
-      },
-    });
-
-    driverRef.current = tour;
-    return tour;
-  }, [closeSidebarIfMobile, isDisabledRoute, onCloseSidebar, onOpenSidebar]);
-
-  const startTour = useCallback(() => {
-    if (isDisabledRoute()) return;
-
-    driverRef.current?.destroy();
-    const tour = createTour();
-    if (!tour) return;
-
-    shouldStartRef.current = true;
-
-    const start = async () => {
-      if (isMobile()) {
-        onOpenSidebar?.();
-        await waitForVisibleTourElement("sidebar");
-      }
-
-      if (!shouldStartRef.current) return;
-      tour.drive();
-    };
-
-    void start();
-  }, [createTour, isDisabledRoute, onOpenSidebar]);
-
+  // Track viewport changes
   useEffect(() => {
-    if (isDisabledRoute()) return;
-
-    const handleRestart = () => {
-      localStorage.removeItem(TOUR_KEY);
-      startTour();
+    const handleResize = () => {
+      const nextMode = isMobileViewport() ? "mobile" : "desktop";
+      setViewportMode(nextMode);
     };
 
-    window.addEventListener("iraap:restart-tour", handleRestart);
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    return () => {
-      window.removeEventListener("iraap:restart-tour", handleRestart);
-      shouldStartRef.current = false;
-      driverRef.current?.destroy();
-      driverRef.current = null;
-    };
-  }, [isDisabledRoute, startTour]);
-
+  // Main Driver Lifecycle
   useEffect(() => {
     if (isDisabledRoute()) return;
 
     const completed = localStorage.getItem(TOUR_KEY);
     if (completed === "1") return;
 
-    const timer = window.setTimeout(() => {
-      startTour();
-    }, 900);
+    let destroyed = false;
+    completionHandledRef.current = false;
+    const mobile = viewportMode === "mobile";
 
-    return () => window.clearTimeout(timer);
-  }, [isDisabledRoute, pathname, startTour]);
+    const moveNextFromSidebar = async (
+      driverObj: Driver,
+      nextSelector: string,
+    ) => {
+      if (!mobile) {
+        driverObj.moveNext();
+        return;
+      }
+
+      onOpenSidebar?.();
+      const next = await waitForVisible(nextSelector);
+      if (!next || destroyed) return;
+
+      await sleep(100);
+      driverObj.moveNext();
+    };
+
+    const movePreviousFromSidebar = async (
+      driverObj: Driver,
+      prevSelector: string,
+    ) => {
+      if (!mobile) {
+        driverObj.movePrevious();
+        return;
+      }
+
+      onOpenSidebar?.();
+      await waitForVisible(prevSelector);
+      if (!destroyed) driverObj.movePrevious();
+    };
+
+    const closeDrawerAndMoveNext = async (driverObj: Driver) => {
+      if (!mobile) {
+        driverObj.moveNext();
+        return;
+      }
+
+      onCloseSidebar?.();
+      await waitForVisible('[data-tour="profile"]');
+      if (!destroyed) {
+        await sleep(100);
+        driverObj.moveNext();
+      }
+    };
+
+    const steps: DriveStep[] = [
+      {
+        popover: {
+          title: "Welcome to IRAAP 🎓",
+          description:
+            "A quick tour of your workspace so you can easily navigate research, archive records, meetings, and team chat.",
+          align: "center",
+        },
+      },
+      stepWithResponsiveTarget({
+        desktop: '[data-tour="sidebar"]',
+        mobile: '[data-tour="mobile-sidebar"]',
+        title: "Your workspace",
+        description:
+          "Use the main navigation to move between your dashboard, research work, conversations, meetings and the academic archive.",
+        side: mobile ? "bottom" : "right",
+        align: mobile ? "center" : "start",
+        onNextClick: mobile
+          ? (_element, _step, { driver }) =>
+              moveNextFromSidebar(driver, '[data-tour="mobile-archive"]')
+          : undefined,
+        onPrevClick: mobile
+          ? (_element, _step, { driver }) => driver.movePrevious()
+          : undefined,
+      }),
+      stepWithResponsiveTarget({
+        desktop: '[data-tour="archive"]',
+        mobile: '[data-tour="mobile-archive"]',
+        title: "Explore the archive",
+        description:
+          "Search and browse approved academic projects across the repository using filters and keywords.",
+        side: mobile ? "bottom" : "right",
+        align: mobile ? "center" : "start",
+        onNextClick: mobile
+          ? (_element, _step, { driver }) =>
+              moveNextFromSidebar(driver, '[data-tour="mobile-chat"]')
+          : undefined,
+        onPrevClick: mobile
+          ? (_element, _step, { driver }) =>
+              movePreviousFromSidebar(driver, '[data-tour="mobile-sidebar"]')
+          : undefined,
+      }),
+      stepWithResponsiveTarget({
+        desktop: '[data-tour="chat"]',
+        mobile: '[data-tour="mobile-chat"]',
+        title: "Stay connected",
+        description:
+          "Message supervisors and collaborators directly from your workspace.",
+        side: mobile ? "bottom" : "right",
+        align: mobile ? "center" : "start",
+        onNextClick: mobile
+          ? (_element, _step, { driver }) =>
+              moveNextFromSidebar(driver, '[data-tour="mobile-meetings"]')
+          : undefined,
+        onPrevClick: mobile
+          ? (_element, _step, { driver }) =>
+              movePreviousFromSidebar(driver, '[data-tour="mobile-archive"]')
+          : undefined,
+      }),
+      stepWithResponsiveTarget({
+        desktop: '[data-tour="meetings"]',
+        mobile: '[data-tour="mobile-meetings"]',
+        title: "Meet online",
+        description:
+          "Start or join scheduled academic meetings without leaving IRAAP.",
+        side: mobile ? "bottom" : "right",
+        align: mobile ? "center" : "start",
+        onNextClick: mobile
+          ? (_element, _step, { driver }) => closeDrawerAndMoveNext(driver)
+          : undefined,
+        onPrevClick: mobile
+          ? (_element, _step, { driver }) =>
+              movePreviousFromSidebar(driver, '[data-tour="mobile-chat"]')
+          : undefined,
+      }),
+      {
+        element: '[data-tour="profile"]',
+        waitForElement: WAIT_TIMEOUT,
+        popover: {
+          title: "Manage your profile",
+          description:
+            "Keep your photo and academic information up to date from your profile menu.",
+          side: "bottom",
+          align: mobile ? "center" : "end",
+          onPrevClick: mobile
+            ? async (_element, _step, { driver }) => {
+                onOpenSidebar?.();
+                await waitForVisible('[data-tour="mobile-meetings"]');
+                await sleep(120);
+                driver.movePrevious();
+              }
+            : undefined,
+        },
+      },
+    ];
+
+    const driverObj = driver({
+      animate: true,
+      duration: 240,
+      overlayColor: "rgba(15, 23, 42, 0.56)",
+      overlayOpacity: 0.56,
+      allowClose: false,
+      allowKeyboardControl: true,
+      smoothScroll: true,
+      showButtons: ["next", "previous"],
+      showProgress: true,
+      progressText: "{{current}} / {{total}}",
+      nextBtnText: "Next",
+      prevBtnText: "Back",
+      doneBtnText: "Finish",
+      stagePadding: mobile ? 5 : 8,
+      stageRadius: mobile ? 10 : 12,
+      popoverOffset: mobile ? 9 : 12,
+      popoverClass: "iraap-driver-popover",
+      steps,
+      onPopoverRender: (popover) => {
+        const skip = document.createElement("button");
+        skip.type = "button";
+        skip.className = "iraap-tour-skip";
+        skip.textContent = "Skip tour";
+        skip.addEventListener("click", () => driverRef.current?.destroy());
+        popover.footerButtons.prepend(skip);
+      },
+      onDoneClick: () => {
+        driverRef.current?.destroy();
+      },
+      onDestroyed: () => {
+        if (!destroyed && !completionHandledRef.current) {
+          completionHandledRef.current = true;
+          if (isMobileViewport()) onCloseSidebar?.();
+          localStorage.setItem(TOUR_KEY, "1");
+        }
+      },
+    });
+
+    driverRef.current = driverObj;
+
+    const boot = async () => {
+      await sleep(900);
+      if (destroyed || isDisabledRoute()) return;
+
+      if (mobile) {
+        onOpenSidebar?.();
+        await waitForVisible('[data-tour="mobile-sidebar"]');
+      }
+
+      if (!destroyed) driverObj.drive();
+    };
+
+    void boot();
+
+    return () => {
+      destroyed = true;
+      driverObj.destroy();
+      driverRef.current = null;
+      if (isMobileViewport()) onCloseSidebar?.();
+    };
+  }, [onCloseSidebar, onOpenSidebar, isDisabledRoute, pathname, viewportMode]);
+
+  // Restart listener API
+  useEffect(() => {
+    if (isDisabledRoute()) return;
+
+    const handleRestart = () => {
+      localStorage.removeItem(TOUR_KEY);
+      window.location.reload();
+    };
+
+    window.addEventListener("iraap:restart-tour", handleRestart);
+    return () =>
+      window.removeEventListener("iraap:restart-tour", handleRestart);
+  }, [isDisabledRoute]);
 
   return null;
 }

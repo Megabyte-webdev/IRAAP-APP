@@ -5,9 +5,7 @@ import { BookOpen, Check, Tag, Milestone } from "lucide-react";
 import { cn } from "@/app/_lib/utils";
 import { useState } from "react";
 import PublicationSubmissionForm from "../_components/PublicationSubmissionForm";
-import NoSupervisor from "@/app/(dashboard)/_components/NoSupervisor";
 
-// Upgraded steps with distinct icons reflecting the newly captured domain data
 const publicationSubmissionSteps = [
   {
     key: "details",
@@ -53,8 +51,6 @@ interface ExtendedSectionCompletion {
 
 export default function PublicationSubmitPage() {
   const { authDetails } = useAuth();
-  const hasSupervisor = authDetails?.user?.supervisorId;
-
   const [completion, setCompletion] = useState<ExtendedSectionCompletion>({
     details: false,
     abstract: false,
@@ -63,8 +59,6 @@ export default function PublicationSubmitPage() {
     researchArea: false,
     upload: false,
   });
-
-  if (!hasSupervisor) return <NoSupervisor />;
 
   const completedCount = Object.values(completion).filter(Boolean).length;
 
