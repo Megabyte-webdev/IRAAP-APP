@@ -19,6 +19,9 @@ import {
   MessageSquare,
   BookOpen,
   CalendarDays,
+  Building2,
+  BarChart3,
+  LifeBuoy,
 } from "lucide-react";
 
 import { cn } from "@/app/_lib/utils";
@@ -93,6 +96,24 @@ const navItems: NavItem[] = [
     href: "/archive",
     roles: "ALL",
     icon: Search,
+  },
+  {
+    name: "Organizations",
+    href: "/organizations",
+    roles: ["ADMIN"],
+    icon: Building2,
+  },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    roles: ["ADMIN"],
+    icon: BarChart3,
+  },
+  {
+    name: "Support",
+    href: "/support",
+    roles: ["ADMIN"],
+    icon: LifeBuoy,
   },
 ];
 

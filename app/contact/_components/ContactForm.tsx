@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Loader2, LifeBuoy } from "lucide-react";
+import { api } from "@/app/_lib/api-client";
 
 const ROLE_OPTIONS = [
   "Current Student",
@@ -19,6 +20,9 @@ export default function ContactForm() {
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -35,9 +39,21 @@ export default function ContactForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
+    setIsSubmitting(true);
+    setSubmitted(false);
+    setError("");
+
+    try {
+      await api.post("/support", { ...formData, subject: "General Support" });
+      setSubmitted(true);
+      setFormData({ fullName: "", email: "", role: "Current Student", message: "" });
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "We could not send your request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,6 +61,9 @@ export default function ContactForm() {
       <div className="w-full max-w-xl rounded-2xl bg-white p-8 md:p-10 shadow-xl">
         {/* Header Section */}
         <div className="text-center mb-8">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 text-sky-600">
+            <LifeBuoy size={19} />
+          </div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
             Send a message to the Admin
           </h2>
@@ -160,12 +179,32 @@ export default function ContactForm() {
             />
           </div>
 
+          {submitted && (
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">
+              Your support request was sent successfully. The admin team will get back to you.
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full rounded-xl bg-[#38BDF8] hover:bg-sky-500 text-white font-semibold py-2.5 px-4 text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 cursor-pointer"
+            disabled={isSubmitting}
+            className="w-full rounded-xl bg-[#38BDF8] hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-70 text-white font-semibold py-2.5 px-4 text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 cursor-pointer flex items-center justify-center gap-2"
           >
-            Send Message
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Sending…
+              </>
+            ) : (
+              "Send Message"
+            )}
           </button>
         </form>
       </div>

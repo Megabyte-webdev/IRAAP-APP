@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import { useState, useRef, ChangeEvent, FormEvent, KeyboardEvent, useEffect } from "react";
 import { cn } from "@/app/_lib/utils";
 import { Upload, AlertCircle, CheckCircle } from "lucide-react";
 import { usePublication } from "@/app/_hooks/use-publications";
@@ -33,7 +33,7 @@ interface FormErrors {
 export default function PublicationSubmissionForm({
   onCompletionChange,
 }: PublicationSubmissionFormProps) {
-  const { submitPublication } = usePublication();
+  const { submitPublication, extractPublicationMetadata } = usePublication();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<FormData>({
@@ -47,6 +47,10 @@ export default function PublicationSubmissionForm({
   });
   const [currentKeyword, setCurrentKeyword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
+
+  useEffect(() => {
+    updateCompletion(formData);
+  }, [formData]);
 
   const updateCompletion = (data: FormData) => {
     onCompletionChange({
@@ -155,12 +159,35 @@ export default function PublicationSubmissionForm({
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const newFormData = { ...formData, file };
-      setFormData(newFormData);
-      updateCompletion(newFormData);
-      if (errors.file) setErrors({ ...errors, file: undefined });
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setErrors((prev) => ({ ...prev, file: "Only PDF files are allowed" }));
+      return;
     }
+
+    if (file.size > 50 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, file: "File size must be less than 50MB" }));
+      return;
+    }
+
+    const newFormData = { ...formData, file };
+    setFormData(newFormData);
+    updateCompletion(newFormData);
+    setErrors((prev) => ({ ...prev, file: undefined }));
+
+    extractPublicationMetadata.mutate(file, {
+      onSuccess: (metadata: any) => {
+        setFormData((current) => ({
+          ...current,
+          title: current.title.trim() ? current.title : metadata.title || "",
+          abstract: current.abstract.trim() ? current.abstract : metadata.abstract || "",
+          methodology: current.methodology.trim() ? current.methodology : metadata.methodology || "",
+          researchArea: current.researchArea.trim() ? current.researchArea : metadata.researchArea || "",
+          keywords: current.keywords.length ? current.keywords : Array.isArray(metadata.keywords) ? metadata.keywords : [],
+        }));
+      },
+    });
   };
 
   const handleRemoveFile = () => {
@@ -515,7 +542,13 @@ export default function PublicationSubmissionForm({
           className="hidden"
         />
 
-        {errors.file && (
+        {extractPublicationMetadata.isPending && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-sky-600">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-sky-500" />
+          Reading your PDF and extracting available metadata…
+        </div>
+      )}
+      {errors.file && (
           <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
             <AlertCircle size={14} />
             {errors.file}

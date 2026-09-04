@@ -8,6 +8,24 @@ import { onFailure, onSuccess } from "../_utils/Notification";
 export const usePublication = () => {
   const queryClient = useQueryClient();
 
+
+  const extractPublicationMetadata = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const { data } = await api.post("/publications/extract", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return data?.metadata || {};
+    },
+    onError: (error: any) => {
+      onFailure({
+        title: "Automatic extraction unavailable",
+        message: extractErrorMessage(error) || "We could not read enough text from this PDF. You can still complete the fields manually.",
+      });
+    },
+  });
+
   // Submit a publication request
   const submitPublication = useMutation({
     mutationFn: async (publicationData: FormData) => {
@@ -167,6 +185,7 @@ export const usePublication = () => {
   });
 
   return {
+    extractPublicationMetadata,
     submitPublication,
     getMyPublications,
     getPendingPublications,
