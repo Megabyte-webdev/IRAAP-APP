@@ -25,7 +25,7 @@ export default function AuthShell({
 
   return (
     <main className="min-h-screen w-full bg-muted dark:bg-[#0F172A] text-foreground antialiased p-4 flex items-center justify-center">
-      <div className="w-90 lg:w-full max-w-205 min-h-[calc(100vh-2rem)] lg:h-150 lg:max-h-[calc(100vh-3rem)] lg:min-h-150 overflow-hidden border border-slate-200 bg-background shadow-2xl dark:border-slate-800 dark:bg-[#1E293B] lg:grid lg:grid-cols-2">
+      <div className="w-90 lg:w-full max-w-205 md:min-h-[calc(100vh-2rem)] lg:h-150 lg:max-h-[calc(100vh-3rem)] lg:min-h-150 overflow-hidden border border-slate-200 bg-background shadow-2xl dark:border-slate-800 dark:bg-[#1E293B] lg:grid lg:grid-cols-2">
         {/* FIRST SECTION */}
         <section
           aria-hidden="true"
@@ -88,7 +88,7 @@ export default function AuthShell({
         </section>
 
         {/* SECOND SECTION */}
-        <section className="min-h-[calc(100vh-2rem)] lg:min-h-0 max-h-full overflow-y-auto flex items-center justify-center">
+        <section className="md:min-h-[calc(100vh-2rem)] lg:min-h-0 max-h-full overflow-y-auto flex items-center justify-center">
           <div className="flex h-full items-center justify-center p-6 md:p-10 lg:p-12 xl:p-16">
             <div className="h-max w-full max-w-sm">
               <Link
