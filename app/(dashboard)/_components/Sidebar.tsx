@@ -27,7 +27,7 @@ import {
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
 
-type UserRole = "ADMIN" | "SUPERVISOR" | "STUDENT";
+type UserRole = "ADMIN" | "SUPERVISOR" | "STUDENT" | "MANAGER";
 
 type NavItem = {
   name: string;
@@ -115,6 +115,12 @@ const navItems: NavItem[] = [
     roles: ["ADMIN"],
     icon: LifeBuoy,
   },
+  {
+    name: "Organization",
+    href: "/manager",
+    roles: ["MANAGER"],
+    icon: Building2,
+  },
 ];
 
 export function Sidebar({
@@ -130,7 +136,7 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = authDetails?.user;
-  const userRole = user?.role as UserRole | undefined;
+  const userRole = (user?.organizationRole === "MANAGER" ? "MANAGER" : user?.role) as UserRole | undefined;
 
   const rolePrefix = userRole ? `/${userRole.toLowerCase()}` : "";
 

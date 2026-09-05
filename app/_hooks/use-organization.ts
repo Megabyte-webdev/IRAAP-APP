@@ -46,16 +46,81 @@ export const useOrganization = () => {
     enabled: !!organizationId,
   });
 
-  const updateSubscription = useMutation({
-    mutationFn: async ({ organizationId, ...payload }: { organizationId: number; planCode: string; status: string; startsAt?: string; endsAt?: string | null }) =>
-      (await api.put(`/organizations/${organizationId}/subscription`, payload)).data,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
-      queryClient.invalidateQueries({ queryKey: ["organization-analytics", variables.organizationId] });
-      onSuccess({ title: "Subscription updated", message: "Subscription settings were updated. Billing enforcement remains isolated." });
-    },
-    onError: (error: any) => onFailure({ title: "Subscription update failed", message: extractErrorMessage(error) || "Unable to update subscription." }),
+
+  return { getOrganizations, createOrganization, getMembers, importMembers, getAnalytics };
+};
+
+
+export const useManager = () => {
+  const queryClient = useQueryClient();
+
+  const getDashboard = () => useQuery({
+    queryKey: ["manager-dashboard"],
+    queryFn: async () => (await api.get("/manager/dashboard")).data,
   });
 
-  return { getOrganizations, createOrganization, getMembers, importMembers, getAnalytics, updateSubscription };
+  const getMembers = () => useQuery({
+    queryKey: ["manager-members"],
+    queryFn: async () => (await api.get("/manager/members")).data?.members || [],
+  });
+
+
+  const addMember = useMutation({
+    mutationFn: async (payload: { fullName: string; email: string; role: "STUDENT" | "SUPERVISOR" | "RESEARCHER"; department?: string }) =>
+      (await api.post("/manager/members", payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manager-members"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      onSuccess({ title: "Member added", message: "The organization member has been added successfully." });
+    },
+    onError: (error: any) => onFailure({ title: "Could not add member", message: extractErrorMessage(error) || "Unable to add member." }),
+  });
+
+  const addManager = useMutation({
+    mutationFn: async (payload: { fullName: string; email: string; department?: string }) =>
+      (await api.post("/manager/managers", payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manager-members"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      onSuccess({ title: "Manager added", message: "The organization manager has been added successfully." });
+    },
+    onError: (error: any) => onFailure({ title: "Could not add manager", message: extractErrorMessage(error) || "Unable to add manager." }),
+  });
+
+  const updateRole = useMutation({
+    mutationFn: async ({ userId, ...payload }: { userId: number; role: "STUDENT" | "SUPERVISOR" | "RESEARCHER" | "MANAGER"; department?: string }) =>
+      (await api.patch(`/manager/members/${userId}/role`, payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manager-members"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      onSuccess({ title: "Role updated", message: "The organization role has been updated." });
+    },
+    onError: (error: any) => onFailure({ title: "Role update failed", message: extractErrorMessage(error) || "Unable to update member role." }),
+  });
+
+  const removeMember = useMutation({
+    mutationFn: async (userId: number) => (await api.delete(`/manager/members/${userId}`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manager-members"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      onSuccess({ title: "Member removed", message: "The member is no longer in this organization." });
+    },
+    onError: (error: any) => onFailure({ title: "Removal failed", message: extractErrorMessage(error) || "Unable to remove member." }),
+  });
+
+  const getBilling = () => useQuery({
+    queryKey: ["manager-billing"],
+    queryFn: async () => (await api.get("/manager/billing")).data,
+  });
+
+  const startCheckout = useMutation({
+    mutationFn: async (planCode: "INSTITUTION" | "ENTERPRISE") =>
+      (await api.post("/manager/billing/checkout", { planCode })).data,
+    onSuccess: (data) => {
+      if (data?.authorizationUrl) window.location.assign(data.authorizationUrl);
+    },
+    onError: (error: any) => onFailure({ title: "Payment could not start", message: extractErrorMessage(error) || "Unable to start payment." }),
+  });
+
+  return { getDashboard, getMembers, addMember, addManager, updateRole, removeMember, getBilling, startCheckout };
 };

@@ -69,11 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ---------------- SINGLE REFRESH PIPELINE ----------------
 
-  const updateAccessToken = useCallback((token: string) => {
+  const updateAccessToken = useCallback((token: string, refreshedUser?: any) => {
     setApiAccessToken(token);
     setAuthDetails((prev: any) => {
       if (!prev) return prev;
-      const updated = { ...prev, token };
+      const updated = { ...prev, token, ...(refreshedUser ? { user: refreshedUser } : {}) };
       localStorage.setItem("iraapUser", JSON.stringify(updated));
       websocket.updateToken(token);
       return updated;
@@ -277,10 +277,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyOtp = async (challengeId: string, code: string, callbackUrl?: string) => {
     const data = await authService.verifyOtp({ challengeId, code });
+    const destinationRole = data.user.organizationRole === "MANAGER"
+      ? "manager"
+      : data.user.role.toLowerCase();
     const destination =
-      callbackUrl && callbackUrl.startsWith(`/${data.user.role.toLowerCase()}`)
+      callbackUrl && callbackUrl.startsWith(`/${destinationRole}`)
         ? callbackUrl
-        : `/${data.user.role.toLowerCase()}`;
+        : `/${destinationRole}`;
     setApiAccessToken(data.token!);
     setAuthDetails(data);
     localStorage.setItem("iraapUser", JSON.stringify(data));
