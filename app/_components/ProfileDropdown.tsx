@@ -19,6 +19,7 @@ interface User {
   role?: string;
   profile?: UserProfile;
   profileImageUrl?: string;
+  organizationRole?: string;
 }
 
 interface ProfileDropdownProps {
@@ -29,7 +30,10 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
   const { authDetails, logout } = useAuth();
   const user = authDetails?.user as User | undefined;
   const [isOpen, setIsOpen] = useState(false);
-  const profileImage = user?.profileImageUrl || user?.profile?.profileImageUrl || user?.profile?.profileImage;
+  const profileImage =
+    user?.profileImageUrl ||
+    user?.profile?.profileImageUrl ||
+    user?.profile?.profileImage;
 
   if (!user) return null;
 
@@ -124,7 +128,9 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
                   setIsOpen(false);
                 }}
               >
-                <span className="h-[18px] w-[18px] rounded-full border border-slate-300 dark:border-slate-600 text-[10px] flex items-center justify-center font-bold">?</span>
+                <span className="h-4.5 w-4.5 rounded-full border border-slate-300 dark:border-slate-600 text-[10px] flex items-center justify-center font-bold">
+                  ?
+                </span>
                 Take a tour
               </button>
 
