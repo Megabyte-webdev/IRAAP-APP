@@ -71,6 +71,7 @@ export const useManager = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["manager-members"] });
       queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-analytics"] });
       onSuccess({ title: "Member added", message: "The organization member has been added successfully." });
     },
     onError: (error: any) => onFailure({ title: "Could not add member", message: extractErrorMessage(error) || "Unable to add member." }),
@@ -82,6 +83,7 @@ export const useManager = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["manager-members"] });
       queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-analytics"] });
       onSuccess({ title: "Manager added", message: "The organization manager has been added successfully." });
     },
     onError: (error: any) => onFailure({ title: "Could not add manager", message: extractErrorMessage(error) || "Unable to add manager." }),
@@ -93,6 +95,7 @@ export const useManager = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["manager-members"] });
       queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-analytics"] });
       onSuccess({ title: "Role updated", message: "The organization role has been updated." });
     },
     onError: (error: any) => onFailure({ title: "Role update failed", message: extractErrorMessage(error) || "Unable to update member role." }),
@@ -103,6 +106,7 @@ export const useManager = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["manager-members"] });
       queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-analytics"] });
       onSuccess({ title: "Member removed", message: "The member is no longer in this organization." });
     },
     onError: (error: any) => onFailure({ title: "Removal failed", message: extractErrorMessage(error) || "Unable to remove member." }),
