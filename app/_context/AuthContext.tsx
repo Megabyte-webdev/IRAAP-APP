@@ -12,13 +12,13 @@ import { authService } from "../_services/auth.service";
 import { useRouter } from "next/navigation";
 import { extractErrorMessage } from "../_lib/utils";
 import { onFailure, onSuccess } from "../_utils/Notification";
-import { clearApiAccessToken, refreshTokenCall, setApiAccessToken } from "../_lib/api-client";
+import {
+  clearApiAccessToken,
+  refreshTokenCall,
+  setApiAccessToken,
+} from "../_lib/api-client";
 import { websocket } from "../_services/websocket";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface JwtPayload {
-  exp: number;
-}
 
 const AuthContext = createContext<any>(null);
 
@@ -28,15 +28,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Organization membership is the source of truth for organization-specific
-  // routing. A manager can legitimately have the global role STUDENT.
   const getEffectiveRole = useCallback((user: any) => {
     if (user?.organizationRole) {
       return String(user.organizationRole).toUpperCase();
     }
-    return user?.role
-      ? String(user.role).toUpperCase()
-      : null;
+    return user?.role ? String(user.role).toUpperCase() : null;
   }, []);
 
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
@@ -47,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authDetailsRef.current = authDetails;
   }, [authDetails]);
 
-  // ---------------- TOKEN HELPERS ----------------
   const getTokenExp = (token: string) => {
     try {
       return JSON.parse(atob(token.split(".")[1]))?.exp * 1000;
@@ -66,12 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logoutLockRef.current = true;
 
     try {
-      // Best-effort server-side logout. This revokes the refresh-token family
-      // and clears the HttpOnly refresh cookie. It is intentionally called
-      // before local state is destroyed.
       await authService.logout();
     } catch (error) {
-      // A network failure must not leave the UI in a broken auth state.
       console.warn("[AUTH] server logout failed during cleanup:", error);
     } finally {
       queryClient.clear();
@@ -89,18 +80,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [queryClient]);
 
-  // ---------------- SINGLE REFRESH PIPELINE ----------------
-
-  const updateAccessToken = useCallback((token: string, refreshedUser?: any) => {
-    setApiAccessToken(token);
-    setAuthDetails((prev: any) => {
-      if (!prev) return prev;
-      const updated = { ...prev, token, ...(refreshedUser ? { user: refreshedUser } : {}) };
-      localStorage.setItem("iraapUser", JSON.stringify(updated));
-      websocket.updateToken(token);
-      return updated;
-    });
-  }, []);
+  const updateAccessToken = useCallback(
+    (token: string, refreshedUser?: any) => {
+      setApiAccessToken(token);
+      setAuthDetails((prev: any) => {
+        if (!prev) return prev;
+        const updated = {
+          ...prev,
+          token,
+          ...(refreshedUser ? { user: refreshedUser } : {}),
+        };
+        localStorage.setItem("iraapUser", JSON.stringify(updated));
+        websocket.updateToken(token);
+        return updated;
+      });
+    },
+    [],
+  );
 
   const refreshTokenSafe = useCallback(async (): Promise<string | null> => {
     if (refreshInFlight.current) {
@@ -111,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const refreshed = await refreshTokenCall();
 
-        // Keep organization membership/role synchronized with the backend.
         if (refreshed.user) {
           setAuthDetails((prev: any) => {
             if (!prev) return prev;
@@ -125,17 +120,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               },
             };
 
-            localStorage.setItem(
-              "iraapUser",
-              JSON.stringify(updated),
-            );
+            localStorage.setItem("iraapUser", JSON.stringify(updated));
 
             return updated;
           });
         } else {
-          setApiAccessToken(
-            refreshed.token,
-          );
+          setApiAccessToken(refreshed.token);
         }
 
         return refreshed.token;
@@ -193,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     websocket.setRefreshHandler(handleRefresh);
   }, [handleRefresh]);
 
-  // ---------------- PROACTIVE REFRESH SCHEDULER ----------------
+  // PROACTIVE REFRESH SCHEDULER
   const scheduleRefresh = useCallback(
     (token: string) => {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
@@ -204,8 +194,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const delay = exp - Date.now() - 60_000; // refresh 60s before expiry
 
       if (delay <= 0) {
-        // Token is already expired or expiring very soon
-        // Only refresh if it's actually expired, not just "about to expire"
         if (Date.now() > exp) {
           handleRefresh();
         } else {
@@ -290,10 +278,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     restoreSession();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [refreshTokenSafe]);
 
-  const login = async (email: string, password: string, callbackUrl?: string) => {
+  const login = async (
+    email: string,
+    password: string,
+    callbackUrl?: string,
+  ) => {
     setIsLoading(true);
     try {
       const data = await authService.login({ email, password });
@@ -302,7 +296,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const role = (data.user?.role || "").toLowerCase();
       const safeCallbackUrl =
-        callbackUrl && role && callbackUrl.startsWith(`/${role}`) && !callbackUrl.startsWith("//")
+        callbackUrl &&
+        role &&
+        callbackUrl.startsWith(`/${role}`) &&
+        !callbackUrl.startsWith("//")
           ? callbackUrl
           : null;
 
@@ -318,7 +315,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.push("/verify-otp");
       return data;
     } catch (err) {
-      const errorMessage = extractErrorMessage(err) || "Please check your credentials and try again.";
+      const errorMessage =
+        extractErrorMessage(err) ||
+        "Please check your credentials and try again.";
       onFailure({ title: "Login Failed", message: errorMessage });
       throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
@@ -326,9 +325,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const verifyOtp = async (challengeId: string, code: string, callbackUrl?: string) => {
+  const verifyOtp = async (
+    challengeId: string,
+    code: string,
+    callbackUrl?: string,
+  ) => {
     const data = await authService.verifyOtp({ challengeId, code });
-    const effectiveRole = getEffectiveRole(data.user)?.toLowerCase() || "dashboard";
+    const effectiveRole =
+      getEffectiveRole(data.user)?.toLowerCase() || "dashboard";
     const destination =
       callbackUrl &&
       callbackUrl.startsWith(`/${effectiveRole}`) &&
@@ -340,7 +344,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("iraapUser", JSON.stringify(data));
     localStorage.removeItem("iraapOtpChallenge");
     websocket.updateToken(data.token!);
-    onSuccess({ title: "Verified", message: `Welcome back, ${data.user.fullName || "User"}.` });
+    onSuccess({
+      title: "Verified",
+      message: `Welcome back, ${data.user.fullName || "User"}.`,
+    });
     router.replace(destination);
     return data;
   };
@@ -351,7 +358,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     window.addEventListener("iraap:auth-expired", handleAuthExpired);
-    return () => window.removeEventListener("iraap:auth-expired", handleAuthExpired);
+    return () =>
+      window.removeEventListener("iraap:auth-expired", handleAuthExpired);
   }, [safeLogout]);
 
   const logout = async () => {
@@ -382,7 +390,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ authDetails, login, verifyOtp, isLoading, setAuthDetails, logout }}
+      value={{
+        authDetails,
+        login,
+        verifyOtp,
+        isLoading,
+        setAuthDetails,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
