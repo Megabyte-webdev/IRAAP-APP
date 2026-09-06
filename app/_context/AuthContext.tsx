@@ -132,6 +132,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return updated;
           });
+        } else {
+          setApiAccessToken(
+            refreshed.token,
+          );
         }
 
         return refreshed.token;

@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
   {
     name: "Chat",
     href: "/chat",
-    roles: ["STUDENT", "SUPERVISOR", "ADMIN"],
+    roles: ["STUDENT", "SUPERVISOR", "ADMIN", "MANAGER"],
     icon: MessageSquare,
   },
   {
@@ -256,10 +256,20 @@ export function Sidebar({
           {filteredNavItems.map((item, index) => {
             const Icon = item.icon;
 
-            const fullHref = `${rolePrefix}${item.href}`;
+            const fullHref =
+              item.name === "Dashboard"
+                ? `/${userRole?.toLowerCase() || "dashboard"}`
+                : item.name === "Organization"
+                  ? "/manager"
+                  : item.roles === "ALL"
+                    ? item.href
+                    : `${rolePrefix}${item.href}`;
 
             const isActive =
-              pathname === fullHref || pathname?.startsWith(`${fullHref}/`);
+              pathname === fullHref ||
+              pathname?.startsWith(
+                `${fullHref}/`,
+              );
 
             const tourTarget = getTourTarget(item.name);
 
