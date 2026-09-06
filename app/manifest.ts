@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "IRAAP Repository",
     short_name: "IRAAP",
-    description: "Institutional Repository for academic projects and scholarly research.",
+    description: "Research, academic projects, publications, and scholarly collaboration.",
     start_url: "/",
     scope: "/",
     display: "standalone",

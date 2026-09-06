@@ -19,7 +19,7 @@ const ProjectList = () => {
     <section className="max-w-7xl mx-auto px-6 md:px-16 py-23.5">
       <div className="flex items-center justify-between mb-10">
         <h2 className="text-2xl font-bold text-black tracking-tight">
-          Recent Computer Engineering Projects
+          Recent Research Projects
         </h2>
 
         <Link

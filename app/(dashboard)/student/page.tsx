@@ -307,7 +307,7 @@ export default function StudentDashboard() {
         </div>
 
         <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100">
-          <h4 className="font-bold text-amber-900 mb-2">University Guides</h4>
+          <h4 className="font-bold text-amber-900 mb-2">Research Guides</h4>
           <div className="space-y-1 text-sm text-amber-700 underline">
             <p className="cursor-pointer hover:text-amber-900 text-sm">
               Format Guidelines.pdf

@@ -25,11 +25,11 @@ export default function Hero({
       className="transition-transform duration-300 group-hover:rotate-6"
     />
   ),
-  badgeText = "Exclusive to OOU Computer Engineering",
-  title = "The Central Hub for OOU Computer Engineering Research",
-  description = `Search thousands of past projects, manage your current drafts, and
-collaborate seamlessly with your supervisor in one centralized, secure
-environment designed specifically for engineering scholars.`,
+  badgeText = "Built for research collaboration",
+  title = "A Central Hub for Research, Knowledge & Collaboration",
+  description = `Discover research projects and scholarly resources, manage your current work, and
+collaborate seamlessly with mentors, peers, and research teams in one centralized, secure
+environment built for researchers across disciplines.`,
   variant = "home",
   onSearchSubmit,
   searchPlaceholder = "Search projects by title, author, or keyword...",

@@ -112,8 +112,8 @@ export default function ArchivePage() {
         variant="archive"
         badgeIcon={<Archive size={14} />}
         badgeText="GLOBAL ARCHIVES"
-        title="Search the OOU Computer Engineering Project Archive"
-        description="Explore thousands of past final year projects. Filter by focus area, academic year, or supervisor to find the exact work you need."
+        title="Search the Research & Project Archive"
+        description="Explore research projects and scholarly work. Filter by research area, academic year, author, mentor, or other available criteria to find the work you need."
         trendingTags={selectedFocus.slice(0, 4)}
         onSearchSubmit={handleSearch}
         onTagClick={handleTagQuery}

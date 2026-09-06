@@ -12,7 +12,7 @@ interface FaqItem {
 const faqData: FaqItem[] = [
   {
     id: 1,
-    question: "How are accounts provisioned for new students?",
+    question: "How are accounts provisioned for new researchers and members?",
     answer:
       "Accounts are automatically provisioned at the start of each semester based on the official registration list from the department. If you cannot log in, please ensure your registration is complete or contact the department admin via the form above.",
   },
@@ -26,13 +26,13 @@ const faqData: FaqItem[] = [
     id: 3,
     question: "Who can view my project uploads?",
     answer:
-      "Approved project uploads are indexed in the public department archive. Drafts, pending submissions, and restricted technical files are only visible to you and your assigned project supervisor.",
+      "Approved research outputs can be indexed in the public repository. Drafts, pending submissions, and restricted materials are only visible to authorized collaborators according to your organization and project permissions.",
   },
   {
     id: 4,
     question: "How do I reset my password?",
     answer:
-      "You can request a password reset link through the login page using your university email address. Alternatively, contact your department administrator for credential verification.",
+      "You can request a password reset link through the login page using your registered email address. Alternatively, contact your organization administrator for account verification.",
   },
 ];
 

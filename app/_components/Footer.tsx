@@ -17,8 +17,7 @@ export default function Footer() {
           </Link>
 
           <p className="max-w-xs text-gray-600 leading-relaxed">
-            The Hub for your external archiving files. OOU Computer Engineering
-            automated project submission and tracking tool.
+            A secure hub for research discovery, collaboration, project management, publication, and academic archiving.
           </p>
         </div>
 
@@ -67,7 +66,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-7xl text-center mx-auto pt-6 border-t border-gray-200 flex items-center justify-center text-gray-400">
-        <p>© 2026 OOU Computer Engineering Dept. All Rights Reserved.</p>
+        <p>© 2026 IRAAP. All Rights Reserved.</p>
       </div>
     </footer>
   );

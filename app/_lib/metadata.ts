@@ -18,7 +18,7 @@ export function generatePageMetadata({
   const finalTitle = title || "IRAAP · Institutional Repository";
   const finalDescription =
     description ||
-    "IRAAP is a digital institutional repository for accessing academic research, publications, and scholarly resources.";
+    "IRAAP is a research and academic collaboration platform for discovering, managing, publishing, and collaborating on scholarly work.";
 
   const finalImage = imageUrl ? imageUrl : `${BASE_URL}/irap-logo.png`;
 
@@ -33,14 +33,13 @@ export function generatePageMetadata({
 
     keywords: [
     "Institutional Repository",
-    "Computer Engineering",
-    "Olabisi Onabanjo University",
-    "Final Year Project",
+    "Research Projects",
+    "Academic Research",
+    "Scholarly Publications",
     "Research Repository",
     "Academic Repository",
     "Student Projects",
     "IRAAP",
-    "OOU",
   ],
 
     robots: {
@@ -61,7 +60,7 @@ export function generatePageMetadata({
     },
     authors: [
     {
-      name: "Department of Computer Engineering",
+      name: "IRAAP Research Platform",
     },
       {
         name:"Afolabi Mubarak"
@@ -74,8 +73,8 @@ export function generatePageMetadata({
       },
   ],
 
-    creator: "Department of Computer Engineering",
-  publisher: "Department of Computer Engineering",
+    creator: "IRAAP Research Platform",
+  publisher: "IRAAP Research Platform",
     
 
     icons: {

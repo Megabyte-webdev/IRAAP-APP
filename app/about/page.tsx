@@ -9,7 +9,7 @@ import { UtilityPole } from "lucide-react";
 export const metadata = generatePageMetadata({
   title: "IRAAP Repository",
   description:
-    "Explore the IRAP institutional repository—access research papers, academic publications, and digital resources across multiple disciplines.",
+    "Explore IRAAP—discover research papers, academic publications, projects, datasets, and scholarly resources across disciplines.",
   path: "/repository",
 });
 
@@ -25,10 +25,8 @@ export default function RepositoryPage({ searchParams }: any) {
     >
       <Nav />
       <Hero
-        title="Digitizing the legacy of OOU Computer Engineering"
-        description={`Transitioning decades of physical research, hardware documentation, and software
-innovations into a unified, accessible digital repository. Empowering the next
-generation of engineers.`}
+        title="Making Research Knowledge Accessible"
+        description={`Bringing research projects, publications, datasets, technical documentation, and scholarly resources into a unified, accessible digital repository. Empowering researchers, institutions, and the next generation of knowledge creators.`}
         variant="about"
         badgeText="OUR MISSION"
         badgeIcon={

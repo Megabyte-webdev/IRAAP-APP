@@ -28,7 +28,7 @@ const Capabilities = () => {
             <p className="text-sm leading-relaxed text-gray-400">
               Find legacy references effortlessly. Query full repositories using
               highly targeted conceptual indexing criteria parsed strictly
-              across OOU CEng research archives dating back multiple cycles.
+              across your research archives, publications, projects, and scholarly resources.
             </p>
           </div>
 
@@ -39,7 +39,7 @@ const Capabilities = () => {
             </div>
 
             <h3 className="mb-2 text-lg font-bold text-black transition-colors group-hover:text-emerald-600">
-              Student Workspace
+              Research Workspace
             </h3>
 
             <p className="text-sm leading-relaxed text-gray-400">
@@ -56,11 +56,11 @@ const Capabilities = () => {
             </div>
 
             <h3 className="mb-2 text-lg font-bold text-black transition-colors group-hover:text-amber-600">
-              Supervisor Collaboration
+              Mentor & Team Collaboration
             </h3>
 
             <p className="text-sm leading-relaxed text-gray-400">
-              Eliminate coordination delays completely. Receive instantaneous
+              Eliminate coordination delays. Receive timely
               context-specific review feedback, access revision directives, and
               acquire step approvals directly inside digital checkpoint notes.
             </p>

@@ -13,11 +13,11 @@ const Features = () => {
         </div>
 
         <h3 className="text-lg font-medium text-gray-900 transition-colors group-hover:text-primary">
-          Exclusive to OOU CPE
+          Research Collaboration
         </h3>
 
         <p className="max-w-80 text-sm leading-relaxed text-gray-400">
-          A dedicated environment for computer engineering faculty and students.
+          A flexible environment for researchers, academics, students, mentors, and collaborators.
         </p>
       </div>
 
@@ -31,12 +31,11 @@ const Features = () => {
         </div>
 
         <h3 className="text-lg font-medium text-gray-900 transition-colors group-hover:text-amber-500">
-          Hardware & Software Archives
+          Research & Project Archives
         </h3>
 
         <p className="max-w-80 text-sm leading-relaxed text-gray-400">
-          Comprehensive indexing of both practical hardware implementations and
-          software systems.
+          Organized discovery of research projects, publications, datasets, technical work, and other scholarly resources.
         </p>
       </div>
 
@@ -50,12 +49,11 @@ const Features = () => {
         </div>
 
         <h3 className="text-lg font-medium text-gray-900 transition-colors group-hover:text-emerald-500">
-          Streamlined Supervisor Grading
+          Streamlined Research Review
         </h3>
 
         <p className="max-w-80 text-sm leading-relaxed text-gray-400">
-          Integrated feedback loops and progress tracking for final year
-          projects.
+          Integrated feedback, review workflows, approvals, and progress tracking for research projects.
         </p>
       </div>
     </section>

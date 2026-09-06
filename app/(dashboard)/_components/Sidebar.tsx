@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
   {
     name: "Chat",
     href: "/chat",
-    roles: ["STUDENT", "SUPERVISOR", "ADMIN", "MANAGER"],
+    roles: ["STUDENT", "SUPERVISOR", "ADMIN"],
     icon: MessageSquare,
   },
   {

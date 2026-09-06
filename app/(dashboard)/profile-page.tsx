@@ -201,8 +201,8 @@ export default function ProfilePage() {
                 ["fullName", "Full name", "Your name as it should appear across IRAAP", true],
                 ["phone", "Phone number", "Optional contact number", false],
                 ["matricNumber", "Matric / Student number", "Your official student identifier", false],
-                ["department", "Department", "e.g. Computer Engineering", true],
-                ["programme", "Programme", "e.g. B.Eng. Computer Engineering", true],
+                ["department", "Department", "e.g. Research Computing", true],
+                ["programme", "Programme", "e.g. M.Sc. Computer Science", true],
                 ["level", "Level", "e.g. 400 Level", true],
                 ["academicSession", "Academic session", "e.g. 2025/2026", false],
               ].map(([key, label, helper, required]) => (
