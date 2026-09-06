@@ -15,10 +15,7 @@ export const setApiAccessToken = (token: string | null) => {
     const parsed = JSON.parse(stored);
 
     if (token) {
-      localStorage.setItem(
-        "iraapUser",
-        JSON.stringify({ ...parsed, token }),
-      );
+      localStorage.setItem("iraapUser", JSON.stringify({ ...parsed, token }));
     } else {
       const { token: _token, ...withoutToken } = parsed || {};
       localStorage.setItem("iraapUser", JSON.stringify(withoutToken));
@@ -48,10 +45,15 @@ api.interceptors.request.use((config) => {
 });
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (token: string | null) => void; reject: (error: unknown) => void }> = [];
+let failedQueue: Array<{
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+}> = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((promise) => (error ? promise.reject(error) : promise.resolve(token)));
+  failedQueue.forEach((promise) =>
+    error ? promise.reject(error) : promise.resolve(token),
+  );
   failedQueue = [];
 };
 
@@ -61,11 +63,21 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const requestUrl = String(originalRequest?.url || "");
     const isRefreshRequest = requestUrl.includes("/auth/refresh-token");
-    const isAuthRequest = /\/auth\/(login|register|forgot-password|reset-password|verify-otp|resend-otp|logout)/.test(requestUrl);
+    const isAuthRequest =
+      /\/auth\/(login|register|forgot-password|reset-password|verify-otp|resend-otp|logout)/.test(
+        requestUrl,
+      );
 
-    if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRequest && !isAuthRequest) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !isRefreshRequest &&
+      !isAuthRequest
+    ) {
       if (isRefreshing) {
-        return new Promise<string | null>((resolve, reject) => failedQueue.push({ resolve, reject })).then((token) => {
+        return new Promise<string | null>((resolve, reject) =>
+          failedQueue.push({ resolve, reject }),
+        ).then((token) => {
           if (token) originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         });
@@ -74,23 +86,25 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
       try {
-        const { data } = await api.post("/auth/refresh-token", {}, { withCredentials: true });
+        const { data } = await api.post(
+          "/auth/refresh-token",
+          {},
+          { withCredentials: true },
+        );
         const newToken = data.token as string | undefined;
         if (!newToken) throw new Error("Refresh token response was invalid");
         setApiAccessToken(newToken);
         processQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
         setApiAccessToken(null);
         processQueue(refreshError, null);
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("iraap:auth-expired", {
               detail: {
-                reason:
-                  refreshError?.response?.data?.code ||
-                  "REFRESH_FAILED",
+                reason: refreshError?.response?.data?.code || "REFRESH_FAILED",
               },
             }),
           );
@@ -118,9 +132,7 @@ export const refreshTokenCall = async (): Promise<{
   const token = res.data?.token;
 
   if (!token) {
-    throw new Error(
-      "No access token returned",
-    );
+    throw new Error("No access token returned");
   }
 
   setApiAccessToken(token);
