@@ -42,6 +42,15 @@ export const authService = {
       email: data.email || email,
     };
   },
+  changePassword: async (payload: { currentPassword?: string; newPassword: string }) => {
+    const { data } = await api.post<AuthResponse>(
+      "/auth/change-password",
+      payload,
+      { withCredentials: true },
+    );
+    if (!data.success) throw new Error(data.message || "Unable to change your password");
+    return data;
+  },
   resetPassword: async (payload: { challengeId: string; code: string; password: string }) => {
     const { data } = await api.post<AuthResponse>(
       "/auth/reset-password",

@@ -216,6 +216,11 @@ export default function VerifyOtpPage() {
       localStorage.setItem("iraapUser", JSON.stringify(data));
       localStorage.removeItem("iraapOtpChallenge");
 
+      if (challenge.purpose === "LOGIN" && data.user.mustChangePassword) {
+        router.replace("/change-password?required=1");
+        return;
+      }
+
       const role = data.user.role.toLowerCase();
 
       if (challenge.purpose === "SIGNUP") {
