@@ -28,6 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Organization membership is the source of truth for organization-specific
+  // routing. A manager can legitimately have the global role STUDENT.
+  const getEffectiveRole = useCallback((user: any) => {
+    if (user?.organizationRole) {
+      return String(user.organizationRole).toUpperCase();
+    }
+    return user?.role
+      ? String(user.role).toUpperCase()
+      : null;
+  }, []);
+
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
   const logoutLockRef = useRef(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,17 +65,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (logoutLockRef.current) return;
     logoutLockRef.current = true;
 
-    queryClient.clear();
+    try {
+      // Best-effort server-side logout. This revokes the refresh-token family
+      // and clears the HttpOnly refresh cookie. It is intentionally called
+      // before local state is destroyed.
+      await authService.logout();
+    } catch (error) {
+      // A network failure must not leave the UI in a broken auth state.
+      console.warn("[AUTH] server logout failed during cleanup:", error);
+    } finally {
+      queryClient.clear();
 
-    setAuthDetails(null);
-    clearApiAccessToken();
-    localStorage.removeItem("iraapUser");
-    localStorage.removeItem("ws_token");
-    websocket.disconnect();
+      setAuthDetails(null);
+      clearApiAccessToken();
+      localStorage.removeItem("iraapUser");
+      localStorage.removeItem("iraapOtpChallenge");
+      localStorage.removeItem("ws_token");
+      websocket.disconnect();
 
-    setTimeout(() => {
-      logoutLockRef.current = false;
-    }, 3000);
+      setTimeout(() => {
+        logoutLockRef.current = false;
+      }, 3000);
+    }
   }, [queryClient]);
 
   // ---------------- SINGLE REFRESH PIPELINE ----------------
@@ -87,7 +109,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     refreshInFlight.current = (async () => {
       try {
-        return await refreshTokenCall();
+        const refreshed = await refreshTokenCall();
+
+        // Keep organization membership/role synchronized with the backend.
+        if (refreshed.user) {
+          setAuthDetails((prev: any) => {
+            if (!prev) return prev;
+
+            const updated = {
+              ...prev,
+              token: refreshed.token,
+              user: {
+                ...prev.user,
+                ...refreshed.user,
+              },
+            };
+
+            localStorage.setItem(
+              "iraapUser",
+              JSON.stringify(updated),
+            );
+
+            return updated;
+          });
+        }
+
+        return refreshed.token;
       } catch (err: any) {
         const isNetworkError =
           !err.response ||
@@ -277,13 +324,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyOtp = async (challengeId: string, code: string, callbackUrl?: string) => {
     const data = await authService.verifyOtp({ challengeId, code });
-    const destinationRole = data.user.organizationRole === "MANAGER"
-      ? "manager"
-      : data.user.role.toLowerCase();
+    const effectiveRole = getEffectiveRole(data.user)?.toLowerCase() || "dashboard";
     const destination =
-      callbackUrl && callbackUrl.startsWith(`/${destinationRole}`)
+      callbackUrl &&
+      callbackUrl.startsWith(`/${effectiveRole}`) &&
+      !callbackUrl.startsWith("//")
         ? callbackUrl
-        : `/${destinationRole}`;
+        : `/${effectiveRole}`;
     setApiAccessToken(data.token!);
     setAuthDetails(data);
     localStorage.setItem("iraapUser", JSON.stringify(data));
@@ -306,7 +353,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await authService.logout();
+
+      queryClient.clear();
       setAuthDetails(null);
+      clearApiAccessToken();
+      localStorage.removeItem("iraapUser");
+      localStorage.removeItem("iraapOtpChallenge");
+      localStorage.removeItem("ws_token");
+      websocket.disconnect();
 
       onSuccess({
         title: "Signed Out",

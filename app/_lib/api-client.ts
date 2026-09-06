@@ -85,7 +85,15 @@ api.interceptors.response.use(
         setApiAccessToken(null);
         processQueue(refreshError, null);
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("iraap:auth-expired"));
+          window.dispatchEvent(
+            new CustomEvent("iraap:auth-expired", {
+              detail: {
+                reason:
+                  refreshError?.response?.data?.code ||
+                  "REFRESH_FAILED",
+              },
+            }),
+          );
         }
         return Promise.reject(refreshError);
       } finally {
@@ -97,10 +105,28 @@ api.interceptors.response.use(
   },
 );
 
-export const refreshTokenCall = async (): Promise<string> => {
-  const res = await api.post("/auth/refresh-token", {}, { withCredentials: true });
+export const refreshTokenCall = async (): Promise<{
+  token: string;
+  user?: any;
+}> => {
+  const res = await api.post(
+    "/auth/refresh-token",
+    {},
+    { withCredentials: true },
+  );
+
   const token = res.data?.token;
-  if (!token) throw new Error("No access token returned");
+
+  if (!token) {
+    throw new Error(
+      "No access token returned",
+    );
+  }
+
   setApiAccessToken(token);
-  return token;
+
+  return {
+    token,
+    user: res.data?.user,
+  };
 };

@@ -339,7 +339,9 @@ export function Sidebar({
               </p>
 
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                {user?.role ?? ""}
+                {user?.organizationRole === "MANAGER"
+                  ? "Organization Manager"
+                  : user?.role ?? ""}
               </p>
             </div>
           )}

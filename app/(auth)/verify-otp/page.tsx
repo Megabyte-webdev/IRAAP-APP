@@ -216,7 +216,10 @@ export default function VerifyOtpPage() {
       localStorage.setItem("iraapUser", JSON.stringify(data));
       localStorage.removeItem("iraapOtpChallenge");
 
-      const role = data.user.role.toLowerCase();
+      const role =
+        data.user.organizationRole === "MANAGER"
+          ? "manager"
+          : data.user.role.toLowerCase();
 
       if (challenge.purpose === "SIGNUP") {
         router.replace(`/${role}/profile?onboarding=1`);

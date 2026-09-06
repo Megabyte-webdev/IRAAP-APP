@@ -33,6 +33,11 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
 
   if (!user) return null;
 
+  const effectiveRole =
+    user.organizationRole === "MANAGER"
+      ? "manager"
+      : user.role?.toLowerCase() || "dashboard";
+
   return (
     <div className="relative text-slate-700 dark:text-slate-300">
       {/* Trigger Button */}
@@ -86,7 +91,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
             <ul className="text-sm text-slate-700 dark:text-slate-300">
               {/* Dashboard Link - Based on Role */}
               <Link
-                href={`/${user?.role?.toLowerCase()}`}
+                href={`/${effectiveRole}`}
                 className="px-4 py-2.5 flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -99,7 +104,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
 
               {/* Profile Link */}
               <Link
-                href={`/${user?.role?.toLowerCase()}/profile`}
+                href={`/${effectiveRole}/profile`}
                 className="px-4 py-2.5 flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
