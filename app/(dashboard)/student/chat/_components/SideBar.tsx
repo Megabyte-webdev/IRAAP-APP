@@ -11,9 +11,10 @@ import useChat from "@/app/_hooks/use-chat";
 interface ChatSidebarProps {
   selectedUser?: User;
   role?: "buyer" | "vendor";
+  basePath?: string;
 }
 
-const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
+const ChatSidebar = ({ selectedUser, role = "buyer", basePath }: ChatSidebarProps) => {
   const { getConversations } = useChat();
   const { userId } = useParams();
 
@@ -124,7 +125,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
           </div>
         ) : filteredConversations.length > 0 ? (
           filteredConversations.map((chat: ChatUser) => (
-            <ChatCard key={chat?.user?.id} chat={chat} />
+            <ChatCard key={chat?.user?.id} chat={chat} basePath={basePath} />
           ))
         ) : (
           <div className="text-center mt-10 text-gray-400 text-sm">
@@ -143,6 +144,7 @@ const ChatSidebar = ({ selectedUser, role = "buyer" }: ChatSidebarProps) => {
       <NewChatModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        basePath={basePath}
       />
     </div>
   );

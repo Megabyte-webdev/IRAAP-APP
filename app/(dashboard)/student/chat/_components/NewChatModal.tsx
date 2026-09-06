@@ -12,9 +12,10 @@ import Portal from "@/app/_components/Portal";
 interface NewChatModalProps {
   isOpen: boolean;
   onClose: () => void;
+  basePath?: string;
 }
 
-export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
+export default function NewChatModal({ isOpen, onClose, basePath }: NewChatModalProps) {
   const { authDetails } = useAuth();
   const router = useRouter();
   const { getChatableUsers } = useChat();
@@ -120,9 +121,7 @@ export default function NewChatModal({ isOpen, onClose }: NewChatModalProps) {
                       key={user.id}
                       ref={isLast ? lastUserRef : null}
                       onClick={() =>
-                        router.push(
-                          `/${authDetails?.user?.role?.toLowerCase()}/chat/${user.id}`,
-                        )
+                        router.push(`${basePath || `/${authDetails?.user?.role?.toLowerCase() || "student"}/chat`}/${user.id}`)
                       }
                       className="flex items-center gap-3 py-3 cursor-pointer hover:bg-gray-50 rounded-lg px-2"
                     >

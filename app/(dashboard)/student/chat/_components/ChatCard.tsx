@@ -7,7 +7,7 @@ import { useAuth } from "@/app/_context/AuthContext";
 import { useChatUtils } from "@/app/_context/ChatContext";
 import UserImage from "@/app/(dashboard)/_components/UserImage";
 
-const ChatCard = ({ chat }: { chat: ChatUser }) => {
+const ChatCard = ({ chat, basePath }: { chat: ChatUser; basePath?: string }) => {
   const { userId } = useParams();
   const router = useRouter();
   const { authDetails } = useAuth();
@@ -103,9 +103,8 @@ const ChatCard = ({ chat }: { chat: ChatUser }) => {
   };
 
   const goToChat = async () => {
-    router.push(
-      `/${authDetails?.user?.role.toLowerCase()}/chat/${chatUser.id}`,
-    );
+    const destination = basePath || `/${authDetails?.user?.role?.toLowerCase() || "student"}/chat`;
+    router.push(`${destination}/${chatUser.id}`);
   };
 
   return (

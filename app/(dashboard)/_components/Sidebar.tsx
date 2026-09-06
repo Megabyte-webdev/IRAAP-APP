@@ -22,6 +22,7 @@ import {
   Building2,
   BarChart3,
   LifeBuoy,
+  CreditCard,
 } from "lucide-react";
 
 import { cn } from "@/app/_lib/utils";
@@ -140,11 +141,15 @@ export function Sidebar({
 
   const rolePrefix = userRole ? `/${userRole.toLowerCase()}` : "";
 
-  const filteredNavItems = navItems.filter((item) => {
-    if (item.roles === "ALL") {
-      return true;
-    }
+  const managerNavItems: NavItem[] = [
+    { name: "Overview", href: "/manager", roles: ["MANAGER"], icon: LayoutDashboard },
+    { name: "Members", href: "/manager/members", roles: ["MANAGER"], icon: Users },
+    { name: "Chat", href: "/manager/chat", roles: ["MANAGER"], icon: MessageSquare },
+    { name: "Billing", href: "/manager/billing", roles: ["MANAGER"], icon: CreditCard },
+  ];
 
+  const filteredNavItems = (userRole === "MANAGER" ? managerNavItems : navItems).filter((item) => {
+    if (item.roles === "ALL") return true;
     return !!userRole && item.roles.includes(userRole);
   });
 
@@ -257,13 +262,15 @@ export function Sidebar({
             const Icon = item.icon;
 
             const fullHref =
-              item.name === "Dashboard"
-                ? `/${userRole?.toLowerCase() || "dashboard"}`
-                : item.name === "Organization"
-                  ? "/manager"
-                  : item.roles === "ALL"
-                    ? item.href
-                    : `${rolePrefix}${item.href}`;
+              userRole === "MANAGER"
+                ? item.href
+                : item.name === "Dashboard"
+                  ? `/${userRole?.toLowerCase() || "dashboard"}`
+                  : item.name === "Organization"
+                    ? "/manager"
+                    : item.roles === "ALL"
+                      ? item.href
+                      : `${rolePrefix}${item.href}`;
 
             const isActive =
               pathname === fullHref ||

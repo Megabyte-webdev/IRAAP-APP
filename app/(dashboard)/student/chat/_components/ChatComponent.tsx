@@ -6,16 +6,17 @@ import useChat from "@/app/_hooks/use-chat";
 
 interface ChatComponentProps {
   role?: "buyer" | "vendor";
+  basePath?: string;
 }
 
-const ChatComponent = ({ role = "buyer" }: ChatComponentProps) => {
+const ChatComponent = ({ role = "buyer", basePath }: ChatComponentProps) => {
   const { userId } = useParams<any>();
   const { getChatUserById } = useChat();
   const { data: selectedUser, isLoading, isFetching } = getChatUserById(userId);
 
   return (
     <div className="flex h-[calc(100dvh-80px)] bg-white min-h-0 overflow-hidden  border-[0.56px] border-t-0 border-l-0 border-[#00000033]">
-      <ChatSidebar role={role} selectedUser={selectedUser} />
+      <ChatSidebar role={role} selectedUser={selectedUser} basePath={basePath} />
       <ChatWindow
         selectedUser={selectedUser}
         isConversationLoading={isLoading || isFetching}
