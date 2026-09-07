@@ -5,7 +5,7 @@ interface UserImageProps {
   user: {
     id?: number | string;
     fullName: string;
-    profile_pic?: { url?: string };
+    profileImageUrl?: string;
   };
   size?: number;
   style?: any;
@@ -34,9 +34,9 @@ const UserImage = ({
       className={`cursor-pointer relative shrink-0 border border-white bg-gray-100 ${rounded}`}
       style={{ ...style, width: size, height: size }}
     >
-      {user?.profile_pic?.url ? (
+      {user?.profileImageUrl ? (
         <SafeImage
-          src={user.profile_pic.url}
+          src={user.profileImageUrl}
           alt={user?.fullName}
           width={size}
           height={size}
