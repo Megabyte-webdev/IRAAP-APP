@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   Download,
@@ -13,15 +14,33 @@ import {
   FileText,
   Tag,
   Search,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react";
 import LoadingSkeleton from "./loadingSkeleton";
 import { useProject } from "@/app/_hooks/use-projects";
 import ErrorState from "./ErrorState";
 
+const sanitizeFileName = (title: string) =>
+  `${title.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 90) || "iraap-project"}.pdf`;
+
+const getAttachmentUrl = (url: string, fileName: string) => {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("cloudinary.com") && parsed.pathname.includes("/upload/")) {
+      parsed.pathname = parsed.pathname.replace("/upload/", `/upload/fl_attachment:${encodeURIComponent(fileName.replace(/\.pdf$/i, ""))}/`);
+      return parsed.toString();
+    }
+  } catch {}
+  return url;
+};
+
 export default function ProjectDetailPage() {
   const { getProjectById } = useProject();
   const { pageId } = useParams();
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
 
   const { data: project, isLoading, error } = getProjectById(Number(pageId));
 
@@ -75,6 +94,16 @@ export default function ProjectDetailPage() {
   const pdfUrl = typeof project.fileUrl === "string" && project.fileUrl.trim()
     ? project.fileUrl.trim().replace(/\.pdf\.pdf$/i, ".pdf")
     : null;
+  const fileName = sanitizeFileName(project.title || "IRAAP Project");
+  const downloadUrl = pdfUrl ? getAttachmentUrl(pdfUrl, fileName) : null;
+
+  const shareProject = async () => {
+    const shareData = { title: project.title, text: project.abstract?.slice(0, 220) || "Research project on IRAAP", url: window.location.href };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else { await navigator.clipboard.writeText(window.location.href); setCopied(true); window.setTimeout(() => setCopied(false), 1800); }
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 pb-24 font-sans">
@@ -178,6 +207,17 @@ export default function ProjectDetailPage() {
               </p>
             </div>
 
+            {(project.metadata || project.submissionYear || project.researchType) && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+                <h2 className="text-base font-bold text-slate-900">Research metadata</h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {project.submissionYear && <div className="rounded-xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Submission year</p><p className="mt-1 text-sm font-semibold text-slate-800">{project.submissionYear}</p></div>}
+                  {(project.metadata?.researchArea || project.researchArea) && <div className="rounded-xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Research area</p><p className="mt-1 text-sm font-semibold text-slate-800">{project.metadata?.researchArea || project.researchArea}</p></div>}
+                  {(project.metadata?.methodology || project.methodology) && <div className="sm:col-span-2 rounded-xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Methodology</p><p className="mt-1 text-sm leading-6 text-slate-700 whitespace-pre-line">{project.metadata?.methodology || project.methodology}</p></div>}
+                </div>
+              </div>
+            )}
+
             {/* Document Preview Placeholder */}
             {pdfUrl && (
               <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
@@ -203,13 +243,14 @@ export default function ProjectDetailPage() {
             <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3">
               {pdfUrl ? (
                 <a
-                  href={pdfUrl}
+                  href={downloadUrl || pdfUrl}
+                  download={fileName}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-xl font-semibold text-sm transition-colors shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-3 px-4 rounded-xl font-semibold text-sm transition-colors shadow-sm"
                 >
                   <Download size={16} />
-                  Download Full PDF
+                  Download PDF
                 </a>
               ) : (
                 <div className="text-center py-2 text-xs text-slate-400 font-medium">

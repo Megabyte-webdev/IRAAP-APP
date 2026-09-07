@@ -1,60 +1,94 @@
 "use client";
 
 import { useAuth } from "@/app/_context/AuthContext";
-import { Bell, Menu } from "lucide-react";
-import { useState } from "react";
+import {
+  Bell,
+  Check,
+  ChevronRight,
+  Menu,
+  MessageCircle,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProfileDropdown from "@/app/_components/ProfileDropdown";
 import useChat from "@/app/_hooks/use-chat";
 import { useNotifications } from "@/app/_hooks/use-notifications";
+import NotificationList from "./NotificationList";
+
+const formatNotificationTime = (value?: string) => {
+  if (!value) return "";
+  const date = new Date(value);
+  const diff = Date.now() - date.getTime();
+  if (diff < 60_000) return "Just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const getNotificationTone = (type?: string) => {
+  if (type?.includes("CHAT"))
+    return "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-300";
+  if (type?.includes("SUPPORT"))
+    return "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300";
+  if (type?.includes("ORGANIZATION") || type?.includes("ACCOUNT"))
+    return "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-300";
+  if (type?.includes("MEETING"))
+    return "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-300";
+  return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+};
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { authDetails, isLoading: authLoading } = useAuth();
   const { getConversations } = useChat();
-
   const { data } = getConversations();
-
   const conversations = data?.pages.flatMap((page) => page.data) ?? [];
-
   const chatUnreadCount = conversations.reduce(
     (total, conversation) => total + (conversation.unreadCount ?? 0),
     0,
   );
-  const { query: notificationsQuery, markRead, markAllRead } = useNotifications();
+  const {
+    query: notificationsQuery,
+    markRead,
+    markAllRead,
+  } = useNotifications();
   const notifications = notificationsQuery.data?.notifications ?? [];
   const notificationCount = Number(notificationsQuery.data?.unreadCount ?? 0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const user = authDetails?.user;
 
-  // Loading state – skeleton
+  useEffect(() => {
+    const close = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node))
+        setShowNotifications(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowNotifications(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   if (authLoading) {
     return (
-      <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between px-8">
-        <div className="h-5 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-        <div className="flex items-center gap-6">
-          <div className="h-8 w-8 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-          <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-700">
-            <div className="text-right">
-              <div className="h-4 w-24 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-              <div className="mt-1 h-3 w-16 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-            </div>
-            <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
-          </div>
-        </div>
+      <header className="h-16 border-b border-slate-200 bg-white px-8">
+        <div className="h-full animate-pulse" />
       </header>
     );
   }
 
-  // Fallback if user is missing (should not happen on protected pages)
   if (!user) {
     return (
-      <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between px-8">
-        <div className="text-sm text-slate-500 dark:text-slate-400">
-          Academic Year: 2025/2026
-        </div>
+      <header className="h-16 border-b border-slate-200 bg-white px-8 flex items-center justify-between">
+        <div className="text-sm text-slate-500">Academic Year: 2025/2026</div>
         <Link
           href="/login"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
         >
           Sign In
         </Link>
@@ -63,80 +97,72 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <header data-tour="header" className="sticky top-0 z-10 h-18 border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 transition-colors">
-      {/* Left section */}
-      <div className="flex items-center gap-4">
+    <header
+      data-tour="header"
+      className="sticky top-0 z-20 flex min-h-18 items-center justify-between border-b border-slate-200/80 bg-white/85 px-3 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#1E293B]/85 sm:px-6 lg:px-8"
+    >
+      <div className="flex items-center gap-3">
         <button
           type="button"
           data-tour="mobile-menu"
           onClick={onMenuClick}
           aria-label="Open navigation"
-          className="p-2 -ml-2 text-slate-600 dark:text-slate-300 lg:hidden hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
+          className="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
         >
-          <Menu size={24} />
+          <Menu size={22} />
         </button>
-        <span className="hidden md:block text-sm font-bold text-slate-900 dark:text-slate-100">
-          Good day, {user.fullName}
-        </span>
+        <div className="hidden md:block">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white">
+            Good day, {user.fullName}
+          </p>
+          <p className="text-[11px] text-slate-400">
+            Stay up to date with your workspace
+          </p>
+        </div>
       </div>
 
-      {/* Right section */}
-      <div className="flex items-center gap-2">
-        {/* <ThemeButton /> */}
-        {/* Notification bell */}
-        <div className="relative">
+      <div className="flex items-center gap-1 md:gap-1.5">
+        <Link
+          href={`/${user.organizationRole === "MANAGER" ? "manager" : (user.role || "student").toLowerCase()}/chat`}
+          aria-label="Open chat"
+          className="relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <span className="sr-only">Chat</span>
+          <MessageCircle size={18} />
+          {chatUnreadCount > 0 && (
+            <span className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
+              {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+            </span>
+          )}
+        </Link>
+
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative rounded-full p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+            type="button"
+            onClick={() => setShowNotifications((v) => !v)}
+            className={`relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800 ${showNotifications ? "bg-slate-100 text-primary dark:bg-slate-800" : ""}`}
             aria-label="Notifications"
             aria-expanded={showNotifications}
           >
-            <Bell size={20} />
+            <Bell size={18} />
             {notificationCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex min-w-4 h-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#1E293B]">
+              <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
                 {notificationCount > 99 ? "99+" : notificationCount}
               </span>
             )}
           </button>
+
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[min(380px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-[#1E293B]">
-              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-700">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">Notifications</p>
-                  <p className="text-[11px] text-slate-500">{notificationCount} unread</p>
-                </div>
-                {notificationCount > 0 && (
-                  <button onClick={() => markAllRead.mutate()} className="text-xs font-semibold text-primary hover:underline">Mark all read</button>
-                )}
-              </div>
-              <div className="max-h-[420px] overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="px-4 py-10 text-center text-sm text-slate-500">You're all caught up.</div>
-                ) : notifications.map((item: any) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      if (!item.readAt) markRead.mutate(item.id);
-                      if (item.link) window.location.assign(item.link);
-                    }}
-                    className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/60 ${!item.readAt ? "bg-indigo-50/60 dark:bg-indigo-950/20" : ""}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${item.readAt ? "bg-slate-300" : "bg-primary"}`} />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</p>
-                        <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.message}</p>
-                        <p className="mt-1 text-[10px] text-slate-400">{item.createdAt ? new Date(item.createdAt).toLocaleString() : ""}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <NotificationList
+              notificationCount={notificationCount}
+              notifications={notifications}
+              markAllRead={markAllRead}
+              markRead={markRead}
+              setShowNotifications={setShowNotifications}
+            />
           )}
         </div>
 
-        {/* User menu */}
         <ProfileDropdown />
       </div>
     </header>

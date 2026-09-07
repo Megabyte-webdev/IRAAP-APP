@@ -30,12 +30,14 @@ export const useSocketConnection = ({
   const setOnlineRef = useRef(setOnlineUsers);
   const activeUserRef = useRef(activeUserId);
   const authUserRef = useRef(authUserId);
+  const authRoleRef = useRef(authDetails?.user?.organizationRole === "MANAGER" ? "manager" : authDetails?.user?.role?.toLowerCase());
   const queryClientRef = useRef(queryClient);
 
   setTypingRef.current = setTypingUsers;
   setOnlineRef.current = setOnlineUsers;
   activeUserRef.current = activeUserId;
   authUserRef.current = authUserId;
+  authRoleRef.current = authDetails?.user?.organizationRole === "MANAGER" ? "manager" : authDetails?.user?.role?.toLowerCase();
   queryClientRef.current = queryClient;
 
   useEffect(() => {
@@ -93,13 +95,14 @@ export const useSocketConnection = ({
       }
 
       if (!isOwnMessage && !isCurrentConversation) {
+        queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
         showChatNotification({
           senderId: msg.senderId,
           senderName: msg.sender?.fullName ?? msg.sender?.name ?? "New Message",
           message: msg.content,
           avatar: msg.sender?.profileImage,
           conversationId: msg.conversationId,
-          authRole: authDetails?.user?.role,
+          authRole: authRoleRef.current,
         });
       }
 

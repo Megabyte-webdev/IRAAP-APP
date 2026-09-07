@@ -76,6 +76,17 @@ export const useManager = () => {
     onError: (error: any) => onFailure({ title: "Could not add member", message: extractErrorMessage(error) || "Unable to add member." }),
   });
 
+  const bulkImportMembers = useMutation({
+    mutationFn: async (members: Array<{ fullName: string; email: string; role: "STUDENT" | "SUPERVISOR" | "RESEARCHER"; department?: string }>) =>
+      (await api.post("/manager/members/import", { members })).data,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["manager-members"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+      onSuccess({ title: "Import complete", message: data?.message || "Members have been imported successfully." });
+    },
+    onError: (error: any) => onFailure({ title: "Import failed", message: extractErrorMessage(error) || "Unable to import members." }),
+  });
+
   const addManager = useMutation({
     mutationFn: async (payload: { fullName: string; email: string; department?: string }) =>
       (await api.post("/manager/managers", payload)).data,
@@ -122,5 +133,5 @@ export const useManager = () => {
     onError: (error: any) => onFailure({ title: "Payment could not start", message: extractErrorMessage(error) || "Unable to start payment." }),
   });
 
-  return { getDashboard, getMembers, addMember, addManager, updateRole, removeMember, getBilling, startCheckout };
+  return { getDashboard, getMembers, addMember, addManager, bulkImportMembers, updateRole, removeMember, getBilling, startCheckout };
 };

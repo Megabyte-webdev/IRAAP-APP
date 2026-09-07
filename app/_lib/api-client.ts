@@ -49,42 +49,54 @@ let refreshPromise: Promise<{
   user?: any;
 }> | null = null;
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const doRefreshToken = async (): Promise<{
   token: string;
   user?: any;
 }> => {
-  const res = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
-    {},
-    {
-      withCredentials: true,
-    },
-  );
+  let lastError: any = null;
 
-  const token = res.data?.token;
+  // A refresh can race another tab/request that has just rotated the
+  // refresh cookie. Retry a stale refresh briefly so a legitimate session
+  // is not turned into an auth-expired event.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+        {},
+        {
+          withCredentials: true,
+        },
+      );
 
-  if (!token) {
-    throw new Error(
-      "Refresh token response was invalid",
-    );
+      const token = res.data?.token;
+
+      if (!token) {
+        throw new Error("Refresh token response was invalid");
+      }
+
+      setApiAccessToken(token);
+
+      return {
+        token,
+        user: res.data?.user,
+      };
+    } catch (error: any) {
+      lastError = error;
+      const code = error?.response?.data?.code;
+
+      if (code !== "REFRESH_STALE" || attempt === 2) {
+        throw error;
+      }
+
+      await wait(150 * (attempt + 1));
+    }
   }
 
-  setApiAccessToken(token);
-
-  return {
-    token,
-    user: res.data?.user,
-  };
+  throw lastError || new Error("Unable to refresh session");
 };
 
-/**
- * ONE refresh pipeline for the entire browser.
- *
- * Axios 401 handling, AuthContext timers, visibility changes,
- * and WebSocket refresh requests all converge here. This prevents
- * two simultaneous refreshes from rotating the same refresh token
- * and accidentally triggering REFRESH_REUSE_DETECTED.
- */
 export const refreshTokenCall = async (): Promise<{
   token: string;
   user?: any;
@@ -102,14 +114,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const requestUrl = String(
-      originalRequest?.url || "",
-    );
+    const requestUrl = String(originalRequest?.url || "");
 
-    const isRefreshRequest =
-      requestUrl.includes(
-        "/auth/refresh-token",
-      );
+    const isRefreshRequest = requestUrl.includes("/auth/refresh-token");
 
     const isAuthRequest =
       /\/auth\/(login|register|forgot-password|reset-password|verify-otp|resend-otp|change-password|logout)/.test(
@@ -125,53 +132,32 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshed =
-          await refreshTokenCall();
+        const refreshed = await refreshTokenCall();
 
-        const newToken =
-          refreshed.token;
+        const newToken = refreshed.token;
 
-        originalRequest.headers =
-          originalRequest.headers || {};
+        originalRequest.headers = originalRequest.headers || {};
 
-        originalRequest.headers.Authorization =
-          `Bearer ${newToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
-        return api(
-          originalRequest,
-        );
-      } catch (
-        refreshError
-      ) {
-        if (
-          typeof window !==
-          "undefined"
-        ) {
+        return api(originalRequest);
+      } catch (refreshError) {
+        if (typeof window !== "undefined") {
           window.dispatchEvent(
-            new CustomEvent(
-              "iraap:auth-expired",
-              {
-                detail: {
-                  reason:
-                    (
-                      refreshError as any
-                    )?.response?.data
-                      ?.code ||
-                    "REFRESH_FAILED",
-                },
+            new CustomEvent("iraap:auth-expired", {
+              detail: {
+                reason:
+                  (refreshError as any)?.response?.data?.code ||
+                  "REFRESH_FAILED",
               },
-            ),
+            }),
           );
         }
 
-        return Promise.reject(
-          refreshError,
-        );
+        return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(
-      error,
-    );
+    return Promise.reject(error);
   },
 );

@@ -5,6 +5,7 @@ interface PageMetadataOptions {
   description?: string;
   imageUrl?: string;
   path?: string;
+  type?: "website" | "article";
 }
 
 const BASE_URL = "https://iraap.com.ng";
@@ -14,6 +15,7 @@ export function generatePageMetadata({
   description,
   imageUrl,
   path = "",
+  type = "website",
 }: PageMetadataOptions): Metadata {
   const finalTitle = title || "IRAAP · Institutional Repository";
   const finalDescription =
@@ -115,7 +117,7 @@ export function generatePageMetadata({
       description: finalDescription,
       url,
       siteName: "IRAAP",
-      type: "website",
+      type,
       images: [
         {
           url: finalImage,

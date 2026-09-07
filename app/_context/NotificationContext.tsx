@@ -12,7 +12,7 @@ function urlBase64ToUint8Array(base64String: string) {
   const rawData = atob(base64);
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+
 
 export function NotificationProvider({
   children,
@@ -60,13 +60,15 @@ export function NotificationProvider({
 
         // 3. Request notification permission
         const permission = await requestNotificationPermission();
-        console.log("Notification permission:", permission);
         if (permission !== "granted") return;
 
-        // 4. Get the active registration (guaranteed after ready + controller check)
+        const { data: keyResponse } = await api.get("/notifications/push/public-key");
+        const vapidKey = String(keyResponse?.publicKey || "").trim();
+        if (!vapidKey) return;
+
         const activeReg = await navigator.serviceWorker.ready;
 
-        // 5. Check for existing subscription
+        // Check for existing subscription
         const existing = await activeReg.pushManager.getSubscription();
 
         if (existing) {
@@ -78,13 +80,13 @@ export function NotificationProvider({
           return;
         }
 
-        // 6. Create new subscription
+        // Create new subscription
         const subscription = await activeReg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          applicationServerKey: urlBase64ToUint8Array(vapidKey),
         });
 
-        // 7. Send to server
+        // Send to server
         await api.post("/push/subscribe", {
           userId: authUserId,
           subscription,

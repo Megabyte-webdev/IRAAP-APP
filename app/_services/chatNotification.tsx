@@ -1,7 +1,6 @@
 "use client";
 
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 
 type ChatNotificationProps = {
   senderId: number;
@@ -13,12 +12,6 @@ type ChatNotificationProps = {
 };
 
 // store router outside component safely
-let router: ReturnType<typeof useRouter> | null = null;
-
-export const setChatRouter = (nextRouter: ReturnType<typeof useRouter>) => {
-  router = nextRouter;
-};
-
 export const requestNotificationPermission = async () => {
   if (typeof window === "undefined") return "denied";
 
@@ -35,17 +28,15 @@ export const showChatNotification = ({
   avatar,
   authRole,
 }: ChatNotificationProps) => {
-  const url = `/${authRole}/chat/${senderId}`;
+  const url = `/${authRole || "student"}/chat/${senderId}`;
 
-  // Toast
   toast.info(
     <div className="flex items-center gap-3 cursor-pointer">
       {avatar ? (
-        <img src={avatar} className="h-10 w-10 rounded-full object-cover" />
+        <img src={avatar} className="h-10 w-10 rounded-full object-cover" alt="" />
       ) : (
-        <div className="h-10 w-10 rounded-full bg-gray-200" />
+        <div className="h-10 w-10 rounded-full bg-gray-200" aria-hidden="true" />
       )}
-
       <div className="min-w-0">
         <p className="font-semibold">{senderName}</p>
         <p className="truncate text-sm text-gray-600">{message}</p>
@@ -53,29 +44,7 @@ export const showChatNotification = ({
     </div>,
     {
       toastId: `chat-${senderId}`,
-      onClick: () => {
-        router?.push(url);
-      },
+      onClick: () => { window.location.assign(url); },
     },
   );
-
-  const shouldShowSystemNotification =
-    typeof window !== "undefined" &&
-    "Notification" in window &&
-    Notification.permission === "granted" &&
-    document.hidden;
-
-  if (shouldShowSystemNotification) {
-    const notification = new Notification(senderName, {
-      body: message,
-      icon: avatar || "/irap-logo.png",
-      tag: `chat-${senderId}`,
-    });
-
-    notification.onclick = () => {
-      window.focus();
-      window.location.href = url;
-      notification.close();
-    };
-  }
 };

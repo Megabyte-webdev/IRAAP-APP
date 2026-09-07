@@ -9,10 +9,15 @@ export async function generateMetadata({ params }: any) {
   const project = await getProjectByIdServer(pageId);
 
   if (project) {
+    const author = project.student?.fullName || project.author || "the researcher";
+    const type = String(project.researchType || project.category || "academic research").replaceAll("_", " ").toLowerCase();
+    const abstract = String(project.abstract || "").replace(/\s+/g, " ").trim();
+    const description = `${type} by ${author}.${abstract ? ` ${abstract.slice(0, 220)}${abstract.length > 220 ? "…" : ""}` : " Explore this research project on IRAAP."}`;
     return generatePageMetadata({
-      title: `${project.title ?? "Report"} · IRAAP Repository`,
-      description: `${project.category ?? "Academic research"} by ${project.author ?? "the researcher"}. Explore the abstract, methodology, metadata, and document.`,
+      title: `${project.title ?? "Research Project"} · IRAAP Repository`,
+      description,
       path: `/archive/${pageId}`,
+      type: "article",
     });
   }
 

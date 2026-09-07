@@ -22,6 +22,7 @@ import {
   Building2,
   BarChart3,
   LifeBuoy,
+  Megaphone,
   CreditCard,
 } from "lucide-react";
 
@@ -47,19 +48,19 @@ const navItems: NavItem[] = [
   {
     name: "Research",
     href: "/research",
-    roles: ["STUDENT", "SUPERVISOR"],
+    roles: ["STUDENT"],
     icon: FileUp,
   },
   {
     name: "Projects",
     href: "/projects",
-    roles: ["STUDENT", "SUPERVISOR"],
+    roles: ["STUDENT"],
     icon: FolderOpen,
   },
   {
     name: "Approvals",
     href: "/approvals",
-    roles: ["ADMIN", "SUPERVISOR"],
+    roles: ["ADMIN"],
     icon: ClipboardCheck,
   },
   {
@@ -115,6 +116,12 @@ const navItems: NavItem[] = [
     href: "/support",
     roles: ["ADMIN"],
     icon: LifeBuoy,
+  },
+  {
+    name: "Communications",
+    href: "/communications",
+    roles: ["ADMIN"],
+    icon: Megaphone,
   },
   {
     name: "Organization",
