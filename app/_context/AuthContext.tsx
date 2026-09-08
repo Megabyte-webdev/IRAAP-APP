@@ -20,6 +20,7 @@ import {
 import { websocket } from "../_services/websocket";
 import { getDashboardRole } from "../_utils/roleRouting";
 import { useQueryClient } from "@tanstack/react-query";
+import { disablePushForCurrentDevice } from "../_services/pushSubscription";
 
 const AuthContext = createContext<any>(null);
 
@@ -57,6 +58,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const safeLogout = useCallback(async () => {
     if (logoutLockRef.current) return;
     logoutLockRef.current = true;
+
+    try {
+      // Stop this browser/device from receiving user-specific push notifications
+      // before the server session is revoked and auth state is cleared.
+      await disablePushForCurrentDevice();
+    } catch (error) {
+      console.warn("[PUSH] device cleanup failed during logout:", error);
+    }
 
     try {
       await authService.logout();
@@ -361,6 +370,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [safeLogout]);
 
   const logout = async () => {
+    try {
+      // Stop this browser/device from receiving user-specific push notifications
+      // before the server session is revoked and auth state is cleared.
+      await disablePushForCurrentDevice();
+    } catch (error) {
+      console.warn("[PUSH] device cleanup failed during logout:", error);
+    }
+
     try {
       await authService.logout();
 
