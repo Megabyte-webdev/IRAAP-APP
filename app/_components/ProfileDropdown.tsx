@@ -7,6 +7,7 @@ import { MdOutlineDashboard } from "react-icons/md";
 import Link from "next/link";
 import { useAuth } from "../_context/AuthContext";
 import { getInitials } from "../_utils/formatters";
+import { getDashboardRole } from "../_utils/roleRouting";
 
 interface UserProfile {
   profileImage?: string;
@@ -37,10 +38,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
 
   if (!user) return null;
 
-  const effectiveRole =
-    user.organizationRole === "MANAGER"
-      ? "manager"
-      : user.role?.toLowerCase() || "dashboard";
+  const effectiveRole = getDashboardRole(user) || "student";
 
   return (
     <div className="relative text-slate-700 dark:text-slate-300">

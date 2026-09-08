@@ -18,6 +18,7 @@ import {
   setApiAccessToken,
 } from "../_lib/api-client";
 import { websocket } from "../_services/websocket";
+import { getDashboardRole } from "../_utils/roleRouting";
 import { useQueryClient } from "@tanstack/react-query";
 
 const AuthContext = createContext<any>(null);
@@ -29,10 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const getEffectiveRole = useCallback((user: any) => {
-    if (user?.organizationRole) {
-      return String(user.organizationRole).toUpperCase();
-    }
-    return user?.role ? String(user.role).toUpperCase() : null;
+    return getDashboardRole(user)?.toUpperCase() || null;
   }, []);
 
   const refreshInFlight = useRef<Promise<string | null> | null>(null);

@@ -11,7 +11,7 @@ self.addEventListener("push", (event) => {
   const title = data.title || "IRAAP";
   const options = {
     body: data.body || "You have a new notification.",
-    icon: data.icon || "/irap-logo.png",
+    icon: data.icon || "/iraap-mark-192x192.png",
     badge: "/favicon-32x32.png",
     tag: data.tag || "iraap-notification",
     renotify: true,

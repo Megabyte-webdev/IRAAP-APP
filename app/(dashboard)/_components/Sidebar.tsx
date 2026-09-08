@@ -28,6 +28,7 @@ import {
 
 import { cn } from "@/app/_lib/utils";
 import { useAuth } from "@/app/_context/AuthContext";
+import { getDashboardRole } from "@/app/_utils/roleRouting";
 
 type UserRole = "ADMIN" | "SUPERVISOR" | "STUDENT" | "MANAGER";
 
@@ -44,12 +45,6 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     roles: "ALL",
     icon: LayoutDashboard,
-  },
-  {
-    name: "Research",
-    href: "/research",
-    roles: ["STUDENT"],
-    icon: FileUp,
   },
   {
     name: "Projects",
@@ -144,18 +139,41 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = authDetails?.user;
-  const userRole = (user?.organizationRole === "MANAGER" ? "MANAGER" : user?.role) as UserRole | undefined;
+  const dashboardRole = getDashboardRole(user);
+  const userRole = dashboardRole?.toUpperCase() as UserRole | undefined;
 
   const rolePrefix = userRole ? `/${userRole.toLowerCase()}` : "";
 
   const managerNavItems: NavItem[] = [
-    { name: "Overview", href: "/manager", roles: ["MANAGER"], icon: LayoutDashboard },
-    { name: "Members", href: "/manager/members", roles: ["MANAGER"], icon: Users },
-    { name: "Chat", href: "/manager/chat", roles: ["MANAGER"], icon: MessageSquare },
-    { name: "Billing", href: "/manager/billing", roles: ["MANAGER"], icon: CreditCard },
+    {
+      name: "Overview",
+      href: "/manager",
+      roles: ["MANAGER"],
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Members",
+      href: "/manager/members",
+      roles: ["MANAGER"],
+      icon: Users,
+    },
+    {
+      name: "Chat",
+      href: "/manager/chat",
+      roles: ["MANAGER"],
+      icon: MessageSquare,
+    },
+    {
+      name: "Billing",
+      href: "/manager/billing",
+      roles: ["MANAGER"],
+      icon: CreditCard,
+    },
   ];
 
-  const filteredNavItems = (userRole === "MANAGER" ? managerNavItems : navItems).filter((item) => {
+  const filteredNavItems = (
+    userRole === "MANAGER" ? managerNavItems : navItems
+  ).filter((item) => {
     if (item.roles === "ALL") return true;
     return !!userRole && item.roles.includes(userRole);
   });
@@ -280,10 +298,7 @@ export function Sidebar({
                       : `${rolePrefix}${item.href}`;
 
             const isActive =
-              pathname === fullHref ||
-              pathname?.startsWith(
-                `${fullHref}/`,
-              );
+              pathname === fullHref || pathname?.startsWith(`${fullHref}/`);
 
             const tourTarget = getTourTarget(item.name);
 
@@ -365,7 +380,7 @@ export function Sidebar({
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                 {user?.organizationRole === "MANAGER"
                   ? "Organization Manager"
-                  : user?.role ?? ""}
+                  : (user?.role ?? "")}
               </p>
             </div>
           )}

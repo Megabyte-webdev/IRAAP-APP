@@ -7,6 +7,7 @@ import { Camera, CheckCircle2, ChevronRight, Loader2, Save, ShieldCheck, UserRou
 import { useAuth } from "@/app/_context/AuthContext";
 import { profileService, type UserProfile, type UpdateProfilePayload } from "@/app/_services/profile.service";
 import { extractErrorMessage } from "@/app/_lib/utils";
+import { getDashboardRole } from "../_utils/roleRouting";
 
 const initialForm: UpdateProfilePayload = {
   fullName: "",
@@ -109,8 +110,12 @@ export default function ProfilePage() {
     event.preventDefault();
     setError("");
     setNotice("");
-    if (!form.fullName.trim() || !form.department?.trim() || !form.programme?.trim() || !form.level?.trim()) {
-      setError("Please complete your name, department, programme, and level.");
+    if (!form.fullName.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (onboarding && (!form.department?.trim() || !form.programme?.trim() || !form.level?.trim())) {
+      setError("Please complete your department, programme, and level to finish onboarding.");
       return;
     }
     setSaving(true);
@@ -121,7 +126,7 @@ export default function ProfilePage() {
       localStorage.setItem("iraapUser", JSON.stringify({ user: { ...(authDetails?.user || {}), ...updated } }));
       setNotice("Your profile has been updated.");
       localStorage.setItem("iraap_profile_seen", "1");
-      if (onboarding) router.replace(`/${String(updated.role).toLowerCase()}`);
+      if (onboarding) router.replace(`/${getDashboardRole({ ...authDetails?.user, ...updated }) || "student"}`);
     } catch (err) {
       setError(extractErrorMessage(err as any) || "Unable to update your profile.");
     } finally {
@@ -143,7 +148,7 @@ export default function ProfilePage() {
   }
 
   const displayImage = preview || profile?.profileImageUrl;
-  const roleLabel = String(profile?.role || authDetails?.user?.role || "USER").toLowerCase();
+  const roleLabel = getDashboardRole({ ...authDetails?.user, ...profile }) || "student";
 
   return (
     <div className="min-h-full bg-slate-50/80 px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 md:px-8 md:py-8">

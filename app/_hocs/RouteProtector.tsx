@@ -3,6 +3,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "../_context/AuthContext";
 import Loading from "../(dashboard)/loading";
+import { getDashboardRole } from "../_utils/roleRouting";
 
 export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
   const { authDetails, isLoading } = useAuth();
@@ -13,10 +14,7 @@ export const RouteProtector = ({ children }: { children: React.ReactNode }) => {
     if (isLoading) return;
 
     const user = authDetails?.user;
-    const effectiveRole =
-      user?.organizationRole?.toUpperCase() === "MANAGER"
-        ? "manager"
-        : user?.role?.toLowerCase();
+    const effectiveRole = getDashboardRole(user);
 
     const isPublicPath = [
       "/",
