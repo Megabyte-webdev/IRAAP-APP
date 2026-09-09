@@ -132,7 +132,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
               title="View organization"
               aria-label="View your organization"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/70 text-white">
                 <span className="text-xs font-bold">O</span>
               </span>
               <span className="min-w-0">
