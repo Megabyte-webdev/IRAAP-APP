@@ -7,7 +7,7 @@ import { Camera, CheckCircle2, ChevronRight, Loader2, Save, ShieldCheck, UserRou
 import { useAuth } from "@/app/_context/AuthContext";
 import { profileService, type UserProfile, type UpdateProfilePayload } from "@/app/_services/profile.service";
 import { extractErrorMessage } from "@/app/_lib/utils";
-import { getDashboardRole } from "../_utils/roleRouting";
+import { getDashboardRole, getRoleLabel } from "../_utils/roleRouting";
 
 const initialForm: UpdateProfilePayload = {
   fullName: "",
@@ -62,10 +62,16 @@ export default function ProfilePage() {
     return () => { cancelled = true; };
   }, []);
 
+  const effectiveProfileRole = String(profile?.organizationRole || profile?.role || authDetails?.user?.role || "STUDENT").toUpperCase();
+  const requiredProfileFields = useMemo(() => {
+    if (effectiveProfileRole === "STUDENT") return [form.fullName, form.department, form.programme, form.level];
+    if (effectiveProfileRole === "SUPERVISOR") return [form.fullName, form.department];
+    return [form.fullName, form.bio];
+  }, [effectiveProfileRole, form]);
+
   const completion = useMemo(() => {
-    const fields = [form.fullName, form.department, form.programme, form.level];
-    return Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  }, [form]);
+    return Math.round((requiredProfileFields.filter(Boolean).length / requiredProfileFields.length) * 100);
+  }, [requiredProfileFields]);
 
   function setField(key: keyof UpdateProfilePayload, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -114,9 +120,13 @@ export default function ProfilePage() {
       setError("Please enter your full name.");
       return;
     }
-    if (onboarding && (!form.department?.trim() || !form.programme?.trim() || !form.level?.trim())) {
-      setError("Please complete your department, programme, and level to finish onboarding.");
-      return;
+    if (onboarding) {
+      const missingAcademicDetails = effectiveProfileRole === "STUDENT" && (!form.department?.trim() || !form.programme?.trim() || !form.level?.trim());
+      const missingSupervisorDetails = effectiveProfileRole === "SUPERVISOR" && !form.department?.trim();
+      if (missingAcademicDetails || missingSupervisorDetails) {
+        setError(effectiveProfileRole === "STUDENT" ? "Please complete your department, programme, and level to finish onboarding." : "Please add your department to finish onboarding.");
+        return;
+      }
     }
     setSaving(true);
     try {
@@ -158,10 +168,44 @@ export default function ProfilePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Account</p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">{onboarding ? "Complete your profile" : "Your profile"}</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-              {onboarding ? "Add a few academic details so IRAAP can personalize your workspace." : "Keep your academic and contact information up to date."}
+              {onboarding ? "Add the details that make sense for your IRAAP role. You can update them any time." : "Keep your identity, contact details, and professional or academic information up to date."}
             </p>
           </div>
           {!onboarding && <button type="button" onClick={() => router.back()} className="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white">Back</button>}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#1E293B]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Workspace identity</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{getRoleLabel({ ...authDetails?.user, ...profile })}</span>
+                {profile?.organization ? (
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{profile.organization.name}</span>
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Personal IRAAP account</span>
+                )}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                {profile?.organization
+                  ? `You are participating in ${profile.organization.name} as ${getRoleLabel({ organizationRole: profile.organizationRole }).replace("Organization ", "")}. Your previous IRAAP work remains attached to your account.`
+                  : "Your account currently has no organization membership. An organization can add you without changing your login or previous IRAAP work."}
+              </p>
+            </div>
+            {(profile?.organizations?.length ?? 0) > 1 && (
+              <span className="text-xs font-semibold text-slate-400">{profile?.organizations?.length} organizations</span>
+            )}
+          </div>
+          {profile?.organizations && profile.organizations.length > 0 && (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {profile.organizations.map((membership) => (
+                <div key={`${membership.id}-${membership.organizationId}`} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/30">
+                  <p className="truncate text-sm font-semibold text-slate-800 dark:text-white">{membership.organizationName}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{getRoleLabel({ organizationRole: membership.role })}{membership.department ? ` · ${membership.department}` : ""}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {onboarding && (

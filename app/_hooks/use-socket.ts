@@ -100,7 +100,7 @@ export const useSocketConnection = ({
           senderId: msg.senderId,
           senderName: msg.sender?.fullName ?? msg.sender?.name ?? "New Message",
           message: msg.content,
-          avatar: msg.sender?.profileImage,
+          avatar: msg.sender?.profileImageUrl ?? msg.sender?.profileImage,
           conversationId: msg.conversationId,
           authRole: authRoleRef.current,
         });
