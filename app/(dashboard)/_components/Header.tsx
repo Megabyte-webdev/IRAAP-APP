@@ -122,11 +122,13 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        {(user?.organizationId || user?.organizationRole || user?.organization?.name) && (
+        {(user?.organizationId ||
+          user?.organizationRole ||
+          user?.organization?.name) && (
           <>
             <Link
               href="/organization"
-              className="flex max-w-[150px] items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-2.5 py-2 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:hidden"
+              className="flex max-w-37.5 items-center gap-2 rounded-xl border border-primary/15 bg-primary/5  p-1 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:hidden"
               title="View organization"
               aria-label="View your organization"
             >
@@ -134,74 +136,87 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
                 <span className="text-xs font-bold">O</span>
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-[9px] font-bold uppercase tracking-wider text-primary">Under org</span>
+                <span className="block truncate text-[9px] font-bold uppercase tracking-wider text-primary">
+                  org
+                </span>
                 <span className="block truncate text-[10px] font-semibold text-slate-700 dark:text-slate-200">
-                  {String(user?.organization?.name || user?.organizationName || "Organization")}
+                  {String(
+                    user?.organization?.name ||
+                      user?.organizationName ||
+                      "Organization",
+                  )}
                 </span>
               </span>
             </Link>
             <Link
               href="/organization"
-              className="hidden max-w-[250px] items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:flex"
+              className="hidden max-w-62.5 items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:flex"
               title="View organization"
             >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
-              <span className="text-xs font-bold">O</span>
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[10px] font-bold uppercase tracking-wider text-primary">You are under</span>
-              <span className="block truncate text-xs font-semibold text-slate-800 dark:text-slate-100">
-                {user?.organization?.name || user?.organizationName || "An organization"}
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+                <span className="text-xs font-bold">O</span>
               </span>
-              <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">
-                {String(user?.organizationRole || "Member").replaceAll("_", " ")}
+              <span className="min-w-0">
+                <span className="block truncate text-[10px] font-bold uppercase tracking-wider text-primary">
+                  You are under
+                </span>
+                <span className="block truncate text-xs font-semibold text-slate-800 dark:text-slate-100">
+                  {user?.organization?.name ||
+                    user?.organizationName ||
+                    "An organization"}
+                </span>
+                <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">
+                  {String(user?.organizationRole || "Member").replaceAll(
+                    "_",
+                    " ",
+                  )}
+                </span>
               </span>
-            </span>
-              </Link>
-            </>
-          )}
+            </Link>
+          </>
+        )}
 
         <div className="flex items-center gap-1 md:gap-1.5">
-        <Link
-          href={`/${user.organizationRole === "MANAGER" ? "manager" : (user.role || "student").toLowerCase()}/chat`}
-          aria-label="Open chat"
-          className="relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800"
-        >
-          <span className="sr-only">Chat</span>
-          <MessageCircle size={18} />
-          {chatUnreadCount > 0 && (
-            <span className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
-              {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
-            </span>
-          )}
-        </Link>
-
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            onClick={() => setShowNotifications((v) => !v)}
-            className={`relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800 ${showNotifications ? "bg-slate-100 text-primary dark:bg-slate-800" : ""}`}
-            aria-label="Notifications"
-            aria-expanded={showNotifications}
+          <Link
+            href={`/${user.organizationRole === "MANAGER" ? "manager" : (user.role || "student").toLowerCase()}/chat`}
+            aria-label="Open chat"
+            className="relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800"
           >
-            <Bell size={18} />
-            {notificationCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
-                {notificationCount > 99 ? "99+" : notificationCount}
+            <span className="sr-only">Chat</span>
+            <MessageCircle size={18} />
+            {chatUnreadCount > 0 && (
+              <span className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
+                {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
               </span>
             )}
-          </button>
+          </Link>
 
-          {showNotifications && (
-            <NotificationList
-              notificationCount={notificationCount}
-              notifications={notifications}
-              markAllRead={markAllRead}
-              markRead={markRead}
-              setShowNotifications={setShowNotifications}
-            />
-          )}
-        </div>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setShowNotifications((v) => !v)}
+              className={`relative rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary dark:text-slate-300 dark:hover:bg-slate-800 ${showNotifications ? "bg-slate-100 text-primary dark:bg-slate-800" : ""}`}
+              aria-label="Notifications"
+              aria-expanded={showNotifications}
+            >
+              <Bell size={18} />
+              {notificationCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white dark:ring-[#1E293B]">
+                  {notificationCount > 99 ? "99+" : notificationCount}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <NotificationList
+                notificationCount={notificationCount}
+                notifications={notifications}
+                markAllRead={markAllRead}
+                markRead={markRead}
+                setShowNotifications={setShowNotifications}
+              />
+            )}
+          </div>
 
           <ProfileDropdown />
         </div>
