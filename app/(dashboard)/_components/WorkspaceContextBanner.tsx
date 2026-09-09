@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Building2, ChevronRight } from "lucide-react";
 import { useAuth } from "@/app/_context/AuthContext";
-import { getRoleLabel } from "@/app/_utils/roleRouting";
+import { getDashboardRole } from "@/app/_utils/roleRouting";
 
 export default function WorkspaceContextBanner() {
   const { authDetails } = useAuth();
@@ -21,10 +21,13 @@ export default function WorkspaceContextBanner() {
           <p className="min-w-0 truncate text-xs text-emerald-800 dark:text-emerald-200">
             <span className="font-semibold">{user.organizationName}</span>
             <span className="mx-1 text-emerald-500">·</span>
-            <span>{getRoleLabel(user)}</span>
+            <span>{getDashboardRole(user)}</span>
           </p>
         </div>
-        <Link href={`/${String(user.organizationRole || "").toUpperCase() === "MANAGER" ? "manager" : "profile"}`} className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100">
+        <Link
+          href={`/${String(user.organizationRole || "").toUpperCase() === "MANAGER" ? "manager" : "profile"}`}
+          className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
+        >
           <span className="hidden sm:inline">View organization</span>
           <ChevronRight size={14} />
         </Link>

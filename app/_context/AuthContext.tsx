@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [authDetails, setAuthDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
 
   const getEffectiveRole = useCallback((user: any) => {
@@ -371,10 +370,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [safeLogout]);
 
   const logout = async () => {
-    if (logoutLockRef.current || isLoggingOut) return;
-    logoutLockRef.current = true;
-    setIsLoggingOut(true);
-
     try {
       // Stop this browser/device from receiving user-specific push notifications
       // before the server session is revoked and auth state is cleared.
@@ -405,9 +400,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Logout Error",
         message: "An unexpected error occurred while signing out.",
       });
-    } finally {
-      setIsLoggingOut(false);
-      logoutLockRef.current = false;
     }
   };
 
@@ -418,7 +410,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         verifyOtp,
         isLoading,
-        isLoggingOut,
         setAuthDetails,
         logout,
       }}

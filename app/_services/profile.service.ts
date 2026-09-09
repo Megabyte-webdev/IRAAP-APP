@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { api } from "../_lib/api-client";
 
 export interface UserProfile {
@@ -18,24 +17,6 @@ export interface UserProfile {
   bio?: string | null;
   profileCompletedAt?: string | null;
   profileComplete: boolean;
-  organizationRole?: string | null;
-  organization?: {
-    id: number;
-    name: string;
-    slug: string;
-    code?: string | null;
-  } | null;
-  organizations?: Array<{
-    organizationName: string;
-    organizationId: any;
-    id: number;
-    name: string;
-    slug: string;
-    code?: string | null;
-    role: string;
-    department?: string | null;
-    joinedAt?: string | null;
-  }>;
 }
 export type UserRole = "STUDENT" | "SUPERVISOR" | "RESEARCHER" | "MANAGER";
 

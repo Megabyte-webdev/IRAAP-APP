@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import AppTour from "@/app/_components/AppTour";
-import WorkspaceContextBanner from "./WorkspaceContextBanner";
 
 const DashboardLayout = ({
   children,
@@ -47,7 +46,6 @@ const DashboardLayout = ({
         {!isMeeting && (
           <Header onMenuClick={openSidebar} />
         )}
-        {!isMeeting && <WorkspaceContextBanner />}
 
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="mx-auto w-full">

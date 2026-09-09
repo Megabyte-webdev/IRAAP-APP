@@ -8,7 +8,6 @@ import {
   Menu,
   MessageCircle,
   Sparkles,
-  Building2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -123,12 +122,6 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <div className="flex items-center gap-1 md:gap-1.5">
-        {user.organizationName && (
-          <div className="hidden max-w-[220px] items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 sm:flex dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300" title={`${user.organizationName} · ${user.organizationRole || "Member"}`}>
-            <Building2 size={14} className="shrink-0" />
-            <span className="truncate">{user.organizationName}</span>
-          </div>
-        )}
         <Link
           href={`/${user.organizationRole === "MANAGER" ? "manager" : (user.role || "student").toLowerCase()}/chat`}
           aria-label="Open chat"

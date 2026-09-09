@@ -51,14 +51,6 @@ export function createOptimisticMessage({
 
     replyToMessageId: replyTo?.id ?? null,
 
-    selectedChat: {
-      id: Number(selectedChat?.id),
-      fullName: (selectedChat as any)?.fullName ?? "User",
-      role: (selectedChat as any)?.role ?? "STUDENT",
-      email: (selectedChat as any)?.email ?? "",
-      profileImageUrl: (selectedChat as any)?.profileImageUrl ?? null,
-    },
-
     sender: {
       id: userId,
       fullName: authDetails?.user?.fullName ?? "You",
@@ -260,7 +252,6 @@ export const updateConversationLastMessage = (
 
       conversations.unshift({
         ...existing,
-        id: msg.conversationId ?? existing.id,
         lastMessage,
         updatedAt: msg.createdAt,
         unreadCount:
@@ -273,17 +264,13 @@ export const updateConversationLastMessage = (
         String(msg.senderId) === String(authUserId)
           ? {
               id: msg.receiverId,
-              fullName: msg.selectedChat?.fullName ?? msg.receiver?.fullName ?? "User",
-              role: msg.selectedChat?.role ?? msg.receiver?.role ?? "STUDENT",
-              email: msg.selectedChat?.email ?? msg.receiver?.email ?? "",
-              profileImageUrl: msg.selectedChat?.profileImageUrl ?? msg.receiver?.profileImageUrl ?? null,
+              fullName: msg.selectedChat?.fullName ?? "Unknown",
+              role: msg.selectedChat?.role ?? "STUDENT",
             }
           : {
               id: msg.sender?.id,
-              fullName: msg.sender?.fullName ?? "User",
+              fullName: msg.sender?.fullName ?? "Unknown",
               role: msg.sender?.role ?? "STUDENT",
-              email: msg.sender?.email ?? "",
-              profileImageUrl: msg.sender?.profileImageUrl ?? msg.sender?.profileImage ?? null,
             };
 
       conversations.unshift({
