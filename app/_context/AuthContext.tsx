@@ -21,6 +21,7 @@ import { websocket } from "../_services/websocket";
 import { getDashboardRole } from "../_utils/roleRouting";
 import { useQueryClient } from "@tanstack/react-query";
 import { disablePushForCurrentDevice } from "../_services/pushSubscription";
+import { api } from "../_lib/api-client";
 
 const AuthContext = createContext<any>(null);
 
@@ -32,6 +33,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getEffectiveRole = useCallback((user: any) => {
     return getDashboardRole(user)?.toUpperCase() || null;
+  }, []);
+
+  const refreshOrganizationContext = useCallback(async (): Promise<any | null> => {
+    try {
+      const response = await api.get("/organizations/me");
+      const organization = response.data?.organization;
+      if (!organization) return null;
+
+      setAuthDetails((prev: any) => {
+        if (!prev?.user) return prev;
+        const updatedUser = {
+          ...prev.user,
+          organizationId: organization.id ?? prev.user.organizationId ?? null,
+          organizationName: organization.name ?? prev.user.organizationName ?? null,
+          organizationRole: organization.myRole ?? prev.user.organizationRole ?? null,
+          organization: {
+            ...(prev.user.organization || {}),
+            ...organization,
+          },
+        };
+        const updated = { ...prev, user: updatedUser };
+        localStorage.setItem("iraapUser", JSON.stringify(updated));
+        return updated;
+      });
+
+      window.dispatchEvent(new CustomEvent("iraap:organization-updated", { detail: organization }));
+      return organization;
+    } catch (error: any) {
+      // A 404/403 simply means the account is not attached to an organization.
+      // Keep the existing session intact and let the normal account state stand.
+      if (error?.response?.status !== 404 && error?.response?.status !== 403) {
+        console.warn("[ORG] unable to refresh organization context:", error);
+      }
+      return null;
+    }
   }, []);
 
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
@@ -282,13 +318,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } finally {
         if (!cancelled) setIsLoading(false);
       }
+
+      if (!cancelled && persistedAuth?.user?.id) {
+        await refreshOrganizationContext();
+      }
     };
 
     restoreSession();
     return () => {
       cancelled = true;
     };
-  }, [refreshTokenSafe]);
+  }, [refreshTokenSafe, refreshOrganizationContext]);
 
   const login = async (
     email: string,
@@ -411,6 +451,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifyOtp,
         isLoading,
         setAuthDetails,
+        refreshOrganizationContext,
         logout,
       }}
     >

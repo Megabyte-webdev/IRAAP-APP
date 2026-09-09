@@ -1,4 +1,5 @@
 import { Bell, Check, ChevronRight } from "lucide-react";
+import { useAuth } from "@/app/_context/AuthContext";
 
 const formatNotificationTime = (value?: string) => {
   if (!value) return "";
@@ -29,6 +30,24 @@ const NotificationList = ({
   markRead,
   setShowNotifications,
 }: any) => {
+  const { refreshOrganizationContext } = useAuth();
+
+  const openNotification = async (item: any) => {
+    if (!item.readAt) markRead.mutate(item.id);
+    setShowNotifications(false);
+
+    const type = String(item.type || "").toUpperCase();
+    const isOrganizationNotification = type.includes("ORGANIZATION");
+
+    if (isOrganizationNotification) {
+      await refreshOrganizationContext();
+      window.location.assign("/organization");
+      return;
+    }
+
+    if (item.link) window.location.assign(item.link);
+  };
+
   return (
     <div className="fixed right-2 mt-3 w-[min(400px,calc(100vw-1rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 dark:border-slate-700 dark:bg-[#172033]">
       <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-700">
@@ -75,11 +94,7 @@ const NotificationList = ({
             <button
               key={item.id}
               type="button"
-              onClick={() => {
-                if (!item.readAt) markRead.mutate(item.id);
-                setShowNotifications(false);
-                if (item.link) window.location.assign(item.link);
-              }}
+              onClick={() => { void openNotification(item); }}
               className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3.5 text-left transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60 ${!item.readAt ? "bg-primary/[0.035]" : ""}`}
             >
               <span

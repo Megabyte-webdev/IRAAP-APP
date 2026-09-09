@@ -19,7 +19,7 @@ export function NotificationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { authDetails } = useAuth();
+  const { authDetails, refreshOrganizationContext } = useAuth();
   const authUserId = authDetails?.user?.id;
 
   useEffect(() => {
@@ -100,6 +100,27 @@ export function NotificationProvider({
 
     setupPush();
   }, [authUserId]);
+
+  useEffect(() => {
+    if (!authUserId) return;
+
+    const refresh = () => {
+      if (document.visibilityState === "visible") {
+        void refreshOrganizationContext();
+      }
+    };
+
+    refresh();
+    const interval = window.setInterval(refresh, 60_000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [authUserId, refreshOrganizationContext]);
 
   return <>{children}</>;
 }
