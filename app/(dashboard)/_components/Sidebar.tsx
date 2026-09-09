@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/app/_lib/utils";
+import LogoutConfirmModal from "@/app/_components/LogoutConfirmModal";
 import { useAuth } from "@/app/_context/AuthContext";
 import { getDashboardRole } from "@/app/_utils/roleRouting";
 
@@ -137,10 +138,23 @@ export function Sidebar({
   const { authDetails, logout } = useAuth();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   const user = authDetails?.user;
   const dashboardRole = getDashboardRole(user);
   const userRole = dashboardRole?.toUpperCase() as UserRole | undefined;
+
+  const requestLogout = async () => {
+    if (logoutLoading) return;
+    setLogoutLoading(true);
+    try {
+      await logout();
+    } finally {
+      setLogoutLoading(false);
+      setShowLogoutConfirm(false);
+    }
+  };
 
   const rolePrefix = userRole ? `/${userRole.toLowerCase()}` : "";
 
@@ -196,6 +210,13 @@ export function Sidebar({
 
   return (
     <>
+      <LogoutConfirmModal
+        open={showLogoutConfirm}
+        loading={logoutLoading}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={requestLogout}
+      />
+
       {/* Mobile Overlay */}
       {isOpen && (
         <div
@@ -387,7 +408,7 @@ export function Sidebar({
 
           <button
             type="button"
-            onClick={logout}
+            onClick={() => setShowLogoutConfirm(true)}
             className={cn(
               "group flex w-full items-center gap-3",
               "rounded-lg px-3 py-2.5",

@@ -1,5 +1,6 @@
 import { generatePageMetadata } from "@/app/_lib/metadata";
 import ProjectDetailPage from "../_components/ProjectDetailPage";
+import DashboardLayout from "@/app/(dashboard)/_components/DashboardLayout";
 import { getProjectByIdServer } from "@/app/_lib/meta-function";
 
 //import { notFound } from "next/navigation";
@@ -29,7 +30,11 @@ export async function generateMetadata({ params }: any) {
 }
 
 const Page = () => {
-  return <ProjectDetailPage />;
+  return (
+    <DashboardLayout>
+      <ProjectDetailPage />
+    </DashboardLayout>
+  );
 };
 
 export default Page;

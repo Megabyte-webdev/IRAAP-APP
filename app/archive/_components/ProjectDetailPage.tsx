@@ -106,29 +106,34 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 pb-24 font-sans">
-      <main className="max-w-6xl mx-auto px-6 pt-8 space-y-8">
-        {/* Back Button */}
-        <div>
+    <div className="min-h-full bg-[#F6F8FB] text-slate-800 pb-16 font-sans dark:bg-slate-950 dark:text-slate-100">
+      <main className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+        <div className="mb-5 flex items-center justify-between gap-3">
           <button
             onClick={() => router.back()}
-            className="p-2.5 rounded-full hover:bg-slate-200/60 transition-colors text-slate-700 inline-flex items-center justify-center cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-primary/30 hover:text-primary dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
             aria-label="Go back"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={16} />
+            Back to archive
           </button>
+          <div className="hidden items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 sm:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            IRAAP Research Repository
+          </div>
         </div>
 
-        {/* Breadcrumbs & Title Block */}
-        <div className="space-y-4">
-          {breadcrumbPath && (
-            <p className="text-xs text-slate-400 font-medium tracking-wide">
-              Research Library / {breadcrumbPath}
-            </p>
-          )}
+        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-primary/10 via-transparent to-indigo-500/10" />
+          <div className="relative p-5 sm:p-7 lg:p-8">
+            {breadcrumbPath && (
+              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Research Library <span className="mx-1">/</span> {breadcrumbPath}
+              </p>
+            )}
 
-          {/* Badges */}
-          <div className="flex items-center gap-2 pt-1">
+            {/* Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
             {(project.researchType || project.category) && (
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
                 {(
@@ -151,12 +156,12 @@ export default function ProjectDetailPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-snug max-w-4xl">
+          <h1 className="mt-3 max-w-4xl text-2xl font-bold leading-tight text-slate-950 sm:text-3xl lg:text-4xl dark:text-white">
             {project.title}
           </h1>
 
           {/* Author / Supervisor Meta */}
-          <p className="text-xs md:text-sm text-slate-500 font-medium">
+          <p className="mt-3 max-w-4xl text-xs font-medium leading-6 text-slate-500 sm:text-sm dark:text-slate-400">
             By{" "}
             <span className="text-slate-700 font-semibold">{authorName}</span>
             {supervisorName !== "N/A" && (
@@ -175,7 +180,8 @@ export default function ProjectDetailPage() {
               </>
             )}
           </p>
-        </div>
+          </div>
+        </section>
 
         {/* 2-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -183,7 +189,7 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-7 space-y-6">
             {/* Key Findings Card */}
             {keyFindings.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                 <h2 className="flex items-center gap-2.5 text-base font-bold text-slate-900">
                   <Zap size={18} className="text-amber-500 fill-amber-500" />
                   Key Findings
@@ -197,7 +203,7 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Abstract Card */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <h2 className="flex items-center gap-2.5 text-base font-bold text-slate-900">
                 <BookOpen size={18} className="text-slate-700" />
                 Abstract
@@ -208,7 +214,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {(project.metadata || project.submissionYear || project.researchType) && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                 <h2 className="text-base font-bold text-slate-900">Research metadata</h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {project.submissionYear && <div className="rounded-xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Submission year</p><p className="mt-1 text-sm font-semibold text-slate-800">{project.submissionYear}</p></div>}
@@ -220,13 +226,13 @@ export default function ProjectDetailPage() {
 
             {/* Document Preview Placeholder */}
             {pdfUrl && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                 <h2 className="flex items-center gap-2.5 text-base font-bold text-slate-900">
                   <FileText size={18} className="text-slate-700" />
                   Document Preview
                 </h2>
 
-                <div className="w-full h-125 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                <div className="h-[420px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-[560px] dark:border-slate-800">
                   <iframe
                     src={`${pdfUrl}#toolbar=0`}
                     className="w-full h-full border-none"
@@ -281,7 +287,7 @@ export default function ProjectDetailPage() {
             {(project.githubUrl ||
               project.datasetUrl ||
               project.sourceCodeUrl) && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <span className="text-slate-600">📂</span> Project Assets
                 </h3>
@@ -315,7 +321,7 @@ export default function ProjectDetailPage() {
 
             {/* Tags */}
             {tags.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <Tag size={16} className="text-slate-600" /> Tags
                 </h3>
@@ -336,7 +342,7 @@ export default function ProjectDetailPage() {
             {/* Related Projects */}
             {Array.isArray(project.relatedProjects) &&
               project.relatedProjects.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
                   <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                     <Search size={16} className="text-slate-600" /> Related
                     Projects

@@ -121,7 +121,47 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 md:gap-1.5">
+      <div className="flex items-center gap-2 md:gap-3">
+        {(user?.organizationId || user?.organizationRole || user?.organization?.name) && (
+          <>
+            <Link
+              href="/organization"
+              className="flex max-w-[150px] items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-2.5 py-2 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:hidden"
+              title="View organization"
+              aria-label="View your organization"
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+                <span className="text-xs font-bold">O</span>
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-[9px] font-bold uppercase tracking-wider text-primary">Under org</span>
+                <span className="block truncate text-[10px] font-semibold text-slate-700 dark:text-slate-200">
+                  {String(user?.organization?.name || user?.organizationName || "Organization")}
+                </span>
+              </span>
+            </Link>
+            <Link
+              href="/organization"
+              className="hidden max-w-[250px] items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-left transition hover:border-primary/30 hover:bg-primary/10 sm:flex"
+              title="View organization"
+            >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+              <span className="text-xs font-bold">O</span>
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[10px] font-bold uppercase tracking-wider text-primary">You are under</span>
+              <span className="block truncate text-xs font-semibold text-slate-800 dark:text-slate-100">
+                {user?.organization?.name || user?.organizationName || "An organization"}
+              </span>
+              <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">
+                {String(user?.organizationRole || "Member").replaceAll("_", " ")}
+              </span>
+            </span>
+              </Link>
+            </>
+          )}
+
+        <div className="flex items-center gap-1 md:gap-1.5">
         <Link
           href={`/${user.organizationRole === "MANAGER" ? "manager" : (user.role || "student").toLowerCase()}/chat`}
           aria-label="Open chat"
@@ -163,7 +203,8 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           )}
         </div>
 
-        <ProfileDropdown />
+          <ProfileDropdown />
+        </div>
       </div>
     </header>
   );

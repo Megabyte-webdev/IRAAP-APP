@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useAuth } from "../_context/AuthContext";
 import { getInitials } from "../_utils/formatters";
 import { getDashboardRole } from "../_utils/roleRouting";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 interface UserProfile {
   profileImage?: string;
@@ -32,17 +33,37 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
   const { authDetails, logout } = useAuth();
   const user = authDetails?.user as User | undefined;
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const profileImage =
     user?.profileImageUrl ||
     user?.profile?.profileImageUrl ||
     user?.profile?.profileImage;
+
+  const requestLogout = async () => {
+    if (logoutLoading) return;
+    setLogoutLoading(true);
+    try {
+      await logout();
+    } finally {
+      setLogoutLoading(false);
+      setShowLogoutConfirm(false);
+    }
+  };
 
   if (!user) return null;
 
   const effectiveRole = getDashboardRole(user) || "student";
 
   return (
-    <div className="relative text-slate-700 dark:text-slate-300">
+    <>
+      <LogoutConfirmModal
+        open={showLogoutConfirm}
+        loading={logoutLoading}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={requestLogout}
+      />
+      <div className="relative text-slate-700 dark:text-slate-300">
       {/* Trigger Button */}
       <div
         data-tour="profile"
@@ -151,7 +172,7 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
                 className="px-4 py-2.5 flex items-center gap-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition-colors"
                 onClick={() => {
                   setIsOpen(false);
-                  logout();
+                  setShowLogoutConfirm(true);
                 }}
               >
                 <FiLogOut size={18} />
@@ -161,7 +182,8 @@ const ProfileDropdown = ({ fullMode = false }: ProfileDropdownProps) => {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
